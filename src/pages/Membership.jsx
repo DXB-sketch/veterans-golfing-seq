@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
@@ -15,55 +14,62 @@ export default function Membership() {
 
   return (
     <>
-      <section className="bg-navy px-5 py-16 text-center md:py-20">
-        <div className="mx-auto max-w-site">
-          <p className="font-display text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-gold">
-            Together we play. Together we grow.
-          </p>
-          <h1 className="text-page-title mt-3 font-display font-bold uppercase text-white">
-            Join the club
-          </h1>
-          <div className="mt-5 flex justify-center">
-            <RibbonRule dark />
+      {/* Membership identity: navy hero split with a solid gold price panel. */}
+      <section className="bg-navy px-5">
+        <div className="mx-auto flex max-w-site flex-col md:flex-row md:items-stretch">
+          <div className="flex-1 py-14 md:py-20 md:pr-12">
+            <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
+              Together we play. Together we grow.
+            </p>
+            <h1 className="text-page-title mt-3 font-display font-bold uppercase text-white">
+              Join the club
+            </h1>
+            <RibbonRule className="mt-5" dark />
+            <p className="mt-6 max-w-xl text-lg text-cream/90">
+              Membership is open to all veterans, serving and ex-serving, and
+              their family members. Fill in the form and we&apos;ll be in touch
+              about payment and getting you kitted out.
+            </p>
+          </div>
+          <div className="flex flex-col items-start justify-center gap-1 bg-gold px-10 py-10 text-navy-deep md:w-72 md:items-center md:py-0 md:text-center">
+            <p className="font-display text-5xl font-bold">$50</p>
+            <p className="font-body text-sm font-bold uppercase tracking-[0.14em]">
+              per year
+            </p>
+            <p className="mt-2 text-sm font-semibold">
+              Includes a club hat or t-shirt
+            </p>
           </div>
         </div>
       </section>
 
-      <Section tone="cream">
-        <div className="grid gap-12 lg:grid-cols-5">
+      <section className="bg-cream px-5 py-16 md:py-24">
+        <div className="mx-auto grid max-w-site gap-14 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <h2 className="font-display text-2xl font-semibold uppercase text-navy">
+            <h2 className="font-display text-2xl font-semibold tracking-wide text-navy">
               What membership gets you
             </h2>
             <RibbonRule className="mt-3" />
-            <ul className="mt-6 space-y-4 text-ink">
+            <ul className="mt-8 divide-y divide-ink/10">
               {[
                 ["$50 a year", "That's it. No hidden fees, no fine print."],
-                ["A club hat or t-shirt", "Your choice — wear the colours with pride."],
+                ["A club hat or t-shirt", "Your choice. Wear the colours with pride."],
                 ["A community that gets it", "Play alongside veterans and families from all three services."],
                 ["Events across SEQ", "Brisbane, Sunshine Coast and Gold Coast rounds through the year."],
               ].map(([title, line]) => (
-                <li key={title} className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gold" aria-hidden="true" />
-                  <div>
-                    <p className="font-semibold">{title}</p>
-                    <p className="text-sm text-ink-muted">{line}</p>
-                  </div>
+                <li key={title} className="py-4">
+                  <p className="font-semibold text-ink">{title}</p>
+                  <p className="mt-0.5 text-sm text-ink-muted">{line}</p>
                 </li>
               ))}
             </ul>
-            <p className="mt-8 text-sm text-ink-muted">
-              Fill in the form and we&apos;ll be in touch about payment and
-              getting you kitted out. All veterans — serving and ex-serving —
-              and family members are welcome.
-            </p>
           </div>
 
           <div className="lg:col-span-3">
             {sent ? (
-              <div className="rounded-card bg-paper p-10 text-center shadow-soft">
-                <p className="font-display text-2xl font-semibold uppercase text-navy">
-                  Thanks — we&apos;ve got it
+              <div className="border-t-4 border-gold bg-paper p-10 text-center">
+                <p className="font-display text-2xl font-semibold tracking-wide text-navy">
+                  Thanks, we&apos;ve got it
                 </p>
                 <RibbonRule className="mt-3" />
                 <p className="mt-4 text-ink-muted">
@@ -74,7 +80,7 @@ export default function Membership() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="grid gap-5 rounded-card bg-paper p-8 shadow-soft sm:grid-cols-2"
+                className="grid gap-5 border-t-4 border-gold bg-paper p-8 sm:grid-cols-2 md:p-10"
               >
                 <FormField label="Full name" id="name" required autoComplete="name" />
                 <FormField label="Email" id="email" type="email" required autoComplete="email" />
@@ -90,7 +96,7 @@ export default function Membership() {
                   <FormField
                     label="Playing / handicap info"
                     id="handicap"
-                    placeholder="e.g. Handicap 18, social player, just starting out…"
+                    placeholder="e.g. Handicap 18, social player, just starting out"
                   />
                 </div>
                 <FormField
@@ -124,7 +130,7 @@ export default function Membership() {
             )}
           </div>
         </div>
-      </Section>
+      </section>
     </>
   );
 }

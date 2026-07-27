@@ -19,11 +19,11 @@ export const events = [
     status: "Upcoming",
     sponsor: "Palmer Gold Coast",
     description:
-      "Our first official open day on the Gold Coast. 18 holes at Palmer Gold Coast, with an optional side competition for handicap players. All veterans — serving and ex-serving — and their families are welcome. Come for the golf, stay for the company.",
+      "Our first official open day on the Gold Coast. 18 holes at Palmer Gold Coast, with an optional side competition for handicap players. All veterans, serving and ex-serving, and their families are welcome. Come for the golf, stay for the company.",
   },
   {
     id: "event-two-2026",
-    title: "Second 2026 Event — Details Coming Soon",
+    title: "Second 2026 Event",
     region: "Brisbane",
     date: "2026-10-01",
     dateDisplay: "Date to be confirmed",
@@ -37,7 +37,7 @@ export const events = [
     status: "Upcoming",
     sponsor: "",
     description:
-      "We're locking in our second event for 2026. Follow us on Facebook or check back here — details will be posted as soon as they're confirmed.",
+      "We're locking in our second event for 2026. Follow us on Facebook or check back here. Details will be posted as soon as they're confirmed.",
   },
 ];
 

@@ -16,13 +16,12 @@ export default {
         "ink-muted": "#4A5B72",
       },
       fontFamily: {
-        display: ["Oswald", "sans-serif"],
+        display: ["Cinzel", "serif"],
         body: ["'Source Sans 3'", "sans-serif"],
-        flourish: ["Yellowtail", "cursive"],
       },
       borderRadius: {
-        card: "10px",
-        img: "12px",
+        card: "2px",
+        img: "4px",
       },
       boxShadow: {
         soft: "0 6px 24px rgba(7,21,43,.10)",

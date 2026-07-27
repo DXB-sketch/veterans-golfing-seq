@@ -7,7 +7,7 @@ import { events } from "../data/events.js";
 import { values } from "../data/values.js";
 
 const teaserIcon = (path) => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     {path}
   </svg>
 );
@@ -17,9 +17,9 @@ export default function Home() {
 
   return (
     <>
-      {/* HERO — photo slot is data-driven: swap the gradient for a real dawn
+      {/* HERO. Photo slot is data-driven: swap the gradient for a real dawn
           fairway photo from the 31 July event when it arrives. */}
-      <section className="relative isolate flex min-h-[78vh] items-center overflow-hidden bg-navy px-5 py-24">
+      <section className="relative isolate flex min-h-[70vh] items-center overflow-hidden bg-navy px-5 py-24">
         <div
           className="absolute inset-0 -z-10"
           aria-hidden="true"
@@ -28,18 +28,9 @@ export default function Home() {
               "radial-gradient(120% 90% at 75% 15%, rgba(228,193,88,0.28) 0%, rgba(200,160,46,0.10) 34%, rgba(11,30,63,0) 62%), linear-gradient(180deg, #0B1E3F 0%, #0B1E3F 45%, #07152B 100%)",
           }}
         />
-        {/* placeholder fairway horizon line */}
-        <div
-          className="absolute inset-x-0 bottom-0 -z-10 h-40 opacity-40"
-          aria-hidden="true"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(7,21,43,0) 0%, rgba(7,21,43,0.9) 100%)",
-          }}
-        />
         <div className="mx-auto w-full max-w-site">
           <div className="max-w-3xl">
-            <p className="font-display text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-gold">
+            <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
               For veterans · By veterans
             </p>
             <RibbonRule className="mt-3" dark />
@@ -61,40 +52,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* NEXT EVENT — one generous card */}
+      {/* NEXT EVENT. One generous card. */}
       {nextEvent && (
         <Section eyebrow="What's on" title="Next event" tone="cream">
           <div className="mx-auto max-w-4xl">
-            <EventCard event={nextEvent} featured />
+            <EventCard event={nextEvent} />
           </div>
         </Section>
       )}
 
-      {/* VALUES — one quiet row */}
+      {/* VALUES. One quiet row. */}
       <Section eyebrow="What we stand for" title="Our values" tone="navy" center>
-        <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
           {values.map((v) => (
-            <li key={v.label} className="flex flex-col items-center text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/40 text-gold" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2l2.9 6.26L21 9.27l-4.5 4.38L17.8 20 12 16.77 6.2 20l1.3-6.35L3 9.27l6.1-1.01L12 2z" />
-                </svg>
-              </span>
-              <h3 className="mt-3 font-display text-lg font-semibold uppercase text-gold-bright">
+            <li key={v.label} className="text-center">
+              <h3 className="font-display text-lg font-semibold tracking-wide text-gold-bright">
                 {v.label}
               </h3>
-              <p className="mt-1 text-sm text-cream/80">{v.line}</p>
+              <p className="mt-2 text-sm text-cream/80">{v.line}</p>
             </li>
           ))}
         </ul>
-        <p className="mt-10 font-display text-sm font-medium uppercase tracking-[0.14em] text-cream/70">
+        <p className="mt-12 font-body text-sm font-bold uppercase tracking-[0.2em] text-cream/70">
           Army · Navy · Air Force
         </p>
       </Section>
 
       {/* TEASERS */}
       <Section eyebrow="Find your way around" title="More about the club" tone="cream">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <TeaserCard
             icon={teaserIcon(
               <>
@@ -103,7 +89,7 @@ export default function Home() {
               </>
             )}
             title="Who we are"
-            blurb="An Australian Defence veteran golf community — our story, our mission and where we're headed."
+            blurb="An Australian Defence veteran golf community. Our story, our mission and where we're headed."
             to="/about"
             linkLabel="About the club"
           />
@@ -115,7 +101,7 @@ export default function Home() {
               </>
             )}
             title="Events"
-            blurb="Golf days across Brisbane, the Sunshine Coast and the Gold Coast — find the next one near you."
+            blurb="Golf days across Brisbane, the Sunshine Coast and the Gold Coast. Find the next one near you."
             to="/events"
             linkLabel="See what's on"
           />
@@ -138,7 +124,7 @@ export default function Home() {
               </>
             )}
             title="Veteran resources"
-            blurb="Trusted support services for veterans and families — Open Arms, DVA, RSL Queensland and more."
+            blurb="Trusted support services for veterans and families, from Open Arms to DVA and RSL Queensland."
             to="/resources"
             linkLabel="Find support"
           />

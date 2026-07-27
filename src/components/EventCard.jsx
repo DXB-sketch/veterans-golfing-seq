@@ -10,7 +10,7 @@ function Row({ icon, label, value }) {
   );
 }
 
-const icons = {
+export const eventIcons = {
   clock: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       <circle cx="12" cy="12" r="9" />
@@ -35,61 +35,68 @@ const icons = {
   ),
 };
 
-export default function EventCard({ event, featured = false }) {
+export function EventTags({ event, dark = false }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span
+        className={`border px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] ${
+          dark ? "border-cream/40 text-cream" : "border-ink/25 text-ink"
+        }`}
+      >
+        {event.region}
+      </span>
+      <span
+        className={`px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-white ${
+          event.status === "Past" ? "bg-ink-muted" : "bg-crimson"
+        }`}
+      >
+        {event.status}
+      </span>
+    </div>
+  );
+}
+
+export function EventDateBlock({ event, className = "" }) {
   const [year, month, day] = event.date.split("-");
   const monthName = new Date(Number(year), Number(month) - 1).toLocaleString("en-AU", { month: "short" });
   const tbc = event.dateDisplay.toLowerCase().includes("confirm");
-
   return (
-    <article
-      className={`flex flex-col overflow-hidden rounded-card bg-paper shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift ${
-        featured ? "md:flex-row" : ""
-      }`}
-    >
-      {/* Date chip panel */}
-      <div
-        className={`flex items-center justify-center gap-3 bg-navy p-5 text-center ${
-          featured ? "md:w-44 md:flex-col md:gap-1" : ""
-        }`}
-      >
-        {tbc ? (
-          <span className="font-display text-xl font-semibold uppercase text-gold-bright">TBC</span>
-        ) : (
-          <>
-            <span className="font-display text-4xl font-bold text-white">{Number(day)}</span>
-            <span className="font-display text-lg font-medium uppercase tracking-wide text-gold-bright">
-              {monthName} {year}
-            </span>
-          </>
-        )}
-      </div>
+    <div className={`flex flex-col items-center justify-center bg-navy text-center ${className}`}>
+      {tbc ? (
+        <span className="font-display text-xl font-semibold uppercase text-gold-bright">TBC</span>
+      ) : (
+        <>
+          <span className="font-display text-4xl font-bold text-white">{Number(day)}</span>
+          <span className="font-body text-sm font-bold uppercase tracking-[0.14em] text-gold-bright">
+            {monthName} {year}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
 
-      <div className="flex flex-1 flex-col gap-4 p-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-cream px-3 py-1 text-xs font-semibold text-ink">
-            {event.region}
-          </span>
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold text-white ${
-              event.status === "Past" ? "bg-ink-muted" : "bg-crimson"
-            }`}
-          >
-            {event.status}
-          </span>
-        </div>
+// The featured card used on the homepage. The one card that earns a box.
+export default function EventCard({ event }) {
+  return (
+    <article className="flex flex-col overflow-hidden border border-ink/10 bg-paper shadow-soft md:flex-row">
+      <EventDateBlock event={event} className="p-6 md:w-44" />
+
+      <div className="flex flex-1 flex-col gap-4 p-7">
+        <EventTags event={event} />
 
         <div>
-          <h3 className="font-display text-xl font-semibold uppercase text-navy">
+          <h3 className="font-display text-xl font-semibold tracking-wide text-navy">
             {event.title}
           </h3>
           <p className="mt-1 text-sm font-semibold text-ink-muted">{event.dateDisplay}</p>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          <Row icon={icons.pin} label="Venue" value={event.venue} />
-          <Row icon={icons.clock} label="Meet" value={event.meetTime} />
-          <Row icon={icons.flag} label="First tee" value={event.firstTee} />
-          <Row icon={icons.dollar} label="Green fees" value={event.greenFee} />
+          <Row icon={eventIcons.pin} label="Venue" value={event.venue} />
+          <Row icon={eventIcons.clock} label="Meet" value={event.meetTime} />
+          <Row icon={eventIcons.flag} label="First tee" value={event.firstTee} />
+          <Row icon={eventIcons.dollar} label="Green fees" value={event.greenFee} />
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-2">
@@ -102,11 +109,41 @@ export default function EventCard({ event, featured = false }) {
           )}
           <Link
             to={`/events/${event.id}`}
-            className="font-display text-sm font-semibold uppercase tracking-wide text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
+            className="font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
           >
-            View event →
+            View event
           </Link>
         </div>
+      </div>
+    </article>
+  );
+}
+
+// Flat list row for the Events page. Hairline separated, no card chrome.
+export function EventRow({ event }) {
+  return (
+    <article className="flex flex-col gap-5 py-8 sm:flex-row sm:items-start">
+      <EventDateBlock event={event} className="h-24 w-28 shrink-0" />
+      <div className="flex-1">
+        <EventTags event={event} />
+        <h3 className="mt-3 font-display text-xl font-semibold tracking-wide text-navy">
+          <Link to={`/events/${event.id}`} className="transition-colors hover:text-crimson">
+            {event.title}
+          </Link>
+        </h3>
+        <p className="mt-1 text-sm font-semibold text-ink-muted">{event.dateDisplay}</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <Row icon={eventIcons.pin} label="Venue" value={event.venue} />
+          <Row icon={eventIcons.clock} label="Meet" value={event.meetTime} />
+          <Row icon={eventIcons.flag} label="First tee" value={event.firstTee} />
+          <Row icon={eventIcons.dollar} label="Fees" value={event.greenFee} />
+        </div>
+        <Link
+          to={`/events/${event.id}`}
+          className="mt-4 inline-block font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
+        >
+          View event
+        </Link>
       </div>
     </article>
   );

@@ -13,7 +13,7 @@ export default function Footer() {
               className="h-20 w-20"
             />
             <p className="mt-4 max-w-xs text-sm text-cream/80">
-              South East Queensland Defence Veterans Golf Club Inc. — a
+              South East Queensland Defence Veterans Golf Club Inc. is a
               registered non-profit incorporated association.
             </p>
             <RibbonRule className="mt-5" dark />
@@ -57,7 +57,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-gold-bright"
                 >
-                  Facebook — South East Queensland Defence Veterans Golf Club
+                  Facebook: South East Queensland Defence Veterans Golf Club
                 </a>
               </li>
               <li>South East Queensland, Australia</li>
@@ -66,7 +66,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 border-t border-gold/15 pt-6 text-center text-sm text-cream/70">
-          <p className="font-display uppercase tracking-[0.14em] text-gold-bright">
+          <p className="font-display text-[0.95rem] font-semibold uppercase tracking-[0.14em] text-gold-bright">
             Proudly supporting Defence veterans
           </p>
           <p className="mt-2">

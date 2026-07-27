@@ -1,7 +1,7 @@
 import RibbonRule from "./RibbonRule.jsx";
 
-// Section wrapper — eyebrow → title → ribbon → content rhythm (DESIGN.md §9).
-// tone: "cream" | "navy" | "paper"
+// Section wrapper handling the eyebrow > title > ribbon > content rhythm.
+// tone: "cream" | "navy" | "navy-deep" | "paper"
 export default function Section({
   eyebrow,
   title,
@@ -25,13 +25,13 @@ export default function Section({
         {(eyebrow || title) && (
           <header className={`mb-10 ${center ? "flex flex-col items-center" : ""}`}>
             {eyebrow && (
-              <p className="font-display text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-gold">
+              <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
                 {eyebrow}
               </p>
             )}
             {title && (
               <h2
-                className={`mt-2 font-display text-[1.75rem] font-semibold uppercase leading-tight ${
+                className={`mt-2 font-display text-[1.7rem] font-semibold leading-tight tracking-wide ${
                   dark ? "text-white" : "text-navy"
                 }`}
               >

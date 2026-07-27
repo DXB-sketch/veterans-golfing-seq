@@ -30,14 +30,14 @@ export default function Nav() {
             alt="SEQDVGC crest"
             className="h-14 w-14 shrink-0"
           />
-          <span className="font-display leading-tight text-white">
-            <span className="block text-[0.7rem] font-medium uppercase tracking-[0.12em] text-cream/80">
+          <span className="leading-tight text-white">
+            <span className="block font-body text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream/80">
               South East Queensland
             </span>
-            <span className="block text-[0.95rem] font-bold uppercase tracking-wide text-gold-bright">
+            <span className="block font-display text-[1rem] font-bold uppercase tracking-[0.06em] text-gold-bright">
               Defence Veterans
             </span>
-            <span className="block text-[0.7rem] font-medium uppercase tracking-[0.12em] text-cream/80">
+            <span className="block font-body text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream/80">
               Golf Club Inc.
             </span>
           </span>
@@ -52,7 +52,7 @@ export default function Nav() {
         </div>
 
         <button
-          className="flex h-11 w-11 items-center justify-center rounded-card text-white lg:hidden"
+          className="flex h-11 w-11 items-center justify-center text-white lg:hidden"
           aria-expanded={open}
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((v) => !v)}
@@ -84,7 +84,7 @@ export default function Nav() {
                 end={l.to === "/"}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
-                  `flex min-h-[44px] items-center rounded-card px-3 font-body text-lg font-semibold ${
+                  `flex min-h-[44px] items-center px-3 font-body text-lg font-semibold ${
                     isActive ? "bg-navy-deep text-gold-bright" : "text-white hover:bg-navy-deep"
                   }`
                 }

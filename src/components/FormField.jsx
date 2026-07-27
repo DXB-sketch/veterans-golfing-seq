@@ -8,7 +8,7 @@ export default function FormField({
   ...rest
 }) {
   const base =
-    "w-full rounded-card border border-ink/15 bg-paper px-4 py-3 text-ink placeholder:text-ink-muted/60 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-gold min-h-[44px]";
+    "w-full border border-ink/20 bg-paper px-4 py-3 text-ink placeholder:text-ink-muted/60 focus:outline-none focus-visible:outline-none focus:border-gold focus:ring-1 focus:ring-gold min-h-[46px]";
 
   return (
     <div>

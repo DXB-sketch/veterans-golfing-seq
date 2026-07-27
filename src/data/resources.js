@@ -1,6 +1,6 @@
 export const resources = [
   {
-    name: "Open Arms — Veterans & Families Counselling",
+    name: "Open Arms (Veterans & Families Counselling)",
     description:
       "Free, confidential counselling and support for anyone who has served at least one day in the ADF, and their families. Available 24/7.",
     url: "https://www.openarms.gov.au",
@@ -8,7 +8,7 @@ export const resources = [
   {
     name: "Department of Veterans' Affairs (DVA)",
     description:
-      "The Australian Government department supporting veterans — claims, health cards, pensions and wellbeing services.",
+      "The Australian Government department supporting veterans with claims, health cards, pensions and wellbeing services.",
     url: "https://www.dva.gov.au",
   },
   {
@@ -26,7 +26,7 @@ export const resources = [
   {
     name: "Golf Australia",
     description:
-      "The national governing body for golf — find a club, get a handicap, and learn the game at any age or ability.",
+      "The national governing body for golf. Find a club, get a handicap, and learn the game at any age or ability.",
     url: "https://www.golf.org.au",
   },
 ];

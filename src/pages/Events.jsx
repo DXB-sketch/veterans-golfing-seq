@@ -1,18 +1,17 @@
 import { useState } from "react";
-import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
-import EventCard from "../components/EventCard.jsx";
+import { EventRow } from "../components/EventCard.jsx";
 import { events, regions, statuses } from "../data/events.js";
 
-function FilterPill({ active, children, onClick }) {
+function FilterTab({ active, children, onClick }) {
   return (
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`min-h-[44px] rounded-full px-5 py-2 font-body text-sm font-semibold transition-colors ${
+      className={`min-h-[44px] border-b-2 px-1 pb-1 pt-2 font-body text-sm font-bold uppercase tracking-[0.06em] transition-colors ${
         active
-          ? "bg-navy text-gold-bright"
-          : "bg-paper text-ink hover:bg-navy/5"
+          ? "border-gold text-navy"
+          : "border-transparent text-ink-muted hover:text-navy"
       }`}
     >
       {children}
@@ -32,61 +31,62 @@ export default function Events() {
 
   return (
     <>
-      <section className="bg-navy px-5 py-16 text-center md:py-20">
+      {/* Events identity: compact navy banner with a solid gold baseline. */}
+      <section className="border-b-4 border-gold bg-navy px-5 py-12 md:py-16">
         <div className="mx-auto max-w-site">
-          <p className="font-display text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-gold">
+          <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
             Golf days &amp; club events
           </p>
           <h1 className="text-page-title mt-3 font-display font-bold uppercase text-white">
             Events
           </h1>
-          <div className="mt-5 flex justify-center">
-            <RibbonRule dark />
-          </div>
-          <p className="mx-auto mt-5 max-w-xl text-cream/85">
-            Brisbane, Sunshine Coast and Gold Coast — filter by region to find
-            a round near you.
+          <RibbonRule className="mt-5" dark />
+          <p className="mt-5 max-w-xl text-cream/85">
+            Brisbane, Sunshine Coast and Gold Coast. Filter by region to find a
+            round near you.
           </p>
         </div>
       </section>
 
-      <Section tone="cream">
-        <div className="mb-10 flex flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-sm font-semibold text-ink-muted">Region:</span>
-            {["All", ...regions].map((r) => (
-              <FilterPill key={r} active={region === r} onClick={() => setRegion(r)}>
-                {r}
-              </FilterPill>
-            ))}
+      <section className="bg-cream px-5 py-14 md:py-20">
+        <div className="mx-auto max-w-site">
+          <div className="flex flex-col gap-2 border-b border-ink/10 pb-4 sm:flex-row sm:items-center sm:gap-10">
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+              <span className="text-sm font-semibold text-ink-muted">Region</span>
+              {["All", ...regions].map((r) => (
+                <FilterTab key={r} active={region === r} onClick={() => setRegion(r)}>
+                  {r}
+                </FilterTab>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+              <span className="text-sm font-semibold text-ink-muted">Status</span>
+              {["All", ...statuses].map((s) => (
+                <FilterTab key={s} active={status === s} onClick={() => setStatus(s)}>
+                  {s}
+                </FilterTab>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-sm font-semibold text-ink-muted">Status:</span>
-            {["All", ...statuses].map((s) => (
-              <FilterPill key={s} active={status === s} onClick={() => setStatus(s)}>
-                {s}
-              </FilterPill>
-            ))}
-          </div>
-        </div>
 
-        {filtered.length > 0 ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            {filtered.map((e) => (
-              <EventCard key={e.id} event={e} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-card bg-paper p-12 text-center shadow-soft">
-            <p className="font-display text-xl font-semibold uppercase text-navy">
-              No events listed yet
-            </p>
-            <p className="mt-2 text-ink-muted">
-              Check back soon or follow us on Facebook.
-            </p>
-          </div>
-        )}
-      </Section>
+          {filtered.length > 0 ? (
+            <div className="divide-y divide-ink/10">
+              {filtered.map((e) => (
+                <EventRow key={e.id} event={e} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-20 text-center">
+              <p className="font-display text-xl font-semibold tracking-wide text-navy">
+                No events listed yet
+              </p>
+              <p className="mt-2 text-ink-muted">
+                Check back soon or follow us on Facebook.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
     </>
   );
 }
