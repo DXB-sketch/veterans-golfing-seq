@@ -50,22 +50,30 @@ export default function Events() {
 
       <section className="bg-cream px-5 py-14 md:py-20">
         <div className="mx-auto max-w-site">
-          <div className="flex flex-col gap-2 border-b border-ink/10 pb-4 sm:flex-row sm:items-center sm:gap-10">
-            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
-              <span className="text-sm font-semibold text-ink-muted">Region</span>
-              {["All", ...regions].map((r) => (
-                <FilterTab key={r} active={region === r} onClick={() => setRegion(r)}>
-                  {r}
-                </FilterTab>
-              ))}
+          <div className="flex flex-col gap-8 border-b border-ink/10 pb-6 sm:flex-row sm:gap-0">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-gold">
+                Filter by region
+              </p>
+              <div className="mt-1 flex flex-wrap gap-x-6">
+                {["All", ...regions].map((r) => (
+                  <FilterTab key={r} active={region === r} onClick={() => setRegion(r)}>
+                    {r}
+                  </FilterTab>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
-              <span className="text-sm font-semibold text-ink-muted">Status</span>
-              {["All", ...statuses].map((s) => (
-                <FilterTab key={s} active={status === s} onClick={() => setStatus(s)}>
-                  {s}
-                </FilterTab>
-              ))}
+            <div className="sm:ml-12 sm:border-l sm:border-ink/10 sm:pl-12">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-gold">
+                Filter by status
+              </p>
+              <div className="mt-1 flex flex-wrap gap-x-6">
+                {["All", ...statuses].map((s) => (
+                  <FilterTab key={s} active={status === s} onClick={() => setStatus(s)}>
+                    {s}
+                  </FilterTab>
+                ))}
+              </div>
             </div>
           </div>
 

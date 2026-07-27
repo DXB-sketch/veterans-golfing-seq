@@ -35,24 +35,22 @@ export const eventIcons = {
   ),
 };
 
-export function EventTags({ event, dark = false }) {
+// Plain-text metadata line: region and status, no boxes.
+export function EventMeta({ event, dark = false }) {
+  const statusColour =
+    event.status === "Past"
+      ? dark
+        ? "text-cream/60"
+        : "text-ink-muted"
+      : dark
+        ? "text-gold-bright"
+        : "text-crimson";
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span
-        className={`border px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] ${
-          dark ? "border-cream/40 text-cream" : "border-ink/25 text-ink"
-        }`}
-      >
-        {event.region}
-      </span>
-      <span
-        className={`px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-white ${
-          event.status === "Past" ? "bg-ink-muted" : "bg-crimson"
-        }`}
-      >
-        {event.status}
-      </span>
-    </div>
+    <p className="text-xs font-bold uppercase tracking-[0.14em]">
+      <span className={dark ? "text-cream/80" : "text-ink-muted"}>{event.region}</span>
+      <span className="mx-2 text-gold" aria-hidden="true">·</span>
+      <span className={statusColour}>{event.status}</span>
+    </p>
   );
 }
 
@@ -83,7 +81,7 @@ export default function EventCard({ event }) {
       <EventDateBlock event={event} className="p-6 md:w-44" />
 
       <div className="flex flex-1 flex-col gap-4 p-7">
-        <EventTags event={event} />
+        <EventMeta event={event} />
 
         <div>
           <h3 className="font-display text-xl font-semibold tracking-wide text-navy">
@@ -125,7 +123,7 @@ export function EventRow({ event }) {
     <article className="flex flex-col gap-5 py-8 sm:flex-row sm:items-start">
       <EventDateBlock event={event} className="h-24 w-28 shrink-0" />
       <div className="flex-1">
-        <EventTags event={event} />
+        <EventMeta event={event} />
         <h3 className="mt-3 font-display text-xl font-semibold tracking-wide text-navy">
           <Link to={`/events/${event.id}`} className="transition-colors hover:text-crimson">
             {event.title}

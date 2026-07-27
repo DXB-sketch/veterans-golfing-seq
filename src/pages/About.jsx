@@ -43,6 +43,79 @@ const roadmap = [
   },
 ];
 
+function TimelineEntry({ item }) {
+  return (
+    <div>
+      <p className="font-body text-xs font-bold uppercase tracking-[0.16em] text-gold">
+        {item.when}
+      </p>
+      <h3 className="mt-1 font-display text-lg font-semibold tracking-wide text-navy">
+        {item.title}
+      </h3>
+      <p className="mt-1.5 text-sm text-ink-muted">{item.detail}</p>
+    </div>
+  );
+}
+
+// Desktop: entries flow left-to-right, drop down a row, then flow back
+// right-to-left, joined by one continuous gold line running along the top
+// of each row and down the alternating outer edge. Mobile: single vertical
+// line down the left.
+function SnakeTimeline({ items, perRow = 3 }) {
+  const rows = [];
+  for (let i = 0; i < items.length; i += perRow) rows.push(items.slice(i, i + perRow));
+
+  return (
+    <>
+      {/* Mobile: vertical */}
+      <ol className="relative ml-1 border-l-2 border-gold/60 md:hidden">
+        {items.map((item) => (
+          <li key={item.title} className="relative pb-10 pl-7 last:pb-0">
+            <span className="absolute -left-[7px] top-1 h-3 w-3 rotate-45 bg-gold" aria-hidden="true" />
+            <TimelineEntry item={item} />
+          </li>
+        ))}
+      </ol>
+
+      {/* Desktop: snake */}
+      <div className="hidden md:block">
+        {rows.map((row, r) => {
+          const reversed = r % 2 === 1;
+          const display = reversed ? [...row].reverse() : row;
+          const lastRow = r === rows.length - 1;
+          return (
+            <div key={r} className="relative">
+              {/* vertical connector down the outer edge to the next row's line */}
+              {!lastRow && (
+                <span
+                  className={`absolute bottom-0 top-0 w-0.5 bg-gold/60 ${
+                    reversed ? "left-0" : "right-0"
+                  }`}
+                  aria-hidden="true"
+                />
+              )}
+              <div
+                className="grid gap-x-12 border-t-2 border-gold/60 px-6 pb-14 pt-5 last:pb-0"
+                style={{ gridTemplateColumns: `repeat(${perRow}, minmax(0, 1fr))` }}
+              >
+                {display.map((item) => (
+                  <div key={item.title} className="relative">
+                    <span
+                      className="absolute -top-[27px] left-0 h-3 w-3 rotate-45 bg-gold"
+                      aria-hidden="true"
+                    />
+                    <TimelineEntry item={item} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
 export default function About() {
   return (
     <>
@@ -92,25 +165,10 @@ export default function About() {
         </div>
       </Section>
 
-      {/* Roadmap timeline */}
+      {/* Roadmap timeline. Snakes across and down the page on desktop,
+          stacks vertically on mobile. One continuous connected line. */}
       <Section eyebrow="The road ahead" title="Where we're headed" tone="cream">
-        <ol className="relative ml-2 border-l-2 border-gold/50 md:ml-4">
-          {roadmap.map((item) => (
-            <li key={item.title} className="relative pb-12 pl-8 last:pb-0 md:pl-12">
-              <span
-                className="absolute -left-[7px] top-1.5 h-3 w-3 rotate-45 bg-gold"
-                aria-hidden="true"
-              />
-              <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
-                {item.when}
-              </p>
-              <h3 className="mt-1 font-display text-xl font-semibold tracking-wide text-navy">
-                {item.title}
-              </h3>
-              <p className="mt-2 max-w-[60ch] text-ink-muted">{item.detail}</p>
-            </li>
-          ))}
-        </ol>
+        <SnakeTimeline items={roadmap} />
       </Section>
 
       <Section eyebrow="What we stand for" title="Our values" tone="navy" center>

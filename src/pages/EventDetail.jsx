@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
-import { EventTags } from "../components/EventCard.jsx";
+import { EventMeta } from "../components/EventCard.jsx";
 import { events } from "../data/events.js";
 
 function Detail({ label, value }) {
@@ -46,7 +46,7 @@ export default function EventDetail() {
             &larr; All events
           </Link>
           <div className="mt-4">
-            <EventTags event={event} dark />
+            <EventMeta event={event} dark />
           </div>
           <h1 className="text-page-title mt-4 font-display font-bold uppercase text-white">
             {event.title}
