@@ -14,6 +14,7 @@ import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import AdminEvents from "./pages/admin/AdminEvents.jsx";
 import AdminEventForm from "./pages/admin/AdminEventForm.jsx";
 import AdminSubmissions from "./pages/admin/AdminSubmissions.jsx";
+import AdminTeam from "./pages/admin/AdminTeam.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -43,6 +44,7 @@ export default function App() {
               <Route path="events/new" element={<AdminEventForm />} />
               <Route path="events/:id/edit" element={<AdminEventForm />} />
               <Route path="submissions" element={<AdminSubmissions />} />
+              <Route path="team" element={<AdminTeam />} />
             </Route>
           </Routes>
         </main>

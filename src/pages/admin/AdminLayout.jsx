@@ -66,6 +66,7 @@ export default function AdminLayout() {
               Events
             </AdminTab>
             <AdminTab to="/admin/submissions">Enquiries &amp; messages</AdminTab>
+            <AdminTab to="/admin/team">Team</AdminTab>
           </nav>
         </div>
       </div>

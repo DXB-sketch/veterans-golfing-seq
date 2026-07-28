@@ -25,7 +25,7 @@ Live data comes from the club's Supabase project (see `BACKEND.md` for the full 
 
 - **Events** are read live from the `events` table (public read via RLS). Committee members manage them at `/admin` (also linked as "Committee login" in the footer).
 - **Membership & contact forms** insert into `membership_enquiries` / `contact_messages` (anon insert only; reads require sign-in). Volunteers can view them under `/admin/submissions`.
-- **Auth**: Supabase email + password. No self-registration — admin accounts are created manually in the Supabase dashboard (Authentication → Users). Keep "Allow new users to sign up" **disabled** in Auth settings, since any authenticated user can edit events.
+- **Auth**: Supabase email + password. No self-registration — keep "Allow new users to sign up" **disabled** in Auth settings, since any authenticated user can edit events. Committee members create and remove volunteer accounts themselves under `/admin/team`, which calls the `admin-users` Edge Function (`supabase/functions/admin-users/` — runs server-side with the service key and only accepts requests from a signed-in admin; it refuses self-removal and removal of the last account). Only the very first account needs creating in the dashboard (Authentication → Users → Add user).
 - **Env vars** (`.env`, copy from `.env.example`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Set the same two in Vercel (Project → Settings → Environment Variables).
 - **GitHub Actions**: `supabase-keepalive.yml` (stops the free-tier project pausing) and `supabase-backup.yml` (weekly JSON export to `/backups`). They need repo secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` (backup only — never in front-end code).
 
