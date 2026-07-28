@@ -3,7 +3,7 @@ import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import { EventMeta } from "../components/EventCard.jsx";
-import { events } from "../data/events.js";
+import { useEvent } from "../hooks/useEvents.js";
 
 function Detail({ label, value }) {
   return (
@@ -18,7 +18,15 @@ function Detail({ label, value }) {
 
 export default function EventDetail() {
   const { id } = useParams();
-  const event = events.find((e) => e.id === id);
+  const { event, loading } = useEvent(id);
+
+  if (loading) {
+    return (
+      <Section eyebrow="Events" title="Loading…" tone="cream" center>
+        <p className="text-ink-muted">Just a moment.</p>
+      </Section>
+    );
+  }
 
   if (!event) {
     return (

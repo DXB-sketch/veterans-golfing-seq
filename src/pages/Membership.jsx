@@ -2,14 +2,38 @@ import { useState } from "react";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
+import { supabase } from "../lib/supabase.js";
 
 export default function Membership() {
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Mock-up only: no backend yet. V1 will post to Supabase / email endpoint.
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSent(true);
+    const f = new FormData(e.target);
+    setError(null);
+    setSending(true);
+    const { error: insertError } = await supabase
+      .from("membership_enquiries")
+      .insert({
+        name: f.get("name"),
+        email: f.get("email"),
+        phone: f.get("phone") || null,
+        service_branch: f.get("branch") || null,
+        playing_info: f.get("handicap") || null,
+        apparel_choice: f.get("merch") || null,
+        apparel_size: f.get("size") || null,
+        delivery_pref: f.get("fulfilment") || null,
+      });
+    setSending(false);
+    if (insertError) {
+      setError(
+        "Sorry, your enquiry didn't go through. Please check your internet connection and try again, or email us at seqdvgc@gmail.com."
+      );
+    } else {
+      setSent(true);
+    }
   }
 
   return (
@@ -121,9 +145,14 @@ export default function Membership() {
                     options={["Pick up at an event", "Post it to me"]}
                   />
                 </div>
+                {error && (
+                  <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
+                    {error}
+                  </p>
+                )}
                 <div className="sm:col-span-2">
-                  <Button type="submit" className="w-full sm:w-auto">
-                    Send enquiry
+                  <Button type="submit" disabled={sending} className="w-full sm:w-auto">
+                    {sending ? "Sending…" : "Send enquiry"}
                   </Button>
                 </div>
               </form>

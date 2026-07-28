@@ -1,7 +1,11 @@
 import { useState } from "react";
 import RibbonRule from "../components/RibbonRule.jsx";
 import { EventRow } from "../components/EventCard.jsx";
-import { events, regions, statuses } from "../data/events.js";
+import { REGIONS } from "../lib/events.js";
+import { useEvents } from "../hooks/useEvents.js";
+
+const regionTabs = ["All", ...REGIONS.map((r) => r.label)];
+const statusTabs = ["All", "Upcoming", "Past"];
 
 function FilterTab({ active, children, onClick }) {
   return (
@@ -22,11 +26,14 @@ function FilterTab({ active, children, onClick }) {
 export default function Events() {
   const [region, setRegion] = useState("All");
   const [status, setStatus] = useState("Upcoming");
+  const { events, loading, error } = useEvents();
 
+  // "Upcoming" includes events marked Full — they haven't been played yet.
   const filtered = events.filter(
     (e) =>
       (region === "All" || e.region === region) &&
-      (status === "All" || e.status === status)
+      (status === "All" ||
+        (status === "Upcoming" ? e.statusValue !== "past" : e.statusValue === "past"))
   );
 
   return (
@@ -56,7 +63,7 @@ export default function Events() {
                 Filter by region
               </p>
               <div className="mt-1 flex flex-wrap gap-x-6">
-                {["All", ...regions].map((r) => (
+                {regionTabs.map((r) => (
                   <FilterTab key={r} active={region === r} onClick={() => setRegion(r)}>
                     {r}
                   </FilterTab>
@@ -68,7 +75,7 @@ export default function Events() {
                 Filter by status
               </p>
               <div className="mt-1 flex flex-wrap gap-x-6">
-                {["All", ...statuses].map((s) => (
+                {statusTabs.map((s) => (
                   <FilterTab key={s} active={status === s} onClick={() => setStatus(s)}>
                     {s}
                   </FilterTab>
@@ -77,7 +84,20 @@ export default function Events() {
             </div>
           </div>
 
-          {filtered.length > 0 ? (
+          {loading ? (
+            <div className="py-20 text-center">
+              <p className="text-ink-muted">Loading events…</p>
+            </div>
+          ) : error ? (
+            <div className="py-20 text-center">
+              <p className="font-display text-xl font-semibold tracking-wide text-navy">
+                {error}
+              </p>
+              <p className="mt-2 text-ink-muted">
+                Please try again in a moment, or find us on Facebook.
+              </p>
+            </div>
+          ) : filtered.length > 0 ? (
             <div className="divide-y divide-ink/10">
               {filtered.map((e) => (
                 <EventRow key={e.id} event={e} />

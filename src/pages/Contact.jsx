@@ -2,14 +2,33 @@ import { useState } from "react";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
+import { supabase } from "../lib/supabase.js";
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Mock-up only: no backend yet. V1 will post to Supabase / email endpoint.
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSent(true);
+    const f = new FormData(e.target);
+    const subject = f.get("subject");
+    setError(null);
+    setSending(true);
+    const { error: insertError } = await supabase.from("contact_messages").insert({
+      name: f.get("name"),
+      email: f.get("email"),
+      // The table has no subject column; keep it at the top of the message.
+      message: subject ? `Subject: ${subject}\n\n${f.get("message")}` : f.get("message"),
+    });
+    setSending(false);
+    if (insertError) {
+      setError(
+        "Sorry, your message didn't go through. Please check your internet connection and try again, or email us at seqdvgc@gmail.com."
+      );
+    } else {
+      setSent(true);
+    }
   }
 
   return (
@@ -94,9 +113,14 @@ export default function Contact() {
                 <div className="sm:col-span-2">
                   <FormField label="Message" id="message" as="textarea" required />
                 </div>
+                {error && (
+                  <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
+                    {error}
+                  </p>
+                )}
                 <div className="sm:col-span-2">
-                  <Button type="submit" className="w-full sm:w-auto">
-                    Send message
+                  <Button type="submit" disabled={sending} className="w-full sm:w-auto">
+                    {sending ? "Sending…" : "Send message"}
                   </Button>
                 </div>
               </form>

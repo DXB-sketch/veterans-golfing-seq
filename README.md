@@ -19,10 +19,18 @@ npm run dev
 
 Home · About · Events (+ event detail) · Membership enquiry · Veteran Resources · Contact
 
-## What's mocked (V1 build replaces these)
+## Backend (Supabase)
 
-- **Events** read from `src/data/events.js` → will read live from Supabase, with a password-protected volunteer admin page.
-- **Membership & contact forms** show a success state only → will post to Supabase / an email endpoint.
+Live data comes from the club's Supabase project (see `BACKEND.md` for the full spec):
+
+- **Events** are read live from the `events` table (public read via RLS). Committee members manage them at `/admin` (also linked as "Committee login" in the footer).
+- **Membership & contact forms** insert into `membership_enquiries` / `contact_messages` (anon insert only; reads require sign-in). Volunteers can view them under `/admin/submissions`.
+- **Auth**: Supabase email + password. No self-registration — admin accounts are created manually in the Supabase dashboard (Authentication → Users). Keep "Allow new users to sign up" **disabled** in Auth settings, since any authenticated user can edit events.
+- **Env vars** (`.env`, copy from `.env.example`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Set the same two in Vercel (Project → Settings → Environment Variables).
+- **GitHub Actions**: `supabase-keepalive.yml` (stops the free-tier project pausing) and `supabase-backup.yml` (weekly JSON export to `/backups`). They need repo secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` (backup only — never in front-end code).
+
+## What's still mocked
+
 - **Hero imagery** is a placeholder gradient → real club photos arrive after the 31 July 2026 event; the slot is data-driven so they drop in without layout changes.
 - **Values** (`src/data/values.js`) are the placeholder set — canonical wording still to be confirmed by the club.
 - ABN in the footer is a placeholder.

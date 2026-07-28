@@ -1,0 +1,21 @@
+name: Supabase keep-alive
+
+# Free-tier Supabase projects pause after ~7 days without activity, which would
+# take the live events feed offline. A trivial read twice a week resets the timer.
+on:
+  schedule:
+    - cron: "0 6 * * 1,4" # Mondays and Thursdays, 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the events table
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/events?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "Supabase responded with HTTP $status"
+          test "$status" = "200"

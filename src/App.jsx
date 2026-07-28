@@ -9,6 +9,11 @@ import EventDetail from "./pages/EventDetail.jsx";
 import Membership from "./pages/Membership.jsx";
 import Resources from "./pages/Resources.jsx";
 import Contact from "./pages/Contact.jsx";
+import { AuthProvider } from "./admin/AuthProvider.jsx";
+import AdminLayout from "./pages/admin/AdminLayout.jsx";
+import AdminEvents from "./pages/admin/AdminEvents.jsx";
+import AdminEventForm from "./pages/admin/AdminEventForm.jsx";
+import AdminSubmissions from "./pages/admin/AdminSubmissions.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -20,21 +25,29 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <ScrollToTop />
-      <Nav />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/events/:id" element={<EventDetail />} />
-          <Route path="/membership" element={<Membership />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <AuthProvider>
+      <div className="flex min-h-screen flex-col">
+        <ScrollToTop />
+        <Nav />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/events/:id" element={<EventDetail />} />
+            <Route path="/membership" element={<Membership />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminEvents />} />
+              <Route path="events/new" element={<AdminEventForm />} />
+              <Route path="events/:id/edit" element={<AdminEventForm />} />
+              <Route path="submissions" element={<AdminSubmissions />} />
+            </Route>
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }

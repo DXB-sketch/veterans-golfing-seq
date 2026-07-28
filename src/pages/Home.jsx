@@ -3,7 +3,7 @@ import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import EventCard from "../components/EventCard.jsx";
 import TeaserCard from "../components/TeaserCard.jsx";
-import { events } from "../data/events.js";
+import { useEvents } from "../hooks/useEvents.js";
 import { values } from "../data/values.js";
 
 const teaserIcon = (path) => (
@@ -13,7 +13,9 @@ const teaserIcon = (path) => (
 );
 
 export default function Home() {
-  const nextEvent = events.find((e) => e.status === "Upcoming");
+  const { events } = useEvents();
+  // Events come back sorted soonest-first, so the first non-past one is next.
+  const nextEvent = events.find((e) => e.statusValue !== "past");
 
   return (
     <>
