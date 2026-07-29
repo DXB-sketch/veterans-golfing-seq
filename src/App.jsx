@@ -9,6 +9,12 @@ import EventDetail from "./pages/EventDetail.jsx";
 import Membership from "./pages/Membership.jsx";
 import Resources from "./pages/Resources.jsx";
 import Contact from "./pages/Contact.jsx";
+import Privacy from "./pages/Privacy.jsx";
+import Terms from "./pages/Terms.jsx";
+import Sponsors from "./pages/Sponsors.jsx";
+import WallOfHonour from "./pages/WallOfHonour.jsx";
+import Merch from "./pages/Merch.jsx";
+import Donate from "./pages/Donate.jsx";
 import { AuthProvider } from "./admin/AuthProvider.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import AdminEvents from "./pages/admin/AdminEvents.jsx";
@@ -39,6 +45,12 @@ export default function App() {
             <Route path="/membership" element={<Membership />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/sponsors" element={<Sponsors />} />
+            <Route path="/wall-of-honour" element={<WallOfHonour />} />
+            <Route path="/merch" element={<Merch />} />
+            <Route path="/donate" element={<Donate />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminEvents />} />
               <Route path="events/new" element={<AdminEventForm />} />

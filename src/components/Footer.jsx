@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-navy-deep px-5 py-16 text-cream">
       <div className="mx-auto max-w-site">
-        <div className="grid gap-10 md:grid-cols-3">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <img
               src="/SEQDVGC-logo-transparent.png"
@@ -31,6 +31,26 @@ export default function Footer() {
                 ["Veteran resources", "/resources"],
                 ["Contact us", "/contact"],
                 ["Committee login", "/admin"],
+              ].map(([label, to]) => (
+                <li key={to}>
+                  <Link to={to} className="text-cream/85 transition-colors hover:text-gold-bright">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-gold">
+              More
+            </h2>
+            <ul className="mt-4 space-y-2 text-sm">
+              {[
+                ["Club merch", "/merch"],
+                ["Sponsors & partners", "/sponsors"],
+                ["Wall of Honour", "/wall-of-honour"],
+                ["Donate", "/donate"],
               ].map(([label, to]) => (
                 <li key={to}>
                   <Link to={to} className="text-cream/85 transition-colors hover:text-gold-bright">
@@ -73,6 +93,15 @@ export default function Footer() {
           <p className="mt-2">
             © {new Date().getFullYear()} South East Queensland Defence Veterans
             Golf Club Inc. · ABN 00 000 000 000 (placeholder)
+          </p>
+          <p className="mt-2 space-x-3">
+            <Link to="/privacy" className="transition-colors hover:text-gold-bright">
+              Privacy Policy
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link to="/terms" className="transition-colors hover:text-gold-bright">
+              Terms of Use
+            </Link>
           </p>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
@@ -122,6 +123,13 @@ export default function Contact() {
                   <Button type="submit" disabled={sending} className="w-full sm:w-auto">
                     {sending ? "Sending…" : "Send message"}
                   </Button>
+                  <p className="mt-3 text-sm text-ink-muted">
+                    By submitting, you agree to our{" "}
+                    <Link to="/privacy" className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </p>
                 </div>
               </form>
             </>
