@@ -3,7 +3,6 @@ import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import EventCard from "../components/EventCard.jsx";
 import TeaserCard from "../components/TeaserCard.jsx";
-import Photo from "../components/Photo.jsx";
 import { useEvents } from "../hooks/useEvents.js";
 import { heroPhoto } from "../lib/photos.js";
 import { values } from "../data/values.js";
@@ -21,20 +20,25 @@ export default function Home() {
 
   return (
     <>
-      {/* HERO. Asymmetric: headline left, framed duotone course photo right.
-          The photo sits in a defined frame, not full-bleed behind the text. */}
+      {/* HERO. Full-bleed duotone course photo with a light navy scrim, and a
+          low-opacity blurred panel behind the text so it stays readable
+          without hiding the image. */}
       <section className="relative isolate flex min-h-[70vh] items-center overflow-hidden bg-navy px-5 py-20 md:py-24">
+        {heroPhoto && (
+          <img
+            src={heroPhoto.src}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 -z-20 h-full w-full object-cover [filter:grayscale(0.22)_saturate(0.88)]"
+          />
+        )}
         <div
-          className="absolute inset-0 -z-10"
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-navy/70 via-navy/40 to-navy/20"
           aria-hidden="true"
-          style={{
-            background:
-              "radial-gradient(120% 90% at 75% 15%, rgba(228,193,88,0.28) 0%, rgba(200,160,46,0.10) 34%, rgba(11,30,63,0) 62%), linear-gradient(180deg, #0B1E3F 0%, #0B1E3F 45%, #07152B 100%)",
-          }}
         />
-        <div className="mx-auto grid w-full max-w-site items-center gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-          <div className="max-w-3xl">
-            <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
+        <div className="mx-auto w-full max-w-site">
+          <div className="max-w-3xl border-b-2 border-gold bg-navy-deep/45 p-8 backdrop-blur-sm md:p-10">
+            <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold-bright">
               For veterans · By veterans
             </p>
             <RibbonRule className="mt-3" dark />
@@ -53,14 +57,6 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          {heroPhoto && (
-            <Photo
-              photo={heroPhoto}
-              ratio="aspect-[3/2]"
-              frame="border border-cream/20"
-              className="w-full border-b-2 border-gold pb-2"
-            />
-          )}
         </div>
       </section>
 
