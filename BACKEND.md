@@ -47,7 +47,7 @@ Three tables. Use `text` columns with `CHECK` constraints for the constrained fi
 | holes | int | |
 | green_fee | numeric | |
 | side_comp | numeric | nullable |
-| status | text | CHECK in ('upcoming','full','past'), default 'upcoming' |
+| status | text | CHECK in ('upcoming','full','past'), default 'upcoming'. Now tracks **spots only** ('upcoming' = taking players, 'full'); 'past' is legacy and no longer set by the admin UI. Timing (Upcoming / On now / Finalised) is derived client-side from `event_date` + `meet_time`/`first_tee` in Australia/Brisbane time (AEST, UTC+10, no DST). |
 | description | text | |
 | sponsor | text | nullable |
 | image_url | text | nullable |
@@ -128,7 +128,7 @@ A simple, mobile-friendly CRUD interface aimed at a **non-technical volunteer**.
 
 - **Events:** list all events; create / edit / delete. Form fields map to the `events` columns, with:
   - a date picker for `event_date`,
-  - dropdowns for `region` and `status`,
+  - dropdowns for `region` and `status` (status = spots only: taking players / full — timing is automatic),
   - plain-language labels (not column names),
   - a **confirm step before delete**,
   - plain success/error messages ("Event saved", "Couldn't save — check your connection" — never a raw Postgres error).
@@ -139,7 +139,7 @@ A simple, mobile-friendly CRUD interface aimed at a **non-technical volunteer**.
 
 ## 6. Wiring the existing front-end to live data
 
-- **Home** "next event" and the **Events page** read live from `events` via the anon key (RLS-protected), filterable by region and status, sorted sensibly (upcoming by date ascending; past by date descending). Friendly empty state: "No events listed yet — check back soon or follow us on Facebook."
+- **Home** "next event" and the **Events page** read live from `events` via the anon key (RLS-protected), filterable by region and derived timing status (Upcoming / On now / Finalised, computed from event date + times in AEST), sorted sensibly (current by date ascending; finalised by date descending). Friendly empty state: "No events listed yet — check back soon or follow us on Facebook."
 - **Membership** form inserts into `membership_enquiries`; **Contact** form inserts into `contact_messages`. Validate client-side, confirm success in plain language, handle failure gracefully.
 - **No payment handling anywhere.** Square is a later phase. Forms capture info only.
 - Must scale to the 2027 load (~25 events/year across three regions + a championship) without layout or query changes.

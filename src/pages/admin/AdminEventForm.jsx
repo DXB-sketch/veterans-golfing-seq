@@ -6,9 +6,8 @@ import RibbonRule from "../../components/RibbonRule.jsx";
 import AdminField from "./AdminField.jsx";
 
 const STATUS_OPTIONS = [
-  { value: "upcoming", label: "Upcoming — taking players" },
+  { value: "upcoming", label: "Taking players" },
   { value: "full", label: "Full — no spots left" },
-  { value: "past", label: "Past — already been played" },
 ];
 
 const emptyForm = {
@@ -61,7 +60,8 @@ export default function AdminEventForm() {
             holes: data.holes === null ? "" : String(data.holes),
             green_fee: data.green_fee === null ? "" : String(data.green_fee),
             side_comp: data.side_comp === null ? "" : String(data.side_comp),
-            status: data.status ?? "upcoming",
+            // "past" is legacy — timing now comes from the event date automatically.
+            status: data.status === "full" ? "full" : "upcoming",
             sponsor: data.sponsor ?? "",
             description: data.description ?? "",
           });
@@ -244,7 +244,7 @@ export default function AdminEventForm() {
           as="select"
           required
           options={STATUS_OPTIONS}
-          hint="Change this to 'Full' when the field is full, and to 'Past' after the day has been played."
+          hint="Only change this to 'Full' when the field is full. The website works out upcoming / on now / finalised by itself from the event date and times (Queensland time)."
           value={form.status}
           onChange={set("status")}
         />

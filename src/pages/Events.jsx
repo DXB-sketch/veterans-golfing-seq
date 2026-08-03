@@ -5,7 +5,7 @@ import { REGIONS } from "../lib/events.js";
 import { useEvents } from "../hooks/useEvents.js";
 
 const regionTabs = ["All", ...REGIONS.map((r) => r.label)];
-const statusTabs = ["All", "Upcoming", "Past"];
+const statusTabs = ["All", "Upcoming", "Finalised"];
 
 function FilterTab({ active, children, onClick }) {
   return (
@@ -28,12 +28,14 @@ export default function Events() {
   const [status, setStatus] = useState("Upcoming");
   const { events, loading, error } = useEvents();
 
-  // "Upcoming" includes events marked Full — they haven't been played yet.
+  // "Upcoming" includes events on right now — they haven't wrapped up yet.
   const filtered = events.filter(
     (e) =>
       (region === "All" || e.region === region) &&
       (status === "All" ||
-        (status === "Upcoming" ? e.statusValue !== "past" : e.statusValue === "past"))
+        (status === "Upcoming"
+          ? e.timeStatus !== "finalised"
+          : e.timeStatus === "finalised"))
   );
 
   return (

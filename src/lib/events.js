@@ -7,17 +7,70 @@ export const REGIONS = [
   { value: "gold_coast", label: "Gold Coast" },
 ];
 
-export const STATUSES = [
+// Timing is derived from the event date/time, never stored. The database
+// `status` column only tracks spots ("upcoming" = taking players, "full").
+export const TIME_STATUSES = [
   { value: "upcoming", label: "Upcoming" },
-  { value: "full", label: "Full" },
-  { value: "past", label: "Past" },
+  { value: "on_now", label: "On now" },
+  { value: "finalised", label: "Finalised" },
 ];
 
 export const regionLabel = (value) =>
   REGIONS.find((r) => r.value === value)?.label ?? value;
 
-export const statusLabel = (value) =>
-  STATUSES.find((s) => s.value === value)?.label ?? value;
+export const timeStatusLabel = (value) =>
+  TIME_STATUSES.find((s) => s.value === value)?.label ?? value;
+
+// Club events run in south-east Queensland: AEST (UTC+10) year round,
+// no daylight saving — so this clock is exact regardless of the visitor's
+// own time zone.
+const BRISBANE_TZ = "Australia/Brisbane";
+
+function brisbaneNow() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: BRISBANE_TZ,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(new Date());
+  const get = (type) => parts.find((p) => p.type === type)?.value ?? "00";
+  return {
+    date: `${get("year")}-${get("month")}-${get("day")}`,
+    minutes: Number(get("hour")) * 60 + Number(get("minute")),
+  };
+}
+
+// Meet/tee times are free text ("8:30am", "9:04 AM", "14:30").
+function parseTimeToMinutes(text) {
+  if (!text) return null;
+  const m = String(text)
+    .trim()
+    .toLowerCase()
+    .match(/^(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?$/);
+  if (!m) return null;
+  let hours = Number(m[1]);
+  const minutes = Number(m[2] ?? 0);
+  if (m[3] === "pm" && hours !== 12) hours += 12;
+  if (m[3] === "am" && hours === 12) hours = 0;
+  if (hours > 23 || minutes > 59) return null;
+  return hours * 60 + minutes;
+}
+
+// upcoming: before the day, or before the meet/tee time on the day.
+// on_now: during the day itself (from meet time, or all day if no time given).
+// finalised: any day after the event date, midnight AEST onwards.
+export function eventTimeStatus(eventDate, meetTime, firstTee) {
+  if (!eventDate) return "upcoming";
+  const now = brisbaneNow();
+  if (eventDate > now.date) return "upcoming";
+  if (eventDate < now.date) return "finalised";
+  const start = parseTimeToMinutes(meetTime) ?? parseTimeToMinutes(firstTee);
+  if (start !== null && now.minutes < start) return "upcoming";
+  return "on_now";
+}
 
 const money = (n) => {
   if (n === null || n === undefined || n === "") return "TBC";
@@ -38,6 +91,7 @@ export function formatEventDate(iso) {
 
 // Shape a database row into the object the existing components render.
 export function mapEvent(row) {
+  const timeStatus = eventTimeStatus(row.event_date, row.meet_time, row.first_tee);
   return {
     id: row.id,
     title: row.title,
@@ -52,21 +106,22 @@ export function mapEvent(row) {
     holes: row.holes ?? 18,
     greenFee: money(row.green_fee),
     sideComp: row.side_comp === null || row.side_comp === undefined ? "None" : money(row.side_comp),
-    status: statusLabel(row.status),
-    statusValue: row.status,
+    status: timeStatusLabel(timeStatus),
+    timeStatus,
+    isFull: row.status === "full" && timeStatus !== "finalised",
     sponsor: row.sponsor || "",
     description: row.description || "",
     imageUrl: row.image_url || "",
   };
 }
 
-// Upcoming/full first (soonest first, no-date last), then past (most recent first).
+// On-now/upcoming first (soonest first, no-date last), then finalised (most recent first).
 function sortEvents(events) {
-  const upcoming = events.filter((e) => e.statusValue !== "past");
-  const past = events.filter((e) => e.statusValue === "past");
-  upcoming.sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"));
-  past.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  return [...upcoming, ...past];
+  const current = events.filter((e) => e.timeStatus !== "finalised");
+  const finalised = events.filter((e) => e.timeStatus === "finalised");
+  current.sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"));
+  finalised.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  return [...current, ...finalised];
 }
 
 export async function fetchEvents() {

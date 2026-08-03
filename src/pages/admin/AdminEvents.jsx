@@ -66,14 +66,15 @@ export default function AdminEvents() {
                   {e.dateDisplay} · {e.region} ·{" "}
                   <span
                     className={
-                      e.statusValue === "past"
+                      e.timeStatus === "finalised"
                         ? "text-ink-muted"
-                        : e.statusValue === "full"
+                        : e.isFull
                           ? "font-semibold text-crimson"
                           : "font-semibold text-navy"
                     }
                   >
                     {e.status}
+                    {e.isFull && " · Full"}
                   </span>
                 </p>
               </div>
