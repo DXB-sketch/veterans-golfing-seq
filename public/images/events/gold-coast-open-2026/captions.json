@@ -1,0 +1,48 @@
+[
+  {
+    "file": "gc-open-2026-group-banner.jpg",
+    "title": "Members group photo (with club banner)",
+    "alt": "South East Queensland Defence Veterans Golf Club members gathered at the tee beside the club banner, Gold Coast Open Day",
+    "orientation": "landscape",
+    "role": "hero-candidate",
+    "faces": "yes",
+    "consent": "granted",
+    "notes": "The money shot: whole group, club feather banner visible. Best for the About page and a strong hero option. Consent to publish confirmed by the club, 3 August 2026."
+  },
+  {
+    "file": "gc-open-2026-water-tree.jpg",
+    "title": "Tee overlooking the water hazard",
+    "alt": "Two club members at the tee looking down the fairway toward a water hazard on a clear morning",
+    "orientation": "portrait",
+    "role": "feature",
+    "faces": "partial",
+    "notes": "Good on-course atmosphere shot. Suits a portrait feature slot or gallery. Photographer's shadow is in the lower foreground; it overlaps the right-hand player's feet, so it cannot be fully cropped out. Framed slots crop from the top edge to minimise it."
+  },
+  {
+    "file": "gc-open-2026-hillside-tee.jpg",
+    "title": "Golfer on the tee, hillside fairway",
+    "alt": "A club member addressing the ball on the tee with a grassed hill and gum trees behind",
+    "orientation": "portrait",
+    "role": "gallery",
+    "faces": "no",
+    "notes": "Face is obscured under the cap. Clean scenery shot, safe to use without consent concerns."
+  },
+  {
+    "file": "gc-open-2026-fourball-wide.jpg",
+    "title": "Four-ball on the tee (scenic wide)",
+    "alt": "Four club members lined up across the tee preparing to play, with a scenic fairway and bushland beyond",
+    "orientation": "landscape",
+    "role": "hero-candidate",
+    "faces": "no",
+    "notes": "Strong wide scenic, a good full-width hero. The on-disk copy has had the Facebook viewer chrome cropped out and is clean to ship, but it is a slightly soft video frame. TODO: request the original full-resolution frame from the album and swap it in."
+  },
+  {
+    "file": "gc-open-2026-shot-tracer.jpg",
+    "title": "Tee shot with shot-tracer",
+    "alt": "A club member mid-swing on the fairway, the ball's flight traced by a red arc",
+    "orientation": "portrait",
+    "role": "accent",
+    "faces": "partial",
+    "notes": "Fun action moment, but the red shot-tracer arc is baked into the image and clashes with the duotone treatment. Use only as a playful gallery accent, or source the original clean frame without the overlay. Do not use as a hero."
+  }
+]

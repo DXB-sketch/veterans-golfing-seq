@@ -2,8 +2,11 @@ import { Link, useParams } from "react-router-dom";
 import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
+import Photo from "../components/Photo.jsx";
 import { EventMeta } from "../components/EventCard.jsx";
 import { useEvent } from "../hooks/useEvents.js";
+import { albumForEvent } from "../lib/photos.js";
+import { FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
 
 function Detail({ label, value }) {
   return (
@@ -42,6 +45,12 @@ export default function EventDetail() {
       </Section>
     );
   }
+
+  const finalised = event.timeStatus === "finalised";
+  const album = finalised ? albumForEvent(event) : null;
+  // Two or three photos make a recap; the full set lives in the Gallery.
+  const recapPhotos =
+    album?.photos.filter((p) => p.role !== "accent").slice(0, 3) ?? [];
 
   return (
     <>
@@ -92,29 +101,83 @@ export default function EventDetail() {
           </div>
 
           <aside className="h-fit border-t-4 border-gold bg-navy p-8 text-white">
-            <h2 className="font-display text-xl font-semibold tracking-wide">
-              Secure your spot
-            </h2>
-            <RibbonRule className="mt-3" dark />
-            <p className="mt-4 text-sm text-cream/85">
-              Message us on Facebook or email the club and we&apos;ll lock you
-              in. All veterans, serving and ex-serving, and family members are
-              welcome.
-            </p>
-            <div className="mt-6 flex flex-col gap-3">
-              <Button href="mailto:seqdvgc@gmail.com">Email the club</Button>
-              <Button
-                href="https://www.facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="secondary"
-              >
-                Message on Facebook
-              </Button>
-            </div>
+            {finalised ? (
+              <>
+                <h2 className="font-display text-xl font-semibold tracking-wide">
+                  This one&apos;s been played
+                </h2>
+                <RibbonRule className="mt-3" dark />
+                <p className="mt-4 text-sm text-cream/85">
+                  Follow the club on Facebook to see photos from the day and
+                  hear about the next one first.
+                </p>
+                <div className="mt-6 flex flex-col gap-3">
+                  <Button
+                    href={FACEBOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Follow on Facebook
+                  </Button>
+                  <Button to="/events" variant="secondary">
+                    See upcoming events
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="font-display text-xl font-semibold tracking-wide">
+                  Secure your spot
+                </h2>
+                <RibbonRule className="mt-3" dark />
+                <p className="mt-4 text-sm text-cream/85">
+                  Message us on Facebook or email the club and we&apos;ll lock
+                  you in. All veterans, serving and ex-serving, and family
+                  members are welcome.
+                </p>
+                <div className="mt-6 flex flex-col gap-3">
+                  <Button href={`mailto:${CLUB_EMAIL}`}>Email the club</Button>
+                  <Button
+                    href={FACEBOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="secondary"
+                  >
+                    Message on Facebook
+                  </Button>
+                </div>
+              </>
+            )}
           </aside>
         </div>
       </Section>
+
+      {/* Recap: only for played events that have a photo album. */}
+      {album && (
+        <Section eyebrow="How the day went" title="From the course" tone="paper">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recapPhotos.map((p) => (
+              <Photo
+                key={p.file}
+                photo={p}
+                ratio={p.orientation === "portrait" ? "aspect-[4/5]" : "aspect-[3/2]"}
+                position="object-top"
+                caption
+              />
+            ))}
+          </div>
+          <p className="mt-8">
+            <a
+              href={album.facebookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
+            >
+              See the full album on Facebook
+            </a>
+          </p>
+        </Section>
+      )}
     </>
   );
 }

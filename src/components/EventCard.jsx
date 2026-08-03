@@ -38,7 +38,7 @@ export const eventIcons = {
 // Plain-text metadata line: region and status, no boxes.
 export function EventMeta({ event, dark = false }) {
   const statusColour =
-    event.status === "Past"
+    event.timeStatus === "finalised"
       ? dark
         ? "text-cream/60"
         : "text-ink-muted"
@@ -50,6 +50,12 @@ export function EventMeta({ event, dark = false }) {
       <span className={dark ? "text-cream/80" : "text-ink-muted"}>{event.region}</span>
       <span className="mx-2 text-gold" aria-hidden="true">·</span>
       <span className={statusColour}>{event.status}</span>
+      {event.isFull && (
+        <>
+          <span className="mx-2 text-gold" aria-hidden="true">·</span>
+          <span className={dark ? "text-cream/80" : "text-crimson"}>Full</span>
+        </>
+      )}
     </p>
   );
 }

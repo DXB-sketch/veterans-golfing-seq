@@ -4,6 +4,7 @@ import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
 import { supabase } from "../lib/supabase.js";
+import { FACEBOOK_URL } from "../lib/site.js";
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
@@ -62,7 +63,7 @@ export default function Contact() {
                 Facebook
               </p>
               <a
-                href="https://www.facebook.com"
+                href={FACEBOOK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1 block font-semibold text-cream hover:text-gold-bright"

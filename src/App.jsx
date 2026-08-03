@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx";
 import About from "./pages/About.jsx";
 import Events from "./pages/Events.jsx";
 import EventDetail from "./pages/EventDetail.jsx";
+import Gallery from "./pages/Gallery.jsx";
 import Membership from "./pages/Membership.jsx";
 import Resources from "./pages/Resources.jsx";
 import Contact from "./pages/Contact.jsx";
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/events" element={<Events />} />
             <Route path="/events/:id" element={<EventDetail />} />
+            <Route path="/gallery" element={<Gallery />} />
             <Route path="/membership" element={<Membership />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/contact" element={<Contact />} />

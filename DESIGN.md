@@ -135,8 +135,9 @@ function RibbonRule({ className = "" }) {
 
 - **Hero style:** the Image 1 hero (veterans walking the fairway into dawn/dusk light) is the target mood — warm, human, Australian, from behind or wide so it's about the group, not portraits.
 - **Treatment:** all photos on navy get a `navy-deep` gradient scrim (bottom-up, ~0→70%) so white/gold text stays legible.
-- **Source:** real club photos are being captured at the 31 July 2026 event — build image slots **data-driven** so they drop in without layout changes. Use tasteful placeholders meanwhile; avoid generic corporate stock.
-- **Never** publish faces without the club's ok. Respect and dignity over polish.
+- **Source:** real club photos now live in `public/images/events/<event-slug>/` with a `captions.json` manifest (title, alt, orientation, role, faces, consent). `src/lib/photos.js` reads the manifest; photos are placed by their manifest `role`, never guessed. Albums are matched to Supabase events by region + date.
+- **Duotone unification:** every photo renders through the `Photo` component, which applies a light desaturation plus a navy multiply wash so mixed phone photos read as one set, inside a defined border frame (never full-bleed behind text).
+- **Never** publish faces without the club's ok: `src/lib/photos.js` filters out any photo with `faces: "yes"` unless its manifest `consent` is `"granted"`. Respect and dignity over polish.
 
 ---
 
@@ -149,9 +150,10 @@ Build these as reusable components; the pages in §10 assemble them.
   - *Secondary:* transparent, 1.5px `gold` border, gold text on navy / navy text on light. Hover → subtle gold fill.
   - *Mission/donate (crimson):* `crimson` fill, white text. Only this one place uses crimson as a button.
   - Every button label is a verb the user recognises: "Join the club", "See what's on", "Send enquiry" — not "Submit".
-- **Nav (sticky, navy):** crest lockup left; links right in Source Sans 3 600. Active link carries a gold underline + ribbon tick. Collapses to a full-height drawer on mobile (hamburger, 44px target). Keep the top-level count tight — Home, About, Events, Membership, Support Us, Resources, Contact. ("Gallery", "Wall of Honour", "Why Golf?" from Image 1 are Phase 2 / can live as inner sections, not top-level, to reduce clutter.)
+- **Nav (sticky, navy):** crest lockup left; links right in Source Sans 3 600. Active link carries a gold underline + ribbon tick. Collapses to a full-height drawer on mobile (hamburger, 44px target). Keep the top-level count tight — Home, About, Events, Gallery, Membership, Merch, Resources, Contact. (Gallery was promoted from Phase 2 once real event photos landed, August 2026. "Wall of Honour", "Why Golf?" stay off the top level to reduce clutter.)
 - **Event card** (the homepage's one hero card): date chip, title, venue, meet/first-tee times, green fee, side comp, region badge, status badge (Upcoming/Full/Past), and a "View event" link. Icon + label rows like Image 4. This is the most important card on the site — give it room.
 - **Teaser card:** icon, H3, one-sentence blurb, text link. Used in the homepage grid. Uniform height.
+- **Photo:** framed duotone photo (`src/components/Photo.jsx`): manifest-driven `src`/`alt`, aspect-ratio prop (3:2 landscape, 4:5 portrait), optional small-caps caption, border frame that adapts to light or navy surrounds. Used by the Home hero, About story, event recaps and the Gallery.
 - **Value item:** gold line-icon, label (Oswald), one supporting line. A single quiet row — see the values note in §11.
 - **Resource row:** logo/name, one-line description, external-link chevron. Opens in new tab with `rel="noopener"`.
 - **Form field:** label above input, `paper` bg, 1px `ink`/15% border, gold focus ring (visible, 2px), generous 44px+ height, inline validation messages in `ink` with a crimson accent icon.

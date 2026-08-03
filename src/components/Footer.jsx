@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import RibbonRule from "./RibbonRule.jsx";
+import { FACEBOOK_URL } from "../lib/site.js";
 
 export default function Footer() {
   return (
@@ -27,6 +28,7 @@ export default function Footer() {
               {[
                 ["About the club", "/about"],
                 ["Events", "/events"],
+                ["Gallery", "/gallery"],
                 ["Membership", "/membership"],
                 ["Veteran resources", "/resources"],
                 ["Contact us", "/contact"],
@@ -73,7 +75,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://www.facebook.com"
+                  href={FACEBOOK_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-gold-bright"

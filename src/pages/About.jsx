@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
+import Photo from "../components/Photo.jsx";
+import { groupPhoto } from "../lib/photos.js";
 import { values } from "../data/values.js";
 
 // Roadmap entries. Grounded in the club's 2026/2027 plan; dates beyond the
@@ -240,24 +242,32 @@ export default function About() {
       </section>
 
       <Section eyebrow="Our story" title="A club built on mateship" tone="paper">
-        <div className="max-w-[68ch] space-y-5">
-          <p>
-            The South East Queensland Defence Veterans Golf Club is an
-            Australian Defence veteran community golf group supporting veterans
-            and their families. We promote connection, and mental and physical
-            wellbeing within the veteran community, through golf.
-          </p>
-          <p>
-            We&apos;re a registered non-profit incorporated association. Every
-            dollar we raise through sponsors, government grants and donations
-            goes to supporting Australian veteran members and the events we run
-            for them.
-          </p>
-          <p>
-            Veteran golfers of all abilities are welcome. All veterans, serving
-            and non-serving, and their family members. You don&apos;t need a
-            low handicap. You just need to turn up.
-          </p>
+        <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,6fr)]">
+          <div className="max-w-[68ch] space-y-5">
+            <p>
+              The South East Queensland Defence Veterans Golf Club is an
+              Australian Defence veteran community golf group supporting veterans
+              and their families. We promote connection, and mental and physical
+              wellbeing within the veteran community, through golf.
+            </p>
+            <p>
+              We&apos;re a registered non-profit incorporated association. Every
+              dollar we raise through sponsors, government grants and donations
+              goes to supporting Australian veteran members and the events we run
+              for them.
+            </p>
+            <p>
+              Veteran golfers of all abilities are welcome. All veterans, serving
+              and non-serving, and their family members. You don&apos;t need a
+              low handicap. You just need to turn up.
+            </p>
+          </div>
+          <Photo
+            photo={groupPhoto}
+            ratio="aspect-[3/2]"
+            caption
+            className="w-full"
+          />
         </div>
       </Section>
 

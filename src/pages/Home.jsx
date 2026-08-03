@@ -3,7 +3,9 @@ import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import EventCard from "../components/EventCard.jsx";
 import TeaserCard from "../components/TeaserCard.jsx";
+import Photo from "../components/Photo.jsx";
 import { useEvents } from "../hooks/useEvents.js";
+import { heroPhoto } from "../lib/photos.js";
 import { values } from "../data/values.js";
 
 const teaserIcon = (path) => (
@@ -14,14 +16,14 @@ const teaserIcon = (path) => (
 
 export default function Home() {
   const { events } = useEvents();
-  // Events come back sorted soonest-first, so the first non-past one is next.
-  const nextEvent = events.find((e) => e.statusValue !== "past");
+  // Events come back sorted soonest-first, so the first non-finalised one is next.
+  const nextEvent = events.find((e) => e.timeStatus !== "finalised");
 
   return (
     <>
-      {/* HERO. Photo slot is data-driven: swap the gradient for a real dawn
-          fairway photo from the 31 July event when it arrives. */}
-      <section className="relative isolate flex min-h-[70vh] items-center overflow-hidden bg-navy px-5 py-24">
+      {/* HERO. Asymmetric: headline left, framed duotone course photo right.
+          The photo sits in a defined frame, not full-bleed behind the text. */}
+      <section className="relative isolate flex min-h-[70vh] items-center overflow-hidden bg-navy px-5 py-20 md:py-24">
         <div
           className="absolute inset-0 -z-10"
           aria-hidden="true"
@@ -30,7 +32,7 @@ export default function Home() {
               "radial-gradient(120% 90% at 75% 15%, rgba(228,193,88,0.28) 0%, rgba(200,160,46,0.10) 34%, rgba(11,30,63,0) 62%), linear-gradient(180deg, #0B1E3F 0%, #0B1E3F 45%, #07152B 100%)",
           }}
         />
-        <div className="mx-auto w-full max-w-site">
+        <div className="mx-auto grid w-full max-w-site items-center gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
           <div className="max-w-3xl">
             <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
               For veterans · By veterans
@@ -51,6 +53,14 @@ export default function Home() {
               </Button>
             </div>
           </div>
+          {heroPhoto && (
+            <Photo
+              photo={heroPhoto}
+              ratio="aspect-[3/2]"
+              frame="border border-cream/20"
+              className="w-full border-b-2 border-gold pb-2"
+            />
+          )}
         </div>
       </section>
 
