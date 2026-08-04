@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase.js";
 import { REGIONS } from "../../lib/events.js";
-import { fetchTeeSlots, replaceTeeSlots } from "../../lib/bookings.js";
+import { fetchTeeSlots, syncTeeSlots } from "../../lib/bookings.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 import AdminField from "./AdminField.jsx";
 
@@ -30,7 +30,7 @@ const emptyForm = {
   description: "",
 };
 
-const emptySlot = { tee_time: "", capacity: "4" };
+const emptySlot = { id: null, tee_time: "", capacity: "4" };
 
 export default function AdminEventForm() {
   const { id } = useParams();
@@ -48,6 +48,11 @@ export default function AdminEventForm() {
   const [confirmPublish, setConfirmPublish] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // One-time unlock for editing a published event's tee slots. Component
+  // state on purpose: leaving the event resets it, so the confirmation is
+  // asked again next time this event is opened.
+  const [slotsUnlocked, setSlotsUnlocked] = useState(false);
+  const [confirmSlotEdit, setConfirmSlotEdit] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -89,6 +94,7 @@ export default function AdminEventForm() {
           .then((rows) =>
             setSlots(
               rows.map((s) => ({
+                id: s.id,
                 tee_time: s.tee_time ?? "",
                 capacity: s.capacity === null ? "4" : String(s.capacity),
               }))
@@ -114,8 +120,10 @@ export default function AdminEventForm() {
   const removeSlot = (index) =>
     setSlots((list) => list.filter((_, i) => i !== index));
 
-  // Tee slots can only change while the event is still a draft.
-  const slotsEditable = !isEdit || (lifecycle === "draft" && !isLocked);
+  // Tee slots are freely editable while the event is a draft. Once it's
+  // published (locked) they can still be edited, but only after the admin
+  // confirms once — the unlock lasts until they leave this event.
+  const slotsEditable = !isEdit || !isLocked || slotsUnlocked;
 
   // Blank rows are simply ignored, so a stray "Add a tee slot" click is harmless.
   // sort_order follows the on-screen order — times like "10:04am" would sort
@@ -124,6 +132,7 @@ export default function AdminEventForm() {
     slots
       .filter((s) => s.tee_time.trim() !== "")
       .map((s, index) => ({
+        id: s.id ?? null,
         tee_time: s.tee_time.trim(),
         capacity: s.capacity === "" ? 4 : Number(s.capacity),
         sort_order: index + 1,
@@ -164,7 +173,7 @@ export default function AdminEventForm() {
           .update(payload)
           .eq("id", id);
         if (saveError) throw saveError;
-        if (slotsEditable) await replaceTeeSlots(id, cleanSlots());
+        if (slotsEditable) await syncTeeSlots(id, cleanSlots());
       } else {
         // New events are saved as drafts — insert first so we get an id
         // back, then attach the tee slots to it.
@@ -174,7 +183,7 @@ export default function AdminEventForm() {
           .select()
           .single();
         if (saveError || !inserted) throw saveError ?? new Error("insert failed");
-        await replaceTeeSlots(inserted.id, cleanSlots());
+        await syncTeeSlots(inserted.id, cleanSlots());
       }
     } catch {
       setSaving(false);
@@ -200,7 +209,7 @@ export default function AdminEventForm() {
       // Save the tee slots while the event is still a draft, then flip it
       // live and freeze them — so a half-failed publish never leaves a live
       // event with a broken tee sheet.
-      await replaceTeeSlots(id, cleanSlots());
+      await syncTeeSlots(id, cleanSlots());
       const { error: saveError } = await supabase
         .from("events")
         .update({ ...buildPayload(), status: "published", is_locked: true })
@@ -417,6 +426,13 @@ export default function AdminEventForm() {
                 (usually 4). Players will book into these slots once the event
                 is published.
               </p>
+              {isLocked && slotsUnlocked && (
+                <p className="mt-3 border-l-4 border-gold bg-gold/10 p-4 text-base text-ink">
+                  You&rsquo;re editing the tee slots of a <strong>published</strong>{" "}
+                  event. Removing a slot also removes any bookings players have
+                  made on it. Changes take effect when you save the event.
+                </p>
+              )}
               <div className="mt-4 grid gap-3">
                 {slots.length === 0 && (
                   <p className="text-base text-ink-muted">
@@ -501,6 +517,48 @@ export default function AdminEventForm() {
                   ))}
                 </ul>
               )}
+              {confirmSlotEdit ? (
+                <div className="mt-5 border-l-4 border-crimson bg-crimson/5 p-5">
+                  <p className="text-lg font-bold text-navy">
+                    Change the tee slots on a published event?
+                  </p>
+                  <p className="mt-1 text-ink-muted">
+                    This event is live and players may have already booked.
+                    Changing a slot&rsquo;s time keeps its bookings, but{" "}
+                    <strong>removing a slot also removes any bookings on
+                    it</strong> — you&rsquo;ll need to let those players know.
+                    You&rsquo;ll only be asked this once: the slots stay
+                    editable until you leave this event.
+                  </p>
+                  <div className="mt-5 flex flex-col gap-4 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSlotsUnlocked(true);
+                        setConfirmSlotEdit(false);
+                      }}
+                      className="min-h-[52px] bg-gold px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy-deep transition-colors hover:bg-gold-bright"
+                    >
+                      Yes, let me edit them
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmSlotEdit(false)}
+                      className="min-h-[52px] border-2 border-navy px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy/5"
+                    >
+                      No, keep them locked
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmSlotEdit(true)}
+                  className="mt-4 min-h-[52px] border-2 border-navy px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy/5"
+                >
+                  Edit the tee slots
+                </button>
+              )}
             </>
           )}
         </div>
@@ -537,9 +595,10 @@ export default function AdminEventForm() {
               </p>
               <p className="mt-1 text-ink-muted">
                 Publishing puts the event on the website for everyone to see,
-                opens bookings, and locks the tee slots — you won&rsquo;t be
-                able to add, remove or change slot times after this. Any
-                changes on the form above are saved as part of publishing.
+                opens bookings, and locks the tee slots — changing them after
+                this will ask you to confirm first, because players may have
+                booked into them. Any changes on the form above are saved as
+                part of publishing.
                 {cleanSlots().length === 0 &&
                   " Heads up: this event has NO tee slots yet, so players won't be able to book a time."}
               </p>

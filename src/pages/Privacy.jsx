@@ -1,4 +1,5 @@
 import RibbonRule from "../components/RibbonRule.jsx";
+import { CLUB_ABN, CLUB_EMAIL } from "../lib/site.js";
 
 {/* REVIEW BEFORE PUBLISHING — starting template, not legal advice. Fill every [BRACKETED] placeholder and have the club confirm the refund + liability sections. */}
 
@@ -21,7 +22,7 @@ const sections = [
   },
   {
     heading: "Access and correction",
-    body: "You can ask to access, correct or delete the personal information we hold about you by emailing [seqdvgc@gmail.com].",
+    body: `You can ask to access, correct or delete the personal information we hold about you by emailing ${CLUB_EMAIL}.`,
   },
   {
     heading: "Cookies and analytics",
@@ -37,7 +38,7 @@ const sections = [
   },
   {
     heading: "Contact",
-    body: "Questions about your privacy? Email us at [seqdvgc@gmail.com].",
+    body: `Questions about your privacy? Email us at ${CLUB_EMAIL}.`,
   },
 ];
 
@@ -54,7 +55,7 @@ export default function Privacy() {
           </h1>
           <RibbonRule className="mt-5" dark />
           <p className="mt-6 text-sm font-semibold text-cream/80">
-            Last updated: [DATE]
+            Last updated: 4 August 2026
           </p>
         </div>
       </section>
@@ -62,8 +63,9 @@ export default function Privacy() {
       <section className="bg-cream px-5 py-14 md:py-20">
         <div className="mx-auto max-w-3xl">
           <p className="max-w-[68ch] text-lg text-ink">
-            South East Queensland Defence Veterans Golf Club Inc. [ABN: ______]
-            (&ldquo;the Club&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;)
+            South East Queensland Defence Veterans Golf Club Inc. (ABN{" "}
+            {CLUB_ABN}) (&ldquo;the Club&rdquo;, &ldquo;we&rdquo;,
+            &ldquo;us&rdquo;)
             respects your privacy. This policy explains how we handle personal
             information, in line with the Australian Privacy Principles under
             the Privacy Act 1988 (Cth).

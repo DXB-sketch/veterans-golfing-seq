@@ -68,24 +68,48 @@ export async function fetchTeeSlots(eventId) {
   return data;
 }
 
-// Replace an event's tee sheet wholesale (only safe for draft events,
-// before any bookings exist).
-export async function replaceTeeSlots(eventId, slots) {
-  const { error: deleteError } = await supabase
-    .from("tee_slots")
-    .delete()
-    .eq("event_id", eventId);
+// Sync an event's tee sheet to match the given rows. Existing slots keep
+// their id (so bookings on them survive — deleting a slot cascades away its
+// bookings); removed slots are deleted, new ones inserted.
+export async function syncTeeSlots(eventId, slots) {
+  const keepIds = slots.filter((s) => s.id).map((s) => s.id);
+  let deleteQuery = supabase.from("tee_slots").delete().eq("event_id", eventId);
+  if (keepIds.length) {
+    deleteQuery = deleteQuery.not("id", "in", `(${keepIds.join(",")})`);
+  }
+  const { error: deleteError } = await deleteQuery;
   if (deleteError) throw deleteError;
-  if (!slots.length) return;
-  const { error: insertError } = await supabase.from("tee_slots").insert(
-    slots.map((slot) => ({
+
+  const existing = slots
+    .filter((s) => s.id)
+    .map((slot) => ({
+      id: slot.id,
       event_id: eventId,
       tee_time: slot.tee_time,
       capacity: slot.capacity,
       sort_order: slot.sort_order,
-    }))
-  );
-  if (insertError) throw insertError;
+    }));
+  if (existing.length) {
+    const { error: upsertError } = await supabase
+      .from("tee_slots")
+      .upsert(existing);
+    if (upsertError) throw upsertError;
+  }
+
+  const fresh = slots
+    .filter((s) => !s.id)
+    .map((slot) => ({
+      event_id: eventId,
+      tee_time: slot.tee_time,
+      capacity: slot.capacity,
+      sort_order: slot.sort_order,
+    }));
+  if (fresh.length) {
+    const { error: insertError } = await supabase
+      .from("tee_slots")
+      .insert(fresh);
+    if (insertError) throw insertError;
+  }
 }
 
 // Raw bookings rows — RLS only allows this for signed-in committee members.

@@ -1,4 +1,5 @@
 import RibbonRule from "../components/RibbonRule.jsx";
+import { CLUB_ABN, CLUB_EMAIL } from "../lib/site.js";
 
 {/* REVIEW BEFORE PUBLISHING — starting template, not legal advice. Fill every [BRACKETED] placeholder and have the club confirm the refund + liability sections. */}
 
@@ -41,7 +42,7 @@ const sections = [
   },
   {
     heading: "Contact",
-    body: "Questions? Email [seqdvgc@gmail.com].",
+    body: `Questions? Email ${CLUB_EMAIL}.`,
   },
 ];
 
@@ -58,7 +59,7 @@ export default function Terms() {
           </h1>
           <RibbonRule className="mt-5" dark />
           <p className="mt-6 text-sm font-semibold text-cream/80">
-            Last updated: [DATE]
+            Last updated: 4 August 2026
           </p>
         </div>
       </section>
@@ -67,8 +68,8 @@ export default function Terms() {
         <div className="mx-auto max-w-3xl">
           <p className="max-w-[68ch] text-lg text-ink">
             This website is operated by South East Queensland Defence Veterans
-            Golf Club Inc. [ABN: ______]. By using this site you agree to these
-            terms.
+            Golf Club Inc. (ABN {CLUB_ABN}). By using this site you agree to
+            these terms.
           </p>
           <div className="mt-10 space-y-8">
             {sections.map((s) => (
