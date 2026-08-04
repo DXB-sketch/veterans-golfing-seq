@@ -118,12 +118,15 @@ export default function AdminEventForm() {
   const slotsEditable = !isEdit || (lifecycle === "draft" && !isLocked);
 
   // Blank rows are simply ignored, so a stray "Add a tee slot" click is harmless.
+  // sort_order follows the on-screen order — times like "10:04am" would sort
+  // before "8:24am" alphabetically otherwise.
   const cleanSlots = () =>
     slots
       .filter((s) => s.tee_time.trim() !== "")
-      .map((s) => ({
+      .map((s, index) => ({
         tee_time: s.tee_time.trim(),
         capacity: s.capacity === "" ? 4 : Number(s.capacity),
+        sort_order: index + 1,
       }));
 
   function buildPayload() {
