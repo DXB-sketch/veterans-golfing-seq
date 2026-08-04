@@ -43,7 +43,7 @@ export default function Merch() {
               <RibbonRule className="mt-3" />
               <p className="mt-4 text-ink-muted">
                 The club store isn&apos;t open just yet. In the meantime,
-                membership includes a club hat or t-shirt — or follow us on
+                membership includes a club hat — or follow us on
                 Facebook for updates.
               </p>
             </div>

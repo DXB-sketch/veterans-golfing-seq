@@ -5,7 +5,7 @@ import RibbonRule from "../components/RibbonRule.jsx";
 const sections = [
   {
     heading: "Membership",
-    body: "Membership is $50 per year and includes a club hat or t-shirt. Membership is confirmed once your enquiry is accepted and payment is received. [Add renewal terms — e.g. whether membership auto-renews or is re-purchased each year.]",
+    body: "Membership is $50 per year and includes a club hat. Membership is confirmed once your enquiry is accepted and payment is received. [Add renewal terms — e.g. whether membership auto-renews or is re-purchased each year.]",
   },
   {
     heading: "Events",

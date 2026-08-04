@@ -95,14 +95,8 @@ export default function AdminSubmissions() {
                   <Row label="Phone" value={e.phone} />
                   <Row label="Service" value={e.service_branch} />
                   <Row label="Playing info" value={e.playing_info} />
-                  <Row
-                    label="Hat or t-shirt"
-                    value={
-                      e.apparel_choice &&
-                      `${e.apparel_choice}${e.apparel_size ? ` (size ${e.apparel_size})` : ""}`
-                    }
-                  />
-                  <Row label="Pickup or delivery" value={e.delivery_pref} />
+                  <Row label="GA handicap" value={e.ga_handicap} />
+                  <Row label="Golf Links number" value={e.golf_links_number} />
                 </div>
               </li>
             ))}

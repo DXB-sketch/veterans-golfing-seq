@@ -5,8 +5,8 @@ import Photo from "../components/Photo.jsx";
 import { groupPhoto } from "../lib/photos.js";
 import { values } from "../data/values.js";
 
-// Roadmap entries. Grounded in the club's 2026/2027 plan; dates beyond the
-// Gold Coast Open Day are indicative and marked TBC where unconfirmed.
+// Roadmap entries. Grounded in the club's 2026/2027 plan; 2027 dates are
+// indicative and marked TBC where unconfirmed.
 const roadmap = [
   {
     when: "Early 2026",
@@ -21,10 +21,10 @@ const roadmap = [
       "Our first official open day at Palmer Gold Coast Golf Course, Robina. 18 holes, an optional side comp, and every veteran and family member welcome.",
   },
   {
-    when: "Late 2026",
-    title: "Second club event",
+    when: "30 August 2026",
+    title: "Keperra Open Day",
     detail:
-      "A second event to close out the year, with details to be confirmed. Follow us on Facebook for the announcement.",
+      "Our second open day, on the Old Course at Keperra Country Golf Club in Brisbane. All veterans, serving and non-serving, and their family members welcome.",
   },
   {
     when: "Early 2027",

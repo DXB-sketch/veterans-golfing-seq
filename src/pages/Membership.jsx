@@ -24,9 +24,8 @@ export default function Membership() {
         phone: f.get("phone") || null,
         service_branch: f.get("branch") || null,
         playing_info: f.get("handicap") || null,
-        apparel_choice: f.get("merch") || null,
-        apparel_size: f.get("size") || null,
-        delivery_pref: f.get("fulfilment") || null,
+        ga_handicap: f.get("ga_handicap") || null,
+        golf_links_number: f.get("golf_links") || null,
       });
     setSending(false);
     if (insertError) {
@@ -56,6 +55,10 @@ export default function Membership() {
               their family members. Fill in the form and we&apos;ll be in touch
               about payment and getting you kitted out.
             </p>
+            <p className="mt-4 max-w-xl text-lg text-cream/90">
+              Membership fees help cover administrative costs, championship
+              accommodation and fees, and event prizes.
+            </p>
           </div>
           <div className="flex flex-col items-start justify-center gap-1 bg-gold px-10 py-10 text-navy-deep md:w-72 md:items-center md:py-0 md:text-center">
             <p className="font-display text-5xl font-bold">$50</p>
@@ -63,7 +66,7 @@ export default function Membership() {
               per year
             </p>
             <p className="mt-2 text-sm font-semibold">
-              Includes a club hat or t-shirt
+              Includes a club hat
             </p>
           </div>
         </div>
@@ -79,7 +82,7 @@ export default function Membership() {
             <ul className="mt-8 divide-y divide-ink/10">
               {[
                 ["$50 a year", "That's it. No hidden fees, no fine print."],
-                ["A club hat or t-shirt", "Your choice. Wear the colours with pride."],
+                ["A club hat", "Wear the colours with pride — handed to you at your first event."],
                 ["A community that gets it", "Play alongside veterans and families from all three services."],
                 ["Events across SEQ", "Brisbane, Sunshine Coast and Gold Coast rounds through the year."],
               ].map(([title, line]) => (
@@ -129,27 +132,20 @@ export default function Membership() {
                   />
                 </div>
                 <FormField
-                  label="Hat or t-shirt?"
-                  id="merch"
+                  label="Do you have a GA handicap?"
+                  id="ga_handicap"
                   as="select"
                   required
-                  options={["Hat", "T-shirt"]}
+                  options={["Yes", "No"]}
                 />
                 <FormField
-                  label="Size (if t-shirt)"
-                  id="size"
-                  as="select"
-                  options={["S", "M", "L", "XL", "2XL", "3XL"]}
+                  label="Golf Links number"
+                  id="golf_links"
+                  placeholder="Leave blank if you don't have one"
                 />
-                <div className="sm:col-span-2">
-                  <FormField
-                    label="Pickup or delivery?"
-                    id="fulfilment"
-                    as="select"
-                    required
-                    options={["Pick up at an event", "Post it to me"]}
-                  />
-                </div>
+                <p className="text-sm text-ink-muted sm:col-span-2">
+                  Your club hat will be given to you at your first event.
+                </p>
                 {error && (
                   <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
                     {error}

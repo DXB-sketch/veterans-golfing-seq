@@ -5,7 +5,7 @@ import RibbonRule from "../components/RibbonRule.jsx";
 const sections = [
   {
     heading: "Information we collect",
-    body: "When you use our membership enquiry form we collect the details you provide: your name, email, phone (optional), service branch, playing/handicap information, apparel choice and size, and delivery preference. When you use our contact form we collect your name, email and message. If you make a payment, your card details are entered directly with our payment provider and are never collected or stored by us.",
+    body: "When you use our membership enquiry form we collect the details you provide: your name, email, phone (optional), service branch, playing/handicap information, whether you hold a GA handicap, and your Golf Links number (optional). When you book a tee slot for an event we collect your name, mobile number (optional, for reminders), handicap and Golf Links details, and your side comp and cart hire preferences. When you use our contact form we collect your name, email and message. If you make a payment, your card details are entered directly with our payment provider and are never collected or stored by us.",
   },
   {
     heading: "How we use it",

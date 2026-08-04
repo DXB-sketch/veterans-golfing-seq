@@ -94,7 +94,7 @@ export default function Footer() {
           </p>
           <p className="mt-2">
             © {new Date().getFullYear()} South East Queensland Defence Veterans
-            Golf Club Inc. · ABN 00 000 000 000 (placeholder)
+            Golf Club Inc. · ABN 35 714 983 753
           </p>
           <p className="mt-2 space-x-3">
             <Link to="/privacy" className="transition-colors hover:text-gold-bright">

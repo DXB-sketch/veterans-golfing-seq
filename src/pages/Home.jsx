@@ -120,7 +120,7 @@ export default function Home() {
               </>
             )}
             title="Membership"
-            blurb="$50 a year, a club hat or t-shirt, and a place in a community that gets it."
+            blurb="$50 a year, a club hat, and a place in a community that gets it."
             to="/membership"
             linkLabel="Join the club"
           />
