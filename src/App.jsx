@@ -20,6 +20,7 @@ import { AuthProvider } from "./admin/AuthProvider.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import AdminEvents from "./pages/admin/AdminEvents.jsx";
 import AdminEventForm from "./pages/admin/AdminEventForm.jsx";
+import AdminBookings from "./pages/admin/AdminBookings.jsx";
 import AdminSubmissions from "./pages/admin/AdminSubmissions.jsx";
 import AdminTeam from "./pages/admin/AdminTeam.jsx";
 
@@ -57,6 +58,7 @@ export default function App() {
               <Route index element={<AdminEvents />} />
               <Route path="events/new" element={<AdminEventForm />} />
               <Route path="events/:id/edit" element={<AdminEventForm />} />
+              <Route path="events/:id/bookings" element={<AdminBookings />} />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="team" element={<AdminTeam />} />
             </Route>

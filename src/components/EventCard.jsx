@@ -111,12 +111,22 @@ export default function EventCard({ event }) {
           ) : (
             <span />
           )}
-          <Link
-            to={`/events/${event.id}`}
-            className="font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
-          >
-            View event
-          </Link>
+          <div className="flex items-center gap-5">
+            <Link
+              to={`/events/${event.id}`}
+              className="font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
+            >
+              View event
+            </Link>
+            {event.bookable && (
+              <Link
+                to={`/events/${event.id}#book`}
+                className="inline-flex min-h-[38px] items-center bg-gold px-5 font-body text-sm font-bold uppercase tracking-[0.08em] text-navy-deep transition-colors hover:bg-gold-bright"
+              >
+                Book event
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </article>
@@ -142,12 +152,22 @@ export function EventRow({ event }) {
           <Row icon={eventIcons.flag} label="First tee" value={event.firstTee} />
           <Row icon={eventIcons.dollar} label="Fees" value={event.greenFee} />
         </div>
-        <Link
-          to={`/events/${event.id}`}
-          className="mt-4 inline-block font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
-        >
-          View event
-        </Link>
+        <div className="mt-4 flex items-center gap-5">
+          <Link
+            to={`/events/${event.id}`}
+            className="font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
+          >
+            View event
+          </Link>
+          {event.bookable && (
+            <Link
+              to={`/events/${event.id}#book`}
+              className="inline-flex min-h-[38px] items-center bg-gold px-5 font-body text-sm font-bold uppercase tracking-[0.08em] text-navy-deep transition-colors hover:bg-gold-bright"
+            >
+              Book event
+            </Link>
+          )}
+        </div>
       </div>
     </article>
   );

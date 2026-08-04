@@ -8,7 +8,8 @@ export const REGIONS = [
 ];
 
 // Timing is derived from the event date/time, never stored. The database
-// `status` column only tracks spots ("upcoming" = taking players, "full").
+// `status` column tracks lifecycle ('draft' | 'published' | 'completed');
+// 'completed' forces the timing to finalised.
 export const TIME_STATUSES = [
   { value: "upcoming", label: "Upcoming" },
   { value: "on_now", label: "On now" },
@@ -72,7 +73,7 @@ export function eventTimeStatus(eventDate, meetTime, firstTee) {
   return "on_now";
 }
 
-const money = (n) => {
+export const money = (n) => {
   if (n === null || n === undefined || n === "") return "TBC";
   const num = Number(n);
   return `$${Number.isInteger(num) ? num : num.toFixed(2)}`;
@@ -91,7 +92,11 @@ export function formatEventDate(iso) {
 
 // Shape a database row into the object the existing components render.
 export function mapEvent(row) {
-  const timeStatus = eventTimeStatus(row.event_date, row.meet_time, row.first_tee);
+  // A completed event is finalised no matter what the clock says.
+  const timeStatus =
+    row.status === "completed"
+      ? "finalised"
+      : eventTimeStatus(row.event_date, row.meet_time, row.first_tee);
   return {
     id: row.id,
     title: row.title,
@@ -101,14 +106,20 @@ export function mapEvent(row) {
     dateDisplay: formatEventDate(row.event_date),
     venue: row.venue || "TBC",
     address: row.address || "",
+    course: row.course || "",
     meetTime: row.meet_time || "TBC",
     firstTee: row.first_tee || "TBC",
     holes: row.holes ?? 18,
     greenFee: money(row.green_fee),
+    cartFee: row.cart_fee === null || row.cart_fee === undefined ? "None" : money(row.cart_fee),
     sideComp: row.side_comp === null || row.side_comp === undefined ? "None" : money(row.side_comp),
+    sideCompNote: row.side_comp_note || "",
     status: timeStatusLabel(timeStatus),
     timeStatus,
-    isFull: row.status === "full" && timeStatus !== "finalised",
+    lifecycle: row.status,
+    isLocked: !!row.is_locked,
+    isFull: row.is_full === true && timeStatus !== "finalised",
+    bookable: row.status === "published" && !!row.is_locked && timeStatus !== "finalised",
     sponsor: row.sponsor || "",
     description: row.description || "",
     imageUrl: row.image_url || "",

@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase.js";
 import { REGIONS } from "../../lib/events.js";
+import { fetchTeeSlots, replaceTeeSlots } from "../../lib/bookings.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 import AdminField from "./AdminField.jsx";
 
-const STATUS_OPTIONS = [
-  { value: "upcoming", label: "Taking players" },
+const SPOTS_OPTIONS = [
+  { value: "open", label: "Taking players" },
   { value: "full", label: "Full — no spots left" },
 ];
 
@@ -15,16 +16,21 @@ const emptyForm = {
   region: "brisbane",
   event_date: "",
   venue: "",
+  course: "",
   address: "",
   meet_time: "",
   first_tee: "",
   holes: "18",
   green_fee: "",
+  cart_fee: "",
   side_comp: "",
-  status: "upcoming",
+  side_comp_note: "",
+  spots: "open",
   sponsor: "",
   description: "",
 };
+
+const emptySlot = { tee_time: "", capacity: "4" };
 
 export default function AdminEventForm() {
   const { id } = useParams();
@@ -32,8 +38,14 @@ export default function AdminEventForm() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState(emptyForm);
+  // Lifecycle: 'draft' | 'published' | 'completed'. New events start as drafts.
+  const [lifecycle, setLifecycle] = useState("draft");
+  const [isLocked, setIsLocked] = useState(false);
+  const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [confirmPublish, setConfirmPublish] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState(null);
@@ -48,65 +60,162 @@ export default function AdminEventForm() {
       .then(({ data, error: loadError }) => {
         if (loadError || !data) {
           setError("Couldn't load this event. Go back and try again.");
-        } else {
-          setForm({
-            title: data.title ?? "",
-            region: data.region ?? "brisbane",
-            event_date: data.event_date ?? "",
-            venue: data.venue ?? "",
-            address: data.address ?? "",
-            meet_time: data.meet_time ?? "",
-            first_tee: data.first_tee ?? "",
-            holes: data.holes === null ? "" : String(data.holes),
-            green_fee: data.green_fee === null ? "" : String(data.green_fee),
-            side_comp: data.side_comp === null ? "" : String(data.side_comp),
-            // "past" is legacy — timing now comes from the event date automatically.
-            status: data.status === "full" ? "full" : "upcoming",
-            sponsor: data.sponsor ?? "",
-            description: data.description ?? "",
-          });
+          setLoading(false);
+          return;
         }
-        setLoading(false);
+        setForm({
+          title: data.title ?? "",
+          region: data.region ?? "brisbane",
+          event_date: data.event_date ?? "",
+          venue: data.venue ?? "",
+          course: data.course ?? "",
+          address: data.address ?? "",
+          meet_time: data.meet_time ?? "",
+          first_tee: data.first_tee ?? "",
+          holes: data.holes === null ? "" : String(data.holes),
+          green_fee: data.green_fee === null ? "" : String(data.green_fee),
+          cart_fee: data.cart_fee === null ? "" : String(data.cart_fee),
+          side_comp: data.side_comp === null ? "" : String(data.side_comp),
+          side_comp_note: data.side_comp_note ?? "",
+          spots: data.is_full ? "full" : "open",
+          sponsor: data.sponsor ?? "",
+          description: data.description ?? "",
+        });
+        setLifecycle(data.status ?? "draft");
+        setIsLocked(Boolean(data.is_locked));
+        // Load the event's tee slots too (shown as editable for drafts,
+        // read-only once the event is published and locked).
+        fetchTeeSlots(id)
+          .then((rows) =>
+            setSlots(
+              rows.map((s) => ({
+                tee_time: s.tee_time ?? "",
+                capacity: s.capacity === null ? "4" : String(s.capacity),
+              }))
+            )
+          )
+          .catch(() => {
+            // Slots failing to load shouldn't block editing the event itself.
+          })
+          .finally(() => setLoading(false));
       });
   }, [id, isEdit]);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const setSlot = (index, key) => (e) => {
+    const value = e.target.value;
+    setSlots((list) =>
+      list.map((s, i) => (i === index ? { ...s, [key]: value } : s))
+    );
+  };
+
+  const addSlot = () => setSlots((list) => [...list, { ...emptySlot }]);
+  const removeSlot = (index) =>
+    setSlots((list) => list.filter((_, i) => i !== index));
+
+  // Tee slots can only change while the event is still a draft.
+  const slotsEditable = !isEdit || (lifecycle === "draft" && !isLocked);
+
+  // Blank rows are simply ignored, so a stray "Add a tee slot" click is harmless.
+  const cleanSlots = () =>
+    slots
+      .filter((s) => s.tee_time.trim() !== "")
+      .map((s) => ({
+        tee_time: s.tee_time.trim(),
+        capacity: s.capacity === "" ? 4 : Number(s.capacity),
+      }));
+
+  function buildPayload() {
+    return {
+      title: form.title.trim(),
+      region: form.region,
+      event_date: form.event_date || null,
+      venue: form.venue.trim() || null,
+      course: form.course.trim() || null,
+      address: form.address.trim() || null,
+      meet_time: form.meet_time.trim() || null,
+      first_tee: form.first_tee.trim() || null,
+      holes: form.holes === "" ? null : Number(form.holes),
+      green_fee: form.green_fee === "" ? null : Number(form.green_fee),
+      cart_fee: form.cart_fee === "" ? null : Number(form.cart_fee),
+      side_comp: form.side_comp === "" ? null : Number(form.side_comp),
+      side_comp_note: form.side_comp_note.trim() || null,
+      is_full: form.spots === "full",
+      sponsor: form.sponsor.trim() || null,
+      description: form.description.trim() || null,
+    };
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
     setSaving(true);
 
-    const payload = {
-      title: form.title.trim(),
-      region: form.region,
-      event_date: form.event_date || null,
-      venue: form.venue.trim() || null,
-      address: form.address.trim() || null,
-      meet_time: form.meet_time.trim() || null,
-      first_tee: form.first_tee.trim() || null,
-      holes: form.holes === "" ? null : Number(form.holes),
-      green_fee: form.green_fee === "" ? null : Number(form.green_fee),
-      side_comp: form.side_comp === "" ? null : Number(form.side_comp),
-      status: form.status,
-      sponsor: form.sponsor.trim() || null,
-      description: form.description.trim() || null,
-    };
+    const payload = buildPayload();
 
-    const { error: saveError } = isEdit
-      ? await supabase.from("events").update(payload).eq("id", id)
-      : await supabase.from("events").insert(payload);
-
-    setSaving(false);
-    if (saveError) {
+    try {
+      if (isEdit) {
+        const { error: saveError } = await supabase
+          .from("events")
+          .update(payload)
+          .eq("id", id);
+        if (saveError) throw saveError;
+        if (slotsEditable) await replaceTeeSlots(id, cleanSlots());
+      } else {
+        // New events are saved as drafts — insert first so we get an id
+        // back, then attach the tee slots to it.
+        const { data: inserted, error: saveError } = await supabase
+          .from("events")
+          .insert({ ...payload, status: "draft" })
+          .select()
+          .single();
+        if (saveError || !inserted) throw saveError ?? new Error("insert failed");
+        await replaceTeeSlots(inserted.id, cleanSlots());
+      }
+    } catch {
+      setSaving(false);
       setError(
         "Couldn't save the event — please check your internet connection and try again."
       );
-    } else {
-      navigate("/admin", {
-        state: { message: isEdit ? "Event saved" : "Event added to the website" },
-      });
+      return;
     }
+
+    setSaving(false);
+    navigate("/admin", {
+      state: {
+        message: isEdit ? "Event saved" : "Event saved as a draft",
+      },
+    });
+  }
+
+  async function handlePublish() {
+    setError(null);
+    setPublishing(true);
+
+    try {
+      // Save the tee slots while the event is still a draft, then flip it
+      // live and freeze them — so a half-failed publish never leaves a live
+      // event with a broken tee sheet.
+      await replaceTeeSlots(id, cleanSlots());
+      const { error: saveError } = await supabase
+        .from("events")
+        .update({ ...buildPayload(), status: "published", is_locked: true })
+        .eq("id", id);
+      if (saveError) throw saveError;
+    } catch {
+      setPublishing(false);
+      setConfirmPublish(false);
+      setError(
+        "Couldn't publish the event — please check your internet connection and try again."
+      );
+      return;
+    }
+
+    setPublishing(false);
+    navigate("/admin", {
+      state: { message: "Event published — it's live on the website now" },
+    });
   }
 
   async function handleDelete() {
@@ -149,6 +258,12 @@ export default function AdminEventForm() {
         &ldquo;TBC&rdquo; on the website, and you can come back and add it
         later.
       </p>
+      {lifecycle === "draft" && (
+        <p className="mt-3 border-l-4 border-gold bg-gold/10 p-4 text-base text-ink">
+          This event is a <strong>draft</strong> — it is NOT shown on the
+          website until you publish it. Take your time getting it right.
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-8 grid gap-7 border-t-4 border-gold bg-paper p-8 shadow-soft md:p-10">
         <AdminField
@@ -184,6 +299,13 @@ export default function AdminEventForm() {
           hint="e.g. Palmer Gold Coast Golf Course"
           value={form.venue}
           onChange={set("venue")}
+        />
+        <AdminField
+          label="Course"
+          id="course"
+          hint="e.g. Old Course — leave blank if the club has just one course"
+          value={form.course}
+          onChange={set("course")}
         />
         <AdminField
           label="Address"
@@ -228,6 +350,18 @@ export default function AdminEventForm() {
             onChange={set("green_fee")}
           />
           <AdminField
+            label="Cart hire ($)"
+            id="cart_fee"
+            type="number"
+            min="0"
+            step="0.01"
+            hint="Leave blank if carts aren't offered."
+            value={form.cart_fee}
+            onChange={set("cart_fee")}
+          />
+        </div>
+        <div className="grid gap-7 sm:grid-cols-2">
+          <AdminField
             label="Side comp ($)"
             id="side_comp"
             type="number"
@@ -237,16 +371,23 @@ export default function AdminEventForm() {
             value={form.side_comp}
             onChange={set("side_comp")}
           />
+          <AdminField
+            label="Side comp note"
+            id="side_comp_note"
+            hint="e.g. Handicap members only"
+            value={form.side_comp_note}
+            onChange={set("side_comp_note")}
+          />
         </div>
         <AdminField
           label="Spots"
-          id="status"
+          id="spots"
           as="select"
           required
-          options={STATUS_OPTIONS}
+          options={SPOTS_OPTIONS}
           hint="Only change this to 'Full' when the field is full. The website works out upcoming / on now / finalised by itself from the event date and times (Queensland time)."
-          value={form.status}
-          onChange={set("status")}
+          value={form.spots}
+          onChange={set("spots")}
         />
         <AdminField
           label="Event sponsor"
@@ -264,6 +405,103 @@ export default function AdminEventForm() {
           onChange={set("description")}
         />
 
+        <div className="border-t border-ink/10 pt-7">
+          <p className="font-body text-base font-bold text-navy">Tee slots</p>
+          {slotsEditable ? (
+            <>
+              <p className="mt-0.5 text-sm text-ink-muted">
+                Add a row for each tee time and how many players fit in it
+                (usually 4). Players will book into these slots once the event
+                is published.
+              </p>
+              <div className="mt-4 grid gap-3">
+                {slots.length === 0 && (
+                  <p className="text-base text-ink-muted">
+                    No tee slots yet — press &ldquo;Add a tee slot&rdquo; to
+                    start.
+                  </p>
+                )}
+                {slots.map((slot, index) => (
+                  <div key={index} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <div className="flex-1">
+                      <label
+                        htmlFor={`slot_time_${index}`}
+                        className="block text-sm font-bold text-navy"
+                      >
+                        Tee time
+                      </label>
+                      <input
+                        id={`slot_time_${index}`}
+                        placeholder="e.g. 8:24am"
+                        value={slot.tee_time}
+                        onChange={setSlot(index, "tee_time")}
+                        className="mt-1 w-full min-h-[52px] border border-ink/25 bg-paper px-4 py-3 text-lg text-ink placeholder:text-ink-muted/50 focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/50"
+                      />
+                    </div>
+                    <div className="sm:w-36">
+                      <label
+                        htmlFor={`slot_capacity_${index}`}
+                        className="block text-sm font-bold text-navy"
+                      >
+                        Players
+                      </label>
+                      <input
+                        id={`slot_capacity_${index}`}
+                        type="number"
+                        min="1"
+                        value={slot.capacity}
+                        onChange={setSlot(index, "capacity")}
+                        className="mt-1 w-full min-h-[52px] border border-ink/25 bg-paper px-4 py-3 text-lg text-ink focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/50"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSlot(index)}
+                      className="min-h-[52px] border-2 border-crimson px-6 font-body text-base font-bold uppercase tracking-[0.08em] text-crimson transition-colors hover:bg-crimson hover:text-white"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addSlot}
+                className="mt-4 min-h-[52px] border-2 border-navy px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy/5"
+              >
+                Add a tee slot
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="mt-0.5 text-sm text-ink-muted">
+                The tee slots are locked because the event is published and
+                bookings may exist. Everything else on this page can still be
+                changed and saved.
+              </p>
+              {slots.length === 0 ? (
+                <p className="mt-3 text-base text-ink-muted">
+                  This event has no tee slots.
+                </p>
+              ) : (
+                <ul className="mt-3 grid gap-2">
+                  {slots.map((slot, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between border border-ink/15 bg-cream px-4 py-3 text-lg text-ink"
+                    >
+                      <span className="font-semibold">{slot.tee_time}</span>
+                      <span className="text-ink-muted">
+                        {slot.capacity} players
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+        </div>
+
         {error && (
           <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-base text-ink">
             {error}
@@ -273,7 +511,7 @@ export default function AdminEventForm() {
         <div className="flex flex-col gap-4 border-t border-ink/10 pt-7 sm:flex-row sm:items-center">
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || publishing}
             className="min-h-[56px] bg-gold px-10 font-body text-base font-bold uppercase tracking-[0.08em] text-navy-deep transition-colors hover:bg-gold-bright disabled:opacity-60"
           >
             {saving ? "Saving…" : "Save event"}
@@ -287,6 +525,55 @@ export default function AdminEventForm() {
         </div>
       </form>
 
+      {isEdit && lifecycle === "draft" && (
+        <div className="mt-10 border-t-4 border-gold bg-paper p-8 shadow-soft">
+          {confirmPublish ? (
+            <>
+              <p className="text-lg font-bold text-navy">
+                Ready to put &ldquo;{form.title}&rdquo; live on the website?
+              </p>
+              <p className="mt-1 text-ink-muted">
+                Publishing puts the event on the website for everyone to see,
+                opens bookings, and locks the tee slots — you won&rsquo;t be
+                able to add, remove or change slot times after this. Any
+                changes on the form above are saved as part of publishing.
+                {cleanSlots().length === 0 &&
+                  " Heads up: this event has NO tee slots yet, so players won't be able to book a time."}
+              </p>
+              <div className="mt-5 flex flex-col gap-4 sm:flex-row">
+                <button
+                  onClick={handlePublish}
+                  disabled={publishing}
+                  className="min-h-[52px] bg-gold px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy-deep transition-colors hover:bg-gold-bright disabled:opacity-60"
+                >
+                  {publishing ? "Publishing…" : "Yes, publish it"}
+                </button>
+                <button
+                  onClick={() => setConfirmPublish(false)}
+                  disabled={publishing}
+                  className="min-h-[52px] border-2 border-navy px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy/5"
+                >
+                  Not yet, keep it as a draft
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="font-semibold text-ink">
+                Happy with everything? Publish the event so members can see it
+                and book a tee slot.
+              </p>
+              <button
+                onClick={() => setConfirmPublish(true)}
+                className="mt-4 min-h-[56px] bg-gold px-10 font-body text-base font-bold uppercase tracking-[0.08em] text-navy-deep transition-colors hover:bg-gold-bright"
+              >
+                Publish &amp; lock
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       {isEdit && (
         <div className="mt-10 border border-crimson/30 bg-paper p-8">
           {confirmDelete ? (
@@ -295,7 +582,8 @@ export default function AdminEventForm() {
                 Delete &ldquo;{form.title}&rdquo; for good?
               </p>
               <p className="mt-1 text-ink-muted">
-                It will disappear from the website straight away, and this
+                It will disappear from the website straight away, along with
+                its tee slots and any bookings players have made, and this
                 cannot be undone.
               </p>
               <div className="mt-5 flex flex-col gap-4 sm:flex-row">

@@ -64,26 +64,42 @@ export default function AdminEvents() {
                 <p className="text-lg font-bold text-navy">{e.title}</p>
                 <p className="mt-0.5 text-ink-muted">
                   {e.dateDisplay} · {e.region} ·{" "}
-                  <span
-                    className={
-                      e.timeStatus === "finalised"
-                        ? "text-ink-muted"
-                        : e.isFull
-                          ? "font-semibold text-crimson"
-                          : "font-semibold text-navy"
-                    }
-                  >
-                    {e.status}
-                    {e.isFull && " · Full"}
-                  </span>
+                  {e.lifecycle === "draft" ? (
+                    <span className="font-semibold text-crimson">
+                      Draft — not on the website yet
+                    </span>
+                  ) : (
+                    <span
+                      className={
+                        e.timeStatus === "finalised"
+                          ? "text-ink-muted"
+                          : e.isFull
+                            ? "font-semibold text-crimson"
+                            : "font-semibold text-navy"
+                      }
+                    >
+                      {e.status}
+                      {e.isFull && " · Full"}
+                    </span>
+                  )}
                 </p>
               </div>
-              <Link
-                to={`/admin/events/${e.id}/edit`}
-                className="inline-flex min-h-[48px] items-center border-2 border-navy px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy hover:text-white"
-              >
-                Edit
-              </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  to={`/admin/events/${e.id}/edit`}
+                  className="inline-flex min-h-[48px] items-center border-2 border-navy px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy hover:text-white"
+                >
+                  Edit
+                </Link>
+                {e.lifecycle !== "draft" && (
+                  <Link
+                    to={`/admin/events/${e.id}/bookings`}
+                    className="inline-flex min-h-[48px] items-center border-2 border-navy px-8 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy hover:text-white"
+                  >
+                    Bookings
+                  </Link>
+                )}
+              </div>
             </li>
           ))}
         </ul>

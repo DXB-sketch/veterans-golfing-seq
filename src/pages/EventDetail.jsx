@@ -1,10 +1,14 @@
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
 import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
+import FormField from "../components/FormField.jsx";
 import Photo from "../components/Photo.jsx";
 import { EventMeta } from "../components/EventCard.jsx";
 import { useEvent } from "../hooks/useEvents.js";
+import { useSlotAvailability } from "../hooks/useBookings.js";
+import { createBooking } from "../lib/bookings.js";
 import { albumForEvent } from "../lib/photos.js";
 import { FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
 
@@ -19,9 +23,235 @@ function Detail({ label, value }) {
   );
 }
 
+// Public booking form: fee summary, tee slot picker, the six fixed fields.
+function BookingSection({ event }) {
+  const { slots, loading, error, refresh } = useSlotAvailability(event.id);
+  const [slotId, setSlotId] = useState(null);
+  const [sending, setSending] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const [booked, setBooked] = useState(null);
+
+  const selectedSlot = slots.find((s) => s.id === slotId);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!slotId) {
+      setFormError("Please pick a tee slot above before booking.");
+      return;
+    }
+    const f = new FormData(e.target);
+    setFormError(null);
+    setSending(true);
+    try {
+      await createBooking({
+        eventId: event.id,
+        teeSlotId: slotId,
+        playerName: f.get("player_name"),
+        mobile: f.get("mobile") || null,
+        gaHandicap: f.get("ga_handicap") === "Yes",
+        golfLinksNumber: f.get("golf_links") || null,
+        playingInComp: f.get("side_comp") === "Yes",
+        cartHire: f.get("cart_hire") === "Yes",
+      });
+      setBooked({
+        playerName: f.get("player_name"),
+        teeTime: selectedSlot?.teeTime,
+      });
+    } catch (err) {
+      if (err.code === "slot_full") {
+        setFormError("That slot just filled up — please pick another time.");
+        setSlotId(null);
+        refresh();
+      } else {
+        setFormError(
+          `Sorry, your booking didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
+        );
+      }
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div id="book">
+      <Section eyebrow="Bookings" title="Book your tee slot" tone="paper">
+        {booked ? (
+          <div className="mx-auto max-w-xl border-t-4 border-gold bg-cream p-10 text-center">
+            <p className="font-display text-2xl font-semibold tracking-wide text-navy">
+              You&apos;re booked in, {booked.playerName}
+            </p>
+            <RibbonRule className="mt-3" />
+            <p className="mt-4 text-ink-muted">
+              We&apos;ve got you down for the{" "}
+              <span className="font-semibold text-ink">{booked.teeTime}</span>{" "}
+              slot. See you on the course.
+            </p>
+          </div>
+        ) : (
+          <div className="max-w-3xl">
+            {/* Fee summary so nobody's surprised on the day. */}
+            <div className="flex flex-wrap gap-x-10 gap-y-2 border-b border-ink/10 pb-6 text-sm">
+              <p>
+                <span className="font-bold uppercase tracking-[0.08em] text-ink-muted">
+                  Green fee
+                </span>{" "}
+                <span className="font-semibold text-ink">{event.greenFee}</span>
+              </p>
+              {event.cartFee !== "None" && (
+                <p>
+                  <span className="font-bold uppercase tracking-[0.08em] text-ink-muted">
+                    Cart hire
+                  </span>{" "}
+                  <span className="font-semibold text-ink">{event.cartFee}</span>
+                </p>
+              )}
+              <p>
+                <span className="font-bold uppercase tracking-[0.08em] text-ink-muted">
+                  Side comp
+                </span>{" "}
+                <span className="font-semibold text-ink">{event.sideComp}</span>
+                {event.sideCompNote && (
+                  <span className="text-ink-muted"> — {event.sideCompNote}</span>
+                )}
+              </p>
+            </div>
+
+            {/* Tee slot picker. Radio-group semantics on plain buttons. */}
+            <div className="mt-8">
+              <p className="text-sm font-semibold text-ink">
+                Pick a tee slot
+                <span className="ml-1 text-crimson" aria-hidden="true">*</span>
+              </p>
+              {loading ? (
+                <p className="mt-3 text-sm text-ink-muted">Loading tee slots…</p>
+              ) : error ? (
+                <p className="mt-3 text-sm text-ink-muted">
+                  We couldn&apos;t load the tee slots. Please try again in a
+                  moment, or email us at {CLUB_EMAIL}.
+                </p>
+              ) : slots.length === 0 ? (
+                <p className="mt-3 text-sm text-ink-muted">
+                  Tee slots haven&apos;t been posted yet — email us at{" "}
+                  {CLUB_EMAIL} and we&apos;ll lock you in.
+                </p>
+              ) : (
+                <div
+                  role="radiogroup"
+                  aria-label="Tee slots"
+                  className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                  {slots.map((s) => {
+                    const full = s.spotsLeft === 0;
+                    const active = s.id === slotId;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        disabled={full}
+                        onClick={() => {
+                          setSlotId(s.id);
+                          setFormError(null);
+                        }}
+                        className={`flex min-h-[46px] items-center justify-between gap-3 border-2 px-4 py-3 text-left transition-colors ${
+                          active
+                            ? "border-gold bg-gold/10"
+                            : full
+                              ? "cursor-not-allowed border-ink/10 bg-paper"
+                              : "border-ink/20 bg-paper hover:border-gold"
+                        }`}
+                      >
+                        <span
+                          className={`font-semibold ${full ? "text-ink-muted" : "text-ink"}`}
+                        >
+                          {s.teeTime}
+                        </span>
+                        <span className="text-sm text-ink-muted">
+                          {full
+                            ? "Full"
+                            : `${s.spotsLeft} of ${s.capacity} spots left`}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-8 grid gap-5 sm:grid-cols-2">
+              <FormField label="Name" id="player_name" required autoComplete="name" />
+              <FormField
+                label="Mobile (for a reminder)"
+                id="mobile"
+                type="tel"
+                autoComplete="tel"
+              />
+              <FormField
+                label="Do you have a GA handicap?"
+                id="ga_handicap"
+                as="select"
+                required
+                options={["Yes", "No"]}
+              />
+              <FormField
+                label="Golf Links number"
+                id="golf_links"
+                placeholder="Leave blank if you don't have one"
+              />
+              <div>
+                <FormField
+                  label="Playing in the side comp?"
+                  id="side_comp"
+                  as="select"
+                  options={["Yes", "No"]}
+                />
+                <p className="mt-1.5 text-sm text-ink-muted">
+                  {event.sideComp}
+                  {event.sideCompNote && ` — ${event.sideCompNote}`}
+                </p>
+              </div>
+              <div>
+                <FormField
+                  label="Cart hire?"
+                  id="cart_hire"
+                  as="select"
+                  options={["Yes", "No"]}
+                />
+                {event.cartFee !== "None" && (
+                  <p className="mt-1.5 text-sm text-ink-muted">{event.cartFee}</p>
+                )}
+              </div>
+              {formError && (
+                <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
+                  {formError}
+                </p>
+              )}
+              <div className="sm:col-span-2">
+                <Button type="submit" disabled={sending} className="w-full sm:w-auto">
+                  {sending ? "Booking…" : "Book my spot"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+      </Section>
+    </div>
+  );
+}
+
 export default function EventDetail() {
   const { id } = useParams();
   const { event, loading } = useEvent(id);
+  const location = useLocation();
+
+  // ScrollToTop in App.jsx wins on route change, so honour the #book anchor
+  // ourselves once the event has loaded.
+  useEffect(() => {
+    if (!loading && event?.bookable && location.hash === "#book") {
+      document.getElementById("book")?.scrollIntoView();
+    }
+  }, [loading, event, location.hash]);
 
   if (loading) {
     return (
@@ -124,6 +354,40 @@ export default function EventDetail() {
                   </Button>
                 </div>
               </>
+            ) : event.bookable ? (
+              <>
+                <h2 className="font-display text-xl font-semibold tracking-wide">
+                  Secure your spot
+                </h2>
+                <RibbonRule className="mt-3" dark />
+                <p className="mt-4 text-sm text-cream/85">
+                  Bookings are open — pick a tee slot and book online in under a
+                  minute. All veterans, serving and ex-serving, and family
+                  members are welcome.
+                </p>
+                <div className="mt-6 flex flex-col gap-3">
+                  <Button
+                    onClick={() =>
+                      document
+                        .getElementById("book")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
+                  >
+                    Book your spot
+                  </Button>
+                  <Button href={`mailto:${CLUB_EMAIL}`} variant="secondary">
+                    Email the club
+                  </Button>
+                  <Button
+                    href={FACEBOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="secondary"
+                  >
+                    Message on Facebook
+                  </Button>
+                </div>
+              </>
             ) : (
               <>
                 <h2 className="font-display text-xl font-semibold tracking-wide">
@@ -151,6 +415,9 @@ export default function EventDetail() {
           </aside>
         </div>
       </Section>
+
+      {/* Online booking: only while the event is published, locked and not yet played. */}
+      {event.bookable && <BookingSection event={event} />}
 
       {/* Recap: only for played events that have a photo album. */}
       {album && (
