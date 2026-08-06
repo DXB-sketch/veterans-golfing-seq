@@ -32,6 +32,7 @@ export default function Footer() {
                 ["Membership", "/membership"],
                 ["Veteran resources", "/resources"],
                 ["Contact us", "/contact"],
+                ["Member sign in", "/member"],
                 ["Committee login", "/admin"],
               ].map(([label, to]) => (
                 <li key={to}>

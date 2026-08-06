@@ -31,7 +31,8 @@ Deno.serve(async (req) => {
     { auth: { persistSession: false } }
   );
 
-  // The caller must be a signed-in user (all accounts are committee admins).
+  // The caller must be a signed-in COMMITTEE user. Invited members are also
+  // authenticated, so a session alone is no longer enough.
   const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
   const {
     data: { user: caller },
@@ -39,6 +40,20 @@ Deno.serve(async (req) => {
   } = await admin.auth.getUser(token);
   if (callerError || !caller) {
     return json({ error: "not_signed_in" }, 401);
+  }
+  const { data: callerProfile, error: profileError } = await admin
+    .from("profiles")
+    .select("role")
+    .eq("id", caller.id)
+    .maybeSingle();
+  if (profileError) {
+    // Legacy window only: before the roles migration exists there are no
+    // member accounts, so every authenticated user is committee. Any error
+    // other than "table missing" is a hard deny.
+    const missing = `${profileError.message ?? ""}`.includes("profiles");
+    if (!missing) return json({ error: "not_committee" }, 403);
+  } else if (callerProfile?.role !== "committee") {
+    return json({ error: "not_committee" }, 403);
   }
 
   let body: { action?: string; email?: string; password?: string; id?: string };

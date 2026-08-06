@@ -21,6 +21,29 @@ const emptyForm = {
   contact_email: "",
 };
 
+// Thumbnail with a graceful fallback: if the logo file is missing or 404s,
+// show the "No logo" block instead of a broken image (as the public page does).
+function SponsorThumb({ sponsor }) {
+  const [failed, setFailed] = useState(false);
+  const logo = logoUrl(sponsor.logo_path);
+
+  if (!logo || failed) {
+    return (
+      <div className="flex h-14 w-14 items-center justify-center border border-dashed border-ink/25 text-xs text-ink-muted">
+        No logo
+      </div>
+    );
+  }
+  return (
+    <img
+      src={logo}
+      alt=""
+      onError={() => setFailed(true)}
+      className="h-14 w-14 border border-ink/10 bg-white object-contain p-1"
+    />
+  );
+}
+
 function TierBadge({ tier }) {
   const t = tierByKey(tier);
   if (!t) return null;
@@ -131,6 +154,29 @@ export default function AdminSponsors() {
     setFormError(null);
     setSaving(true);
 
+    // Tidy and check the website address before doing anything else. A bare
+    // "example.com" gets https:// added; anything that isn't http(s) is
+    // rejected so a broken link never reaches the public page.
+    let websiteUrl = form.website_url.trim() || null;
+    if (websiteUrl) {
+      if (!/^[a-z][a-z0-9+.-]*:/i.test(websiteUrl)) {
+        websiteUrl = `https://${websiteUrl}`;
+      }
+      let parsed = null;
+      try {
+        parsed = new URL(websiteUrl);
+      } catch {
+        parsed = null;
+      }
+      if (!parsed || (parsed.protocol !== "http:" && parsed.protocol !== "https:")) {
+        setSaving(false);
+        setFormError(
+          "That website address doesn't look right — it needs to start with https:// (e.g. https://urbanfairways.com.au). Please fix it and save again."
+        );
+        return;
+      }
+    }
+
     let logoPath = editingLogoPath;
     if (logoFile) {
       try {
@@ -147,7 +193,7 @@ export default function AdminSponsors() {
     const amount = form.amount_dollars === "" ? null : Number(form.amount_dollars);
     const payload = {
       company_name: form.company_name.trim(),
-      website_url: form.website_url.trim() || null,
+      website_url: websiteUrl,
       description: form.description.trim() || null,
       tier: form.tier || null,
       amount_cents:
@@ -244,7 +290,6 @@ export default function AdminSponsors() {
         <ul className="mt-8 divide-y divide-ink/10 border-t border-ink/10">
           {sponsors.map((s) => {
             const pending = !s.is_active;
-            const logo = logoUrl(s.logo_path);
             return (
               <li
                 key={s.id}
@@ -253,17 +298,7 @@ export default function AdminSponsors() {
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  {logo ? (
-                    <img
-                      src={logo}
-                      alt=""
-                      className="h-14 w-14 border border-ink/10 bg-white object-contain p-1"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 items-center justify-center border border-dashed border-ink/25 text-xs text-ink-muted">
-                      No logo
-                    </div>
-                  )}
+                  <SponsorThumb key={s.logo_path ?? "none"} sponsor={s} />
                   <div>
                     <p className="text-lg font-bold text-navy">
                       {s.company_name}{" "}

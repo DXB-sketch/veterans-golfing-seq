@@ -179,6 +179,9 @@ export default function Membership() {
 function JoinAndPay() {
   const [details, setDetails] = useState(null);
   const [paid, setPaid] = useState(false);
+  // Whether the server managed to email the login invite — when it couldn't,
+  // the success panel must not promise an email that isn't coming.
+  const [inviteSent, setInviteSent] = useState(false);
 
   function handleDetails(e) {
     e.preventDefault();
@@ -216,12 +219,22 @@ function JoinAndPay() {
                 Payment received — welcome to the club!
               </p>
               <RibbonRule className="mt-3" />
-              <p className="mt-4 text-ink-muted">
-                You&apos;re now a member of the South East Queensland Defence
-                Veterans Golf Club. An email invite to set up your member login
-                is on its way to {details?.email} — if it doesn&apos;t arrive
-                in the next few minutes, please check your spam folder.
-              </p>
+              {inviteSent ? (
+                <p className="mt-4 text-ink-muted">
+                  You&apos;re now a member of the South East Queensland Defence
+                  Veterans Golf Club. An email invite to set up your member login
+                  is on its way to {details?.email} — if it doesn&apos;t arrive
+                  in the next few minutes, please check your spam folder.
+                </p>
+              ) : (
+                <p className="mt-4 text-ink-muted">
+                  You&apos;re now a member of the South East Queensland Defence
+                  Veterans Golf Club. Your payment has been received, and the
+                  club will be in touch to set up your member login — if you
+                  don&apos;t hear from us within a few days, email us at
+                  seqdvgc@gmail.com.
+                </p>
+              )}
               <p className="mt-3 text-ink-muted">
                 Your club hat will be given to you at your first event. See you
                 on the course.
@@ -248,7 +261,10 @@ function JoinAndPay() {
                   payerName={details.name}
                   payerEmail={details.email}
                   member={details}
-                  onSuccess={() => setPaid(true)}
+                  onSuccess={(paymentId, data) => {
+                    setInviteSent(data?.inviteSent === true);
+                    setPaid(true);
+                  }}
                 />
               </div>
             </div>

@@ -35,11 +35,14 @@ function formatDate(iso) {
   });
 }
 
-// A year from today, as YYYY-MM-DD — the standard membership term.
+// A year from today in Queensland time, as YYYY-MM-DD — the standard
+// membership term. Same approach as api/create-payment.js, so a member
+// added early in the morning doesn't expire a day early.
 function oneYearFromToday() {
-  const d = new Date();
-  d.setFullYear(d.getFullYear() + 1);
-  return d.toISOString().slice(0, 10);
+  return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString(
+    "en-CA",
+    { timeZone: "Australia/Brisbane" }
+  );
 }
 
 export default function AdminMembers() {
@@ -53,6 +56,7 @@ export default function AdminMembers() {
   const [notice, setNotice] = useState(null);
   const [formError, setFormError] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
+  const [invitingId, setInvitingId] = useState(null);
   const formRef = useRef(null);
 
   async function loadMembers() {
@@ -170,16 +174,50 @@ export default function AdminMembers() {
       });
       inviteMessage = res.ok
         ? " An email invite to set up their member login is on its way."
-        : " Their login invite couldn't be sent just now — you can try again later by re-saving them, or ask them to contact the club.";
+        : " Their login invite couldn't be sent just now — use the \"Send login invite\" button next to their name to try again later.";
     } catch {
       inviteMessage =
-        " Their login invite couldn't be sent just now — you can try again later by re-saving them, or ask them to contact the club.";
+        " Their login invite couldn't be sent just now — use the \"Send login invite\" button next to their name to try again later.";
     }
 
     setSaving(false);
     setNotice(`${payload.name} has been added as a paid member.${inviteMessage}`);
     setForm(emptyForm);
     loadMembers();
+  }
+
+  // Email a member their login invite — for when the invite failed at add
+  // time, or for members recorded before invites existed.
+  async function sendInvite(m) {
+    setNotice(null);
+    setFormError(null);
+    setInvitingId(m.id);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const res = await fetch("/api/invite-member", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token ?? ""}`,
+        },
+        body: JSON.stringify({ email: m.email }),
+      });
+      if (res.ok) {
+        setNotice(`A login invite is on its way to ${m.email}.`);
+        loadMembers();
+      } else {
+        setFormError(
+          `Couldn't send the login invite to ${m.email} just now — please try again in a few minutes.`
+        );
+      }
+    } catch {
+      setFormError(
+        `Couldn't send the login invite to ${m.email} — please check your internet connection and try again.`
+      );
+    }
+    setInvitingId(null);
   }
 
   // Flip a member between active and expired.
@@ -279,6 +317,15 @@ export default function AdminMembers() {
                   >
                     Edit
                   </button>
+                  {!m.auth_user_id && (
+                    <button
+                      onClick={() => sendInvite(m)}
+                      disabled={invitingId === m.id}
+                      className="min-h-[48px] border-2 border-navy px-6 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy/5 disabled:opacity-60"
+                    >
+                      {invitingId === m.id ? "Sending…" : "Send login invite"}
+                    </button>
+                  )}
                   <button
                     onClick={() => toggleStatus(m)}
                     disabled={togglingId === m.id}

@@ -4,10 +4,20 @@ import { supabase } from "../../lib/supabase.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 
 // A count query that never throws — any failure (including tables that don't
-// exist until the roles migration is applied) simply reads as zero.
-async function safeCount(build) {
+// exist until the roles migration is applied) simply reads as zero. An
+// optional fallback query is tried first if the main one errors, so a count
+// filtered on a not-yet-migrated column can degrade to the unfiltered total
+// instead of a misleading zero.
+async function safeCount(build, fallback) {
   try {
     const { count, error } = await build();
+    if (!error) return count ?? 0;
+  } catch {
+    // fall through to the fallback (if any)
+  }
+  if (!fallback) return 0;
+  try {
+    const { count, error } = await fallback();
     if (error) return 0;
     return count ?? 0;
   } catch {
@@ -51,23 +61,38 @@ export default function AdminOverview() {
           .eq("status", "published")
           .gte("event_date", today)
       ),
-      safeCount(() =>
-        supabase
-          .from("membership_enquiries")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "new")
+      safeCount(
+        () =>
+          supabase
+            .from("membership_enquiries")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "new"),
+        () =>
+          supabase
+            .from("membership_enquiries")
+            .select("id", { count: "exact", head: true })
       ),
-      safeCount(() =>
-        supabase
-          .from("volunteer_enquiries")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "new")
+      safeCount(
+        () =>
+          supabase
+            .from("volunteer_enquiries")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "new"),
+        () =>
+          supabase
+            .from("volunteer_enquiries")
+            .select("id", { count: "exact", head: true })
       ),
-      safeCount(() =>
-        supabase
-          .from("contact_messages")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "new")
+      safeCount(
+        () =>
+          supabase
+            .from("contact_messages")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "new"),
+        () =>
+          supabase
+            .from("contact_messages")
+            .select("id", { count: "exact", head: true })
       ),
       safeCount(() =>
         supabase

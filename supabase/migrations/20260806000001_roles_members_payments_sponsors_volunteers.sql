@@ -117,6 +117,11 @@ language plpgsql
 set search_path = public
 as $$
 begin
+  -- Server-side (service role / SECURITY DEFINER) writes have no auth.uid()
+  -- and must pass — the guard only restrains signed-in non-committee users.
+  if auth.uid() is null then
+    return new;
+  end if;
   if not public.is_committee() then
     if new.status is distinct from old.status
        or new.expires_at is distinct from old.expires_at
@@ -136,9 +141,18 @@ create trigger members_guard before update on public.members
 -- ---------------------------------------------------------------------------
 -- 3. Tighten the pre-role policies: authenticated no longer means committee.
 -- ---------------------------------------------------------------------------
--- events
-drop policy if exists "events admin read" on public.events;
-drop policy if exists "events admin write" on public.events;
+-- events — sweep ALL legacy authenticated policies by pattern rather than by
+-- guessed name (the live DB has "events admin read/insert/update/delete").
+do $$
+declare p record;
+begin
+  for p in select policyname from pg_policies
+           where schemaname = 'public' and tablename = 'events'
+             and policyname like 'events admin%'
+  loop
+    execute format('drop policy %I on public.events', p.policyname);
+  end loop;
+end $$;
 create policy "events authenticated read" on public.events
   for select to authenticated
   using (status <> 'draft' or public.is_committee());
@@ -151,7 +165,16 @@ create policy "events committee delete" on public.events
   for delete to authenticated using (public.is_committee());
 
 -- tee_slots
-drop policy if exists "tee slots admin all" on public.tee_slots;
+do $$
+declare p record;
+begin
+  for p in select policyname from pg_policies
+           where schemaname = 'public' and tablename = 'tee_slots'
+             and policyname like 'tee slots admin%'
+  loop
+    execute format('drop policy %I on public.tee_slots', p.policyname);
+  end loop;
+end $$;
 create policy "tee slots authenticated read" on public.tee_slots
   for select to authenticated
   using (
@@ -170,6 +193,12 @@ create policy "tee slots committee delete" on public.tee_slots
 -- a signed-in member can see the bookings they made themselves.
 alter table public.bookings
   add column if not exists created_by uuid default auth.uid();
+
+-- Re-pin the insert policy so created_by can't be forged onto someone else.
+drop policy if exists "bookings public insert" on public.bookings;
+create policy "bookings public insert" on public.bookings
+  for insert to anon, authenticated
+  with check (created_by is null or created_by = auth.uid());
 
 drop policy if exists "bookings admin read" on public.bookings;
 drop policy if exists "bookings admin update" on public.bookings;
@@ -244,7 +273,11 @@ create policy "payments committee read" on public.payments
   for select to authenticated using (public.is_committee());
 create policy "payments member read own" on public.payments
   for select to authenticated
-  using (lower(coalesce(payer_email, '')) = lower(coalesce(auth.jwt() ->> 'email', '')));
+  using (
+    payer_email is not null
+    and auth.jwt() ->> 'email' is not null
+    and lower(payer_email) = lower(auth.jwt() ->> 'email')
+  );
 -- No insert/update/delete policies: writes happen with the service role only.
 
 -- ---------------------------------------------------------------------------
@@ -318,6 +351,10 @@ create view public.public_sponsors as
   select id, company_name, website_url, logo_path, description, tier, display_order
   from public.sponsors
   where is_active;
+-- The project's default ACL grants anon/authenticated ALL on new relations,
+-- and a single-table view is auto-updatable — without this revoke, anon could
+-- write to sponsors THROUGH the view with the owner's rights. Read-only, hard.
+revoke all on public.public_sponsors from public, anon, authenticated;
 grant select on public.public_sponsors to anon, authenticated;
 
 -- First sponsor: Urban Fairways West End (Appendix B). Bronze, active.

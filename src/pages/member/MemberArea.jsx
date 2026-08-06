@@ -338,7 +338,12 @@ function ProfileForm({ member, onSaved }) {
         name: f.get("name").trim(),
         phone: f.get("phone")?.trim() || null,
         service_branch: f.get("service_branch") || null,
-        ga_handicap: f.get("ga_handicap") === "Yes",
+        ga_handicap:
+          f.get("ga_handicap") === "Yes"
+            ? true
+            : f.get("ga_handicap") === "No"
+              ? false
+              : null,
         golf_links_number: f.get("golf_links_number")?.trim() || null,
       });
       if (updated) onSaved(updated);

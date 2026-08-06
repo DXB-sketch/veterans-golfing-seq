@@ -93,6 +93,9 @@ export default function Sponsors() {
   const [tierKey, setTierKey] = useState("bronze");
   const [customDollars, setCustomDollars] = useState("");
   const [paidDone, setPaidDone] = useState(false);
+  // Whether the server managed to record the sponsorship row — when it
+  // couldn't, we ask the sponsor to email in so the payment can be matched.
+  const [recorded, setRecorded] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -217,6 +220,19 @@ export default function Sponsors() {
                 at your contact email to arrange your logo and confirm the
                 details before your sponsorship goes live on the site.
               </p>
+              {!recorded && (
+                <p className="mt-2 text-sm text-ink-muted">
+                  One more thing — we couldn&apos;t automatically link your
+                  payment to your company details, so please email{" "}
+                  <a
+                    href="mailto:seqdvgc@gmail.com"
+                    className="font-semibold text-navy underline"
+                  >
+                    seqdvgc@gmail.com
+                  </a>{" "}
+                  with your company name so we can match it up.
+                </p>
+              )}
             </div>
           ) : (
             <>
@@ -378,7 +394,10 @@ export default function Sponsors() {
                       websiteUrl: website.trim() || undefined,
                       description: description.trim() || undefined,
                     }}
-                    onSuccess={() => setPaidDone(true)}
+                    onSuccess={(paymentId, data) => {
+                      setRecorded(data?.recorded !== false);
+                      setPaidDone(true);
+                    }}
                   />
                 )}
               </div>

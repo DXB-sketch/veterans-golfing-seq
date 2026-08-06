@@ -106,12 +106,19 @@ export default function Donate() {
           </div>
 
           <div className="mt-8">
-            <SquarePayment
-              purpose="donation"
-              amountCents={cents}
-              payerName={donorName.trim() || undefined}
-              payerEmail={donorEmail.trim() || undefined}
-            />
+            {cents >= 500 && cents <= 700000 ? (
+              <SquarePayment
+                purpose="donation"
+                amountCents={cents}
+                payerName={donorName.trim() || undefined}
+                payerEmail={donorEmail.trim() || undefined}
+              />
+            ) : (
+              <p className="border border-ink/10 bg-paper p-4 text-sm text-ink-muted">
+                Donations are between $5 and $7,000 AUD — choose an amount above
+                to continue.
+              </p>
+            )}
           </div>
 
           <p className="mt-6 text-sm text-ink-muted">

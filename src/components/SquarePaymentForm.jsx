@@ -61,7 +61,7 @@ export default function SquarePaymentForm({
       const data = await res.json();
       if (res.ok && data.ok) {
         setPaid(true);
-        onSuccess?.(data.paymentId);
+        onSuccess?.(data.paymentId, data);
       } else {
         setError(
           data.error ||

@@ -16,6 +16,22 @@ function cleanText(v, max = 300) {
   return typeof v === "string" ? v.trim().slice(0, max) : null;
 }
 
+function cleanEmail(v) {
+  const s = cleanText(v, 254);
+  return s ? s.toLowerCase() : null;
+}
+
+function cleanUrl(v) {
+  const s = cleanText(v, 300);
+  if (!s) return null;
+  try {
+    const u = new URL(s.includes("://") ? s : `https://${s}`);
+    return u.protocol === "http:" || u.protocol === "https:" ? u.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -57,12 +73,11 @@ export default async function handler(req, res) {
     note = "SEQDVGC donation";
   } else if (purpose === "sponsorship") {
     const amount = body.amountCents;
-    if (
-      !Number.isInteger(amount) ||
-      amount < SPONSORSHIP_MIN_CENTS ||
-      amount > SPONSORSHIP_MAX_CENTS
-    ) {
+    if (!Number.isInteger(amount) || amount < SPONSORSHIP_MIN_CENTS) {
       return bad(res, "Sponsorship starts at $250 AUD (below that, it's a donation — thank you!).");
+    }
+    if (amount > SPONSORSHIP_MAX_CENTS) {
+      return bad(res, "For sponsorships over $10,000 AUD, please email us so we can arrange it directly.");
     }
     if (!cleanText(body.sponsor?.companyName) || !cleanText(body.sponsor?.contactEmail)) {
       return bad(res, "Sponsorship payments need a company name and contact email.");
@@ -73,11 +88,45 @@ export default async function handler(req, res) {
     return bad(res, "Unknown payment purpose.");
   }
 
+  // --- Pre-flight: never charge a card we can't record ---------------------
+  // Until the foundation migration is applied (payments/members/sponsors
+  // tables), taking money would strand the charge in Square with no local
+  // record and no side effects — so refuse up front instead.
+  const supabase = serviceClient();
+  if (!supabase) {
+    return res
+      .status(503)
+      .json({ ok: false, error: "Online payments are not quite ready yet — please try again soon or email us." });
+  }
+  {
+    const probes = [supabase.from("payments").select("id", { head: true, count: "exact" }).limit(1)];
+    if (purpose === "membership") {
+      probes.push(supabase.from("members").select("id", { head: true, count: "exact" }).limit(1));
+    }
+    if (purpose === "sponsorship") {
+      probes.push(supabase.from("sponsors").select("id", { head: true, count: "exact" }).limit(1));
+    }
+    const results = await Promise.all(probes);
+    if (results.some((r) => r.error)) {
+      console.error("Payment refused — recording tables unavailable", results.map((r) => r.error?.message));
+      return res
+        .status(503)
+        .json({ ok: false, error: "Online payments are not quite ready yet — please try again soon or email us." });
+    }
+  }
+
   // --- Charge via Square ---------------------------------------------------
+  const environment =
+    process.env.SQUARE_ENVIRONMENT || process.env.VITE_SQUARE_ENVIRONMENT;
   const base =
-    process.env.SQUARE_ENVIRONMENT === "production"
+    environment === "production"
       ? "https://connect.squareup.com"
       : "https://connect.squareupsandbox.com";
+
+  const buyerEmail =
+    cleanEmail(body.payerEmail) ||
+    cleanEmail(body.member?.email) ||
+    cleanEmail(body.sponsor?.contactEmail);
 
   let payment;
   try {
@@ -93,6 +142,7 @@ export default async function handler(req, res) {
         idempotency_key: randomUUID(),
         amount_money: { amount: chargeCents, currency: "AUD" },
         location_id: process.env.SQUARE_LOCATION_ID || process.env.VITE_SQUARE_LOCATION_ID,
+        buyer_email_address: buyerEmail || undefined,
         note,
         reference_id: purpose,
       }),
@@ -115,27 +165,53 @@ export default async function handler(req, res) {
   }
 
   // --- Record + purpose side effects (service role) ------------------------
-  // The card has been charged: from here on, failures are logged and reported
-  // as warnings, never surfaced as a payment failure.
-  const supabase = serviceClient();
-  let referenceId = null;
-  let payerName = cleanText(body.payerName, 120);
-  let payerEmail = cleanText(body.payerEmail, 254);
+  // The card has been charged: from here on, failures are logged (with enough
+  // detail to recover the sale) and reported as flags, never as a payment
+  // failure. The payments row is written FIRST so the money is never without
+  // a local record even if a side effect fails.
+  const payerName =
+    cleanText(body.payerName, 120) ||
+    cleanText(body.member?.name, 120) ||
+    cleanText(body.sponsor?.contactName, 120);
+  const payerEmail = buyerEmail;
 
-  if (!supabase) {
-    console.error("Payment recorded in Square only — service role env missing.", {
+  let recorded = false;
+  let paymentRowId = null;
+  try {
+    const { data: payRow, error: payError } = await supabase
+      .from("payments")
+      .insert({
+        square_payment_id: payment?.id,
+        amount_cents: chargeCents,
+        currency: "AUD",
+        purpose,
+        payer_name: payerName,
+        payer_email: payerEmail,
+        status:
+          payment?.status === "COMPLETED"
+            ? "completed"
+            : (payment?.status || "completed").toLowerCase(),
+      })
+      .select("id")
+      .single();
+    if (payError) throw payError;
+    recorded = true;
+    paymentRowId = payRow.id;
+  } catch (err) {
+    console.error("PAYMENT NOT RECORDED — recover from Square", {
       purpose,
       squarePaymentId: payment?.id,
+      payerEmail,
+      err: err?.message || err,
     });
-    return res.status(200).json({ ok: true, paymentId: payment?.id });
   }
 
+  let inviteSent = false;
+  let referenceId = null;
   try {
     if (purpose === "membership") {
       const m = body.member;
-      payerName = payerName || cleanText(m.name, 120);
-      payerEmail = payerEmail || cleanText(m.email, 254);
-      const email = cleanText(m.email, 254);
+      const email = cleanEmail(m.email);
       const joined = new Date().toLocaleDateString("en-CA", {
         timeZone: "Australia/Brisbane",
       });
@@ -173,23 +249,23 @@ export default async function handler(req, res) {
       const { error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
         redirectTo: `${origin}/member/welcome`,
       });
-      if (inviteError && !`${inviteError.message}`.includes("already")) {
+      if (!inviteError || `${inviteError.message}`.includes("already")) {
+        inviteSent = true; // already-registered counts: they have a login
+      } else {
         console.error("Member invite failed", inviteError);
       }
     } else if (purpose === "sponsorship") {
       const s = body.sponsor;
-      payerName = payerName || cleanText(s.contactName, 120);
-      payerEmail = payerEmail || cleanText(s.contactEmail, 254);
       const { data: sponsorRow, error } = await supabase
         .from("sponsors")
         .insert({
           company_name: cleanText(s.companyName, 160),
-          website_url: cleanText(s.websiteUrl, 300),
+          website_url: cleanUrl(s.websiteUrl), // http(s) only — never store js: URLs
           description: cleanText(s.description, 600),
           tier: tierFromAmountCents(chargeCents), // server-computed, never client
           amount_cents: chargeCents,
           contact_name: cleanText(s.contactName, 120),
-          contact_email: cleanText(s.contactEmail, 254),
+          contact_email: cleanEmail(s.contactEmail),
           is_active: false, // pending logo + committee approval
         })
         .select("id")
@@ -198,20 +274,19 @@ export default async function handler(req, res) {
       referenceId = sponsorRow.id;
     }
 
-    const { error: payError } = await supabase.from("payments").insert({
-      square_payment_id: payment?.id,
-      amount_cents: chargeCents,
-      currency: "AUD",
-      purpose,
-      reference_id: referenceId,
-      payer_name: payerName,
-      payer_email: payerEmail,
-      status: payment?.status === "COMPLETED" ? "completed" : (payment?.status || "completed").toLowerCase(),
-    });
-    if (payError) throw payError;
+    if (recorded && referenceId) {
+      await supabase.from("payments").update({ reference_id: referenceId }).eq("id", paymentRowId);
+    }
   } catch (err) {
-    console.error("Post-payment recording failed", { purpose, squarePaymentId: payment?.id, err });
+    console.error("Post-payment side effect failed", {
+      purpose,
+      squarePaymentId: payment?.id,
+      payerEmail,
+      err: err?.message || err,
+    });
   }
 
-  return res.status(200).json({ ok: true, paymentId: payment?.id });
+  return res
+    .status(200)
+    .json({ ok: true, paymentId: payment?.id, recorded, inviteSent });
 }

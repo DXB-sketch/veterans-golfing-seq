@@ -44,6 +44,9 @@ export default function SquarePayment({
       fallback={<p className="text-sm text-ink-muted">Loading secure payment form…</p>}
     >
       <SquarePaymentForm
+        // The SDK freezes the Apple/Google Pay sheet amount at mount — key the
+        // form by amount so changing it remounts and the wallets stay honest.
+        key={`${purpose}-${amountCents ?? "fixed"}`}
         appId={appId}
         locationId={locationId}
         purpose={purpose}

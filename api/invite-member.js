@@ -38,10 +38,12 @@ export default async function handler(req, res) {
   }
 
   // Only paid/recorded members may be invited — that's the account gate.
+  // Exact match on the lowercased email (ilike would treat % and _ as
+  // wildcards); member emails are stored lowercased at write time.
   const { data: member } = await supabase
     .from("members")
     .select("id, status")
-    .ilike("email", email)
+    .eq("email", email.toLowerCase())
     .maybeSingle();
   if (!member) {
     return res
