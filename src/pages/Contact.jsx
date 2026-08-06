@@ -10,6 +10,9 @@ export default function Contact() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
+  const [volSent, setVolSent] = useState(false);
+  const [volSending, setVolSending] = useState(false);
+  const [volError, setVolError] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -30,6 +33,27 @@ export default function Contact() {
       );
     } else {
       setSent(true);
+    }
+  }
+
+  async function handleVolunteerSubmit(e) {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    setVolError(null);
+    setVolSending(true);
+    const { error: insertError } = await supabase.from("volunteer_enquiries").insert({
+      name: f.get("vol-name"),
+      email: f.get("vol-email"),
+      phone: f.get("vol-phone") || null,
+      message: f.get("vol-message"),
+    });
+    setVolSending(false);
+    if (insertError) {
+      setVolError(
+        "Sorry, your enquiry didn't go through. Please check your internet connection and try again, or email us at seqdvgc@gmail.com."
+      );
+    } else {
+      setVolSent(true);
     }
   }
 
@@ -135,6 +159,68 @@ export default function Contact() {
               </form>
             </>
           )}
+
+          <div className="mt-16 border-t-2 border-gold/40 pt-12">
+            {volSent ? (
+              <div className="border-t-4 border-gold bg-paper p-10 text-center">
+                <p className="font-display text-2xl font-semibold tracking-wide text-navy">
+                  Thanks for offering to help
+                </p>
+                <RibbonRule className="mt-3" />
+                <p className="mt-4 text-ink-muted">
+                  We&apos;ve received your volunteer enquiry. A committee member
+                  will be in touch as soon as we can.
+                </p>
+              </div>
+            ) : (
+              <>
+                <h2 className="font-display text-2xl font-semibold tracking-wide text-navy">
+                  Volunteer with us
+                </h2>
+                <RibbonRule className="mt-3" />
+                <p className="mt-4 text-ink-muted">
+                  The club runs on volunteers. If you&apos;d like to lend a hand
+                  — on game days, behind the scenes or anywhere in between —
+                  tell us a bit about yourself and we&apos;ll get back to you.
+                </p>
+                <form
+                  onSubmit={handleVolunteerSubmit}
+                  className="mt-8 grid gap-5 sm:grid-cols-2"
+                >
+                  <FormField label="Your name" id="vol-name" required autoComplete="name" />
+                  <FormField label="Email" id="vol-email" type="email" required autoComplete="email" />
+                  <div className="sm:col-span-2">
+                    <FormField label="Phone (optional)" id="vol-phone" type="tel" autoComplete="tel" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <FormField
+                      label="How you'd like to help / availability"
+                      id="vol-message"
+                      as="textarea"
+                      required
+                    />
+                  </div>
+                  {volError && (
+                    <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
+                      {volError}
+                    </p>
+                  )}
+                  <div className="sm:col-span-2">
+                    <Button type="submit" disabled={volSending} className="w-full sm:w-auto">
+                      {volSending ? "Sending…" : "Send volunteer enquiry"}
+                    </Button>
+                    <p className="mt-3 text-sm text-ink-muted">
+                      By submitting, you agree to our{" "}
+                      <Link to="/privacy" className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy">
+                        Privacy Policy
+                      </Link>
+                      .
+                    </p>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </main>
     </div>
