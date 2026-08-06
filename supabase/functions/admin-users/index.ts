@@ -80,6 +80,16 @@ Deno.serve(async (req) => {
         error.code === "email_exists" || /already/i.test(error.message);
       return json({ error: duplicate ? "email_exists" : "create_failed" }, 400);
     }
+
+    // Accounts made here are committee volunteers. The on-auth-user-created
+    // trigger gives every new user a 'member' profile by default, so override
+    // it with the service client (bypasses RLS). Ignore failure while the
+    // roles migration hasn't been applied yet — pre-migration, every account
+    // is treated as committee anyway.
+    await admin
+      .from("profiles")
+      .upsert({ id: data.user.id, role: "committee" }, { onConflict: "id" });
+
     return json({ user: { id: data.user.id, email: data.user.email } });
   }
 

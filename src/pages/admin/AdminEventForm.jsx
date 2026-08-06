@@ -194,7 +194,7 @@ export default function AdminEventForm() {
     }
 
     setSaving(false);
-    navigate("/admin", {
+    navigate("/admin/events", {
       state: {
         message: isEdit ? "Event saved" : "Event saved as a draft",
       },
@@ -225,7 +225,7 @@ export default function AdminEventForm() {
     }
 
     setPublishing(false);
-    navigate("/admin", {
+    navigate("/admin/events", {
       state: { message: "Event published — it's live on the website now" },
     });
   }
@@ -244,7 +244,7 @@ export default function AdminEventForm() {
         "Couldn't delete the event — please check your internet connection and try again."
       );
     } else {
-      navigate("/admin", { state: { message: "Event deleted" } });
+      navigate("/admin/events", { state: { message: "Event deleted" } });
     }
   }
 
@@ -255,7 +255,7 @@ export default function AdminEventForm() {
   return (
     <div className="mx-auto max-w-3xl">
       <Link
-        to="/admin"
+        to="/admin/events"
         className="text-base font-semibold text-navy underline decoration-gold decoration-2 underline-offset-4 hover:text-crimson"
       >
         &larr; Back to your events
@@ -578,7 +578,7 @@ export default function AdminEventForm() {
             {saving ? "Saving…" : "Save event"}
           </button>
           <Link
-            to="/admin"
+            to="/admin/events"
             className="inline-flex min-h-[56px] items-center justify-center border-2 border-navy px-10 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy/5"
           >
             Cancel

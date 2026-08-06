@@ -62,7 +62,7 @@ export default function AdminBookings() {
   return (
     <div className="mx-auto max-w-3xl">
       <Link
-        to="/admin"
+        to="/admin/events"
         className="text-base font-semibold text-navy underline decoration-gold decoration-2 underline-offset-4 hover:text-crimson"
       >
         &larr; Back to your events
