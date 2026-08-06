@@ -78,7 +78,7 @@ export default function AdminSubmissions() {
       if (cancelled) return;
       if (enq.error || msg.error) {
         setError(
-          "Couldn't load submissions — please check your internet connection and refresh the page."
+          "Couldn't load submissions. Please check your internet connection and refresh the page."
         );
       } else {
         setEnquiries(enq.data);
@@ -106,7 +106,7 @@ export default function AdminSubmissions() {
     setSavingKey(null);
     if (updateError) {
       setToggleError(
-        "Couldn't update that one — please check your internet connection and try again."
+        "Couldn't update that one. Please check your internet connection and try again."
       );
       return;
     }
@@ -138,7 +138,7 @@ export default function AdminSubmissions() {
           <RibbonRule className="mt-3" />
           <p className="mt-3 text-ink-muted">
             People who&apos;ve filled in the &ldquo;Join the club&rdquo; form.
-            Newest first — reply to them by email, then mark them as handled.
+            Newest first. Reply to them by email, then mark them as handled.
           </p>
           {enquiries.length === 0 ? (
             <p className="mt-8 text-ink-muted">No enquiries yet.</p>
@@ -242,7 +242,7 @@ export default function AdminSubmissions() {
           </p>
           {volunteers === null ? (
             <p className="mt-8 text-ink-muted">
-              Volunteer enquiries aren&apos;t switched on yet — they&apos;ll
+              Volunteer enquiries aren&apos;t switched on yet. They&apos;ll
               appear here once the site update is finished.
             </p>
           ) : volunteers.length === 0 ? (

@@ -46,7 +46,7 @@ export default function AdminBookings() {
       refresh();
     } catch {
       setRemoveError(
-        "Couldn't remove that booking — please check your internet connection and try again."
+        "Couldn't remove that booking. Please check your internet connection and try again."
       );
     }
     setRemovingId(null);
@@ -69,7 +69,7 @@ export default function AdminBookings() {
       </Link>
 
       <h2 className="mt-4 font-display text-2xl font-semibold tracking-wide text-navy">
-        Bookings — {event ? event.title : "this event"}
+        Bookings: {event ? event.title : "this event"}
       </h2>
       {event && <p className="mt-1 text-lg text-ink-muted">{event.dateDisplay}</p>}
       <RibbonRule className="mt-3" />
@@ -81,7 +81,7 @@ export default function AdminBookings() {
 
       {error ? (
         <p className="mt-10 text-lg text-ink-muted">
-          Couldn&apos;t load bookings — please check your internet connection
+          Couldn&apos;t load bookings. Please check your internet connection
           and refresh the page.
         </p>
       ) : slots.length === 0 ? (
@@ -139,7 +139,7 @@ export default function AdminBookings() {
                       }
                     >
                       {slotBookings.length} of {slot.capacity} spots taken
-                      {isFull && " — full"}
+                      {isFull && " (full)"}
                     </p>
                   </div>
 
@@ -181,7 +181,7 @@ export default function AdminBookings() {
                                   <p className="max-w-xs text-sm text-ink-muted">
                                     This player paid ${(b.paid_cents / 100).toFixed(2)}{" "}
                                     online. Removing the booking does NOT refund
-                                    them — do that in the Square dashboard.
+                                    them. Do that in the Square dashboard.
                                   </p>
                                 ) : null}
                                 <div className="flex flex-col gap-3 sm:flex-row">

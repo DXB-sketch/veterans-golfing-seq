@@ -4,6 +4,7 @@ import RibbonRule from "../components/RibbonRule.jsx";
 import Photo from "../components/Photo.jsx";
 import { groupPhoto } from "../lib/photos.js";
 import { values } from "../data/values.js";
+import Sponsors from "./Sponsors.jsx";
 
 // Roadmap entries. Grounded in the club's 2026/2027 plan; 2027 dates are
 // indicative and marked TBC where unconfirmed.
@@ -297,6 +298,10 @@ export default function About() {
           </p>
         </div>
       </Section>
+
+      {/* Sponsors and partners live here now; /sponsors redirects to
+          /about#sponsors. */}
+      <Sponsors />
     </>
   );
 }

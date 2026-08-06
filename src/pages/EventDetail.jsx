@@ -76,7 +76,7 @@ function BookingSection({ event }) {
         setBooked({ playerName: details.playerName, teeTime: selectedSlot?.teeTime });
       } catch (err) {
         if (err.code === "slot_full") {
-          setFormError("That slot just filled up — please pick another time.");
+          setFormError("That slot just filled up. Please pick another time.");
           setSlotId(null);
           refresh();
         } else {
@@ -97,7 +97,7 @@ function BookingSection({ event }) {
     if (data?.code === "slot_full") {
       setPending(null);
       setSlotId(null);
-      setFormError("That tee time filled up before payment went through — you haven't been charged. Please pick another slot.");
+      setFormError("That tee time filled up before payment went through. You haven't been charged. Please pick another slot.");
       refresh();
     }
   }
@@ -193,7 +193,7 @@ function BookingSection({ event }) {
                 </span>{" "}
                 <span className="font-semibold text-ink">{event.sideComp}</span>
                 {event.sideCompNote && (
-                  <span className="text-ink-muted"> — {event.sideCompNote}</span>
+                  <span className="text-ink-muted"> ({event.sideCompNote})</span>
                 )}
               </p>
             </div>
@@ -213,7 +213,7 @@ function BookingSection({ event }) {
                 </p>
               ) : slots.length === 0 ? (
                 <p className="mt-3 text-sm text-ink-muted">
-                  Tee slots haven&apos;t been posted yet — email us at{" "}
+                  Tee slots haven&apos;t been posted yet. Email us at{" "}
                   {CLUB_EMAIL} and we&apos;ll lock you in.
                 </p>
               ) : (
@@ -290,7 +290,7 @@ function BookingSection({ event }) {
                 />
                 <p className="mt-1.5 text-sm text-ink-muted">
                   {event.sideComp}
-                  {event.sideCompNote && ` — ${event.sideCompNote}`}
+                  {event.sideCompNote && ` (${event.sideCompNote})`}
                 </p>
               </div>
               <div>
@@ -319,7 +319,7 @@ function BookingSection({ event }) {
                 </Button>
                 {event.greenFeeCents > 0 && (
                   <p className="mt-3 text-sm text-ink-muted">
-                    Your slot is confirmed once payment goes through —
+                    Your slot is confirmed once payment goes through, and
                     you&apos;ll see the total before you pay.
                   </p>
                 )}
@@ -453,7 +453,7 @@ export default function EventDetail() {
                 </h2>
                 <RibbonRule className="mt-3" dark />
                 <p className="mt-4 text-sm text-cream/85">
-                  Bookings are open — pick a tee slot and book online in under a
+                  Bookings are open. Pick a tee slot and book online in under a
                   minute. All veterans, serving and ex-serving, and family
                   members are welcome.
                 </p>

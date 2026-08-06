@@ -101,7 +101,7 @@ export default function AdminLayout() {
           </h1>
           <p className="mt-3 text-ink-muted">
             You&apos;re signed in as a club member, so there&apos;s nothing for
-            you here — your bookings and details live in the member area.
+            you here. Your bookings and details live in the member area.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link

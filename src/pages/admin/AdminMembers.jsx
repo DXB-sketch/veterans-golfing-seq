@@ -4,7 +4,7 @@ import RibbonRule from "../../components/RibbonRule.jsx";
 import AdminField from "./AdminField.jsx";
 
 const BRANCH_OPTIONS = [
-  { value: "", label: "— Choose —" },
+  { value: "", label: "Choose…" },
   { value: "Army", label: "Army" },
   { value: "Navy", label: "Navy" },
   { value: "Air Force", label: "Air Force" },
@@ -66,7 +66,7 @@ export default function AdminMembers() {
       .order("name", { ascending: true });
     if (error) {
       setLoadError(
-        "Couldn't load the members list. If the site was just updated, the members register may not be switched on yet — otherwise check your internet connection and refresh the page."
+        "Couldn't load the members list. If the site was just updated, the members register may not be switched on yet. Otherwise check your internet connection and refresh the page."
       );
     } else {
       setLoadError(null);
@@ -132,7 +132,7 @@ export default function AdminMembers() {
       setSaving(false);
       if (error) {
         setFormError(
-          "Couldn't save those changes — please check your internet connection and try again."
+          "Couldn't save those changes. Please check your internet connection and try again."
         );
         return;
       }
@@ -152,7 +152,7 @@ export default function AdminMembers() {
       setFormError(
         insertError.code === "23505"
           ? "There's already a member with that email address."
-          : "Couldn't add the member — please check your internet connection and try again."
+          : "Couldn't add the member. Please check your internet connection and try again."
       );
       return;
     }
@@ -174,10 +174,10 @@ export default function AdminMembers() {
       });
       inviteMessage = res.ok
         ? " An email invite to set up their member login is on its way."
-        : " Their login invite couldn't be sent just now — use the \"Send login invite\" button next to their name to try again later.";
+        : " Their login invite couldn't be sent just now. Use the \"Send login invite\" button next to their name to try again later.";
     } catch {
       inviteMessage =
-        " Their login invite couldn't be sent just now — use the \"Send login invite\" button next to their name to try again later.";
+        " Their login invite couldn't be sent just now. Use the \"Send login invite\" button next to their name to try again later.";
     }
 
     setSaving(false);
@@ -209,12 +209,12 @@ export default function AdminMembers() {
         loadMembers();
       } else {
         setFormError(
-          `Couldn't send the login invite to ${m.email} just now — please try again in a few minutes.`
+          `Couldn't send the login invite to ${m.email} just now. Please try again in a few minutes.`
         );
       }
     } catch {
       setFormError(
-        `Couldn't send the login invite to ${m.email} — please check your internet connection and try again.`
+        `Couldn't send the login invite to ${m.email}. Please check your internet connection and try again.`
       );
     }
     setInvitingId(null);
@@ -233,7 +233,7 @@ export default function AdminMembers() {
     setTogglingId(null);
     if (error) {
       setFormError(
-        "Couldn't change that member's status — please check your internet connection and try again."
+        "Couldn't change that member's status. Please check your internet connection and try again."
       );
     } else {
       setNotice(

@@ -79,6 +79,8 @@ function SponsorCard({ sponsor }) {
 
 const dollars = (cents) => `$${(cents / 100).toLocaleString("en-AU")}`;
 
+// Rendered as the closing section of the About page (anchored at
+// /about#sponsors); the old /sponsors route redirects there.
 export default function Sponsors() {
   const [sponsors, setSponsors] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -126,20 +128,20 @@ export default function Sponsors() {
 
   return (
     <>
-      <section className="bg-navy px-5 py-14 md:py-20">
+      <section id="sponsors" className="scroll-mt-20 bg-navy px-5 py-14 md:py-20">
         <div className="mx-auto max-w-site">
           <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
             Support the mission
           </p>
-          <h1 className="text-page-title mt-3 font-display font-bold uppercase text-white">
+          <h2 className="text-page-title mt-3 font-display font-bold uppercase text-white">
             Sponsors &amp; partners
-          </h1>
+          </h2>
           <RibbonRule className="mt-5" dark />
           <p className="mt-6 max-w-2xl text-lg text-cream/90">
-            The Club is seeking sponsors, government grants and donations to
+            The club is seeking sponsors, government grants and donations to
             support Australian Defence veterans and their families. Every
-            dollar goes to our veteran members and the events we run for them
-            — sponsorship puts your name behind that.
+            dollar goes to our veteran members and the events we run for them.
+            Sponsorship puts your name behind that.
           </p>
         </div>
       </section>
@@ -201,8 +203,8 @@ export default function Sponsors() {
           </h2>
           <RibbonRule className="mt-3" />
           <p className="mt-5 text-ink-muted">
-            Whether you&apos;re a local business or a national brand, we&apos;d
-            love your name behind the veteran community. Pay your sponsorship
+            We&apos;d be proud to put your name behind the veteran community,
+            from local businesses to national brands. Pay your sponsorship
             online below, or email{" "}
             <a href="mailto:seqdvgc@gmail.com" className="font-semibold text-navy underline">
               seqdvgc@gmail.com
@@ -222,7 +224,7 @@ export default function Sponsors() {
               </p>
               {!recorded && (
                 <p className="mt-2 text-sm text-ink-muted">
-                  One more thing — we couldn&apos;t automatically link your
+                  One more thing: we couldn&apos;t automatically link your
                   payment to your company details, so please email{" "}
                   <a
                     href="mailto:seqdvgc@gmail.com"
@@ -360,8 +362,8 @@ export default function Sponsors() {
                         </>
                       ) : (
                         <>
-                          Sponsorship starts at {dollars(SPONSORSHIP_MIN_CENTS)} —
-                          smaller amounts are very welcome as donations on our
+                          Sponsorship starts at {dollars(SPONSORSHIP_MIN_CENTS)}.
+                          Smaller amounts are very welcome as donations on our
                           Donate page.
                         </>
                       )}

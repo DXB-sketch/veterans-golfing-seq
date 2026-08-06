@@ -75,7 +75,7 @@ function MemberSignIn() {
           <RibbonRule className="mt-4" />
           <p className="mt-5 text-ink-muted">
             Member accounts are created by invite. When you join the club,
-            we email you a link to set up your login — there&apos;s no
+            we email you a link to set up your login. There&apos;s no
             self-serve sign-up.
           </p>
 
@@ -266,7 +266,7 @@ function MembershipCard({ member }) {
       </dl>
       {!active && (
         <p className="mt-5 text-sm text-ink-muted">
-          Your membership has lapsed — you can renew on the{" "}
+          Your membership has lapsed. You can renew on the{" "}
           <Link
             to="/membership"
             className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
@@ -289,8 +289,8 @@ function BookingsList({ bookings }) {
       <RibbonRule className="mt-3" />
       {bookings.length === 0 ? (
         <p className="mt-5 text-sm text-ink-muted">
-          No bookings yet. Bookings you make while signed in will show here —
-          have a look at{" "}
+          No bookings yet. Bookings you make while signed in will show here.
+          Have a look at{" "}
           <Link
             to="/events"
             className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
@@ -375,7 +375,7 @@ function ProfileForm({ member, onSaved }) {
         <RibbonRule className="mt-3" />
         <p className="mt-4 text-sm text-ink-muted">
           Keep these up to date so we can reach you about events. Your login
-          email is {member.email} — to change it, email us at
+          email is {member.email}. To change it, email us at
           seqdvgc@gmail.com.
         </p>
       </div>
@@ -426,7 +426,7 @@ function ProfileForm({ member, onSaved }) {
       )}
       {saved && !error && (
         <p className="border-l-4 border-gold bg-gold/10 p-4 text-sm text-ink sm:col-span-2">
-          Saved — your details are up to date.
+          Saved. Your details are up to date.
         </p>
       )}
       <div className="sm:col-span-2">

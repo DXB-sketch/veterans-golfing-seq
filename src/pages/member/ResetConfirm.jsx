@@ -36,7 +36,7 @@ export default function ResetConfirm() {
       return;
     }
     if (password !== confirm) {
-      setError("Those passwords don't match — please type them again.");
+      setError("Those passwords don't match. Please type them again.");
       return;
     }
     setSaving(true);
@@ -68,7 +68,7 @@ export default function ResetConfirm() {
           ) : session ? (
             <>
               <p className="mt-5 text-ink-muted">
-                G&apos;day{session.user.email ? ` — you're signed in as ${session.user.email}` : ""}.
+                G&apos;day{session.user.email ? `, you're signed in as ${session.user.email}` : ""}.
                 Choose a new password below.
               </p>
               <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
@@ -102,11 +102,11 @@ export default function ResetConfirm() {
             <>
               <p className="mt-5 text-ink-muted">
                 {linkError === "otp_expired"
-                  ? "This reset link has expired — they only last a little while for security."
+                  ? "This reset link has expired. They only last a little while for security."
                   : "This reset link isn't valid any more. It may have expired or already been used."}
               </p>
               <p className="mt-3 text-ink-muted">
-                No drama — you can{" "}
+                No drama. You can{" "}
                 <Link
                   to="/member/reset"
                   className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"

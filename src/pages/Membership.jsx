@@ -25,8 +25,8 @@ export default function Membership() {
             <RibbonRule className="mt-5" dark />
             <p className="mt-6 max-w-xl text-lg text-cream/90">
               Membership is open to all veterans, serving and ex-serving, and
-              their family members. Join and pay online in a couple of minutes
-              — your club hat will be waiting at your first event.
+              their family members. Join and pay online in a couple of minutes,
+              and your club hat will be waiting at your first event.
             </p>
             <p className="mt-4 max-w-xl text-lg text-cream/90">
               Membership fees help cover administrative costs, championship
@@ -55,7 +55,7 @@ export default function Membership() {
             <ul className="mt-8 divide-y divide-ink/10">
               {[
                 ["$50 a year", "That's it. No hidden fees, no fine print."],
-                ["A club hat", "Wear the colours with pride — handed to you at your first event."],
+                ["A club hat", "Wear the colours with pride. Handed to you at your first event."],
                 ["A community that gets it", "Play alongside veterans and families from all three services."],
                 ["Events across SEQ", "Brisbane, Sunshine Coast and Gold Coast rounds through the year."],
               ].map(([title, line]) => (
@@ -117,21 +117,21 @@ function JoinAndPay() {
     return (
       <div className="border-t-4 border-gold bg-paper p-8 text-center md:p-10">
         <p className="font-display text-2xl font-semibold tracking-wide text-navy">
-          Payment received — welcome to the club!
+          Payment received. Welcome to the club!
         </p>
         <RibbonRule className="mt-3" />
         {inviteSent ? (
           <p className="mt-4 text-ink-muted">
             You&apos;re now a member of the South East Queensland Defence
             Veterans Golf Club. An email invite to set up your member login
-            is on its way to {details?.email} — if it doesn&apos;t arrive
+            is on its way to {details?.email}. If it doesn&apos;t arrive
             in the next few minutes, please check your spam folder.
           </p>
         ) : (
           <p className="mt-4 text-ink-muted">
             You&apos;re now a member of the South East Queensland Defence
             Veterans Golf Club. Your payment has been received, and the
-            club will be in touch to set up your member login — if you
+            club will be in touch to set up your member login. If you
             don&apos;t hear from us within a few days, email us at
             seqdvgc@gmail.com.
           </p>
@@ -151,7 +151,7 @@ function JoinAndPay() {
           Annual membership for {details.name}
         </p>
         <p className="mt-1 text-sm text-ink-muted">
-          $50.00 AUD — includes your club hat.{" "}
+          $50.00 AUD, includes your club hat.{" "}
           <button
             type="button"
             onClick={() => setDetails(null)}
@@ -183,7 +183,7 @@ function JoinAndPay() {
     >
       <div className="sm:col-span-2">
         <h2 className="font-display text-2xl font-semibold tracking-wide text-navy">
-          Become a member — $50/year
+          Become a member: $50/year
         </h2>
         <RibbonRule className="mt-3" />
       </div>

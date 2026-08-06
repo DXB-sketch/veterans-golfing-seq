@@ -46,7 +46,7 @@ export default function ResetPassword() {
           {sent ? (
             <>
               <p className="mt-5 text-ink-muted">
-                Done — if that email belongs to a member account, a reset link is
+                Done. If that email belongs to a member account, a reset link is
                 on its way. It only lasts a little while, so it&apos;s best used
                 soon. If it doesn&apos;t arrive in the next few minutes, check
                 your spam folder.
@@ -65,7 +65,7 @@ export default function ResetPassword() {
           ) : (
             <>
               <p className="mt-5 text-ink-muted">
-                No drama — enter the email address on your member account and
+                No drama. Enter the email address on your member account and
                 we&apos;ll send you a link to choose a new password.
               </p>
               <form onSubmit={handleSubmit} className="mt-8 grid gap-5">

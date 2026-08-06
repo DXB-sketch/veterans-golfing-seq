@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /member
+Disallow: /auth
+
+Sitemap: https://www.seqdvgc.com.au/sitemap.xml

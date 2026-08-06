@@ -37,7 +37,7 @@ export default function MemberWelcome() {
       return;
     }
     if (password !== confirm) {
-      setError("Those passwords don't match — please type them again.");
+      setError("Those passwords don't match. Please type them again.");
       return;
     }
     setSaving(true);
@@ -69,7 +69,7 @@ export default function MemberWelcome() {
           ) : session ? (
             <>
               <p className="mt-5 text-ink-muted">
-                G&apos;day{session.user.email ? ` — you're signed in as ${session.user.email}` : ""}.
+                G&apos;day{session.user.email ? `, you're signed in as ${session.user.email}` : ""}.
                 Choose a password and you&apos;re all set.
               </p>
               <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
@@ -103,11 +103,11 @@ export default function MemberWelcome() {
             <>
               <p className="mt-5 text-ink-muted">
                 {linkError === "otp_expired"
-                  ? "This invite link has expired — they only last a little while for security."
+                  ? "This invite link has expired. They only last a little while for security."
                   : "This invite link isn't valid any more. It may have expired or already been used."}
               </p>
               <p className="mt-3 text-ink-muted">
-                No drama — email us at seqdvgc@gmail.com and we&apos;ll send
+                No drama. Email us at seqdvgc@gmail.com and we&apos;ll send
                 you a fresh one. If you&apos;ve already set a password, you can{" "}
                 <Link
                   to="/member"

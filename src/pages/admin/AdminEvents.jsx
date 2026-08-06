@@ -43,7 +43,7 @@ export default function AdminEvents() {
         <p className="mt-10 text-lg text-ink-muted">Loading your events…</p>
       ) : error ? (
         <p className="mt-10 text-lg text-ink-muted">
-          Couldn&apos;t load events — please check your internet connection and
+          Couldn&apos;t load events. Please check your internet connection and
           refresh the page.
         </p>
       ) : events.length === 0 ? (
@@ -66,7 +66,7 @@ export default function AdminEvents() {
                   {e.dateDisplay} · {e.region} ·{" "}
                   {e.lifecycle === "draft" ? (
                     <span className="font-semibold text-crimson">
-                      Draft — not on the website yet
+                      Draft, not on the website yet
                     </span>
                   ) : (
                     <span

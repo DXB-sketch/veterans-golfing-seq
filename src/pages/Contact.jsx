@@ -180,8 +180,8 @@ export default function Contact() {
                 <RibbonRule className="mt-3" />
                 <p className="mt-4 text-ink-muted">
                   The club runs on volunteers. If you&apos;d like to lend a hand
-                  — on game days, behind the scenes or anywhere in between —
-                  tell us a bit about yourself and we&apos;ll get back to you.
+                  on game days, behind the scenes or anywhere in between, tell
+                  us a bit about yourself and we&apos;ll get back to you.
                 </p>
                 <form
                   onSubmit={handleVolunteerSubmit}

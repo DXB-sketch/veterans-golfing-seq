@@ -41,7 +41,7 @@ export default function AdminTeam() {
       setLoadError(null);
     } catch {
       setLoadError(
-        "Couldn't load the team list — please check your internet connection and refresh the page."
+        "Couldn't load the team list. Please check your internet connection and refresh the page."
       );
     }
     setLoading(false);
@@ -187,7 +187,7 @@ export default function AdminTeam() {
           </h3>
           <p className="mt-2 text-ink-muted">
             Fill in their email and choose a starting password for them, then
-            pass both on — that&apos;s what they&apos;ll use to sign in.
+            pass both on. That&apos;s what they&apos;ll use to sign in.
           </p>
         </div>
         <AdminField

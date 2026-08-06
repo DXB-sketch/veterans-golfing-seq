@@ -8,7 +8,7 @@ import AdminField from "./AdminField.jsx";
 
 const SPOTS_OPTIONS = [
   { value: "open", label: "Taking players" },
-  { value: "full", label: "Full — no spots left" },
+  { value: "full", label: "Full (no spots left)" },
 ];
 
 const emptyForm = {
@@ -188,7 +188,7 @@ export default function AdminEventForm() {
     } catch {
       setSaving(false);
       setError(
-        "Couldn't save the event — please check your internet connection and try again."
+        "Couldn't save the event. Please check your internet connection and try again."
       );
       return;
     }
@@ -219,14 +219,14 @@ export default function AdminEventForm() {
       setPublishing(false);
       setConfirmPublish(false);
       setError(
-        "Couldn't publish the event — please check your internet connection and try again."
+        "Couldn't publish the event. Please check your internet connection and try again."
       );
       return;
     }
 
     setPublishing(false);
     navigate("/admin/events", {
-      state: { message: "Event published — it's live on the website now" },
+      state: { message: "Event published. It&apos;s live on the website now" },
     });
   }
 
@@ -241,7 +241,7 @@ export default function AdminEventForm() {
     if (deleteError) {
       setConfirmDelete(false);
       setError(
-        "Couldn't delete the event — please check your internet connection and try again."
+        "Couldn't delete the event. Please check your internet connection and try again."
       );
     } else {
       navigate("/admin/events", { state: { message: "Event deleted" } });
@@ -266,13 +266,13 @@ export default function AdminEventForm() {
       </h2>
       <RibbonRule className="mt-3" />
       <p className="mt-3 text-ink-muted">
-        Fill in what you know — anything you leave blank will simply show as
+        Fill in what you know. Anything you leave blank will simply show as
         &ldquo;TBC&rdquo; on the website, and you can come back and add it
         later.
       </p>
       {lifecycle === "draft" && (
         <p className="mt-3 border-l-4 border-gold bg-gold/10 p-4 text-base text-ink">
-          This event is a <strong>draft</strong> — it is NOT shown on the
+          This event is a <strong>draft</strong>. It is NOT shown on the
           website until you publish it. Take your time getting it right.
         </p>
       )}
@@ -315,7 +315,7 @@ export default function AdminEventForm() {
         <AdminField
           label="Course"
           id="course"
-          hint="e.g. Old Course — leave blank if the club has just one course"
+          hint="e.g. Old Course. Leave blank if the club has just one course"
           value={form.course}
           onChange={set("course")}
         />
@@ -436,7 +436,7 @@ export default function AdminEventForm() {
               <div className="mt-4 grid gap-3">
                 {slots.length === 0 && (
                   <p className="text-base text-ink-muted">
-                    No tee slots yet — press &ldquo;Add a tee slot&rdquo; to
+                    No tee slots yet. Press &ldquo;Add a tee slot&rdquo; to
                     start.
                   </p>
                 )}
@@ -526,7 +526,7 @@ export default function AdminEventForm() {
                     This event is live and players may have already booked.
                     Changing a slot&rsquo;s time keeps its bookings, but{" "}
                     <strong>removing a slot also removes any bookings on
-                    it</strong> — you&rsquo;ll need to let those players know.
+                    it</strong>. You&rsquo;ll need to let those players know.
                     You&rsquo;ll only be asked this once: the slots stay
                     editable until you leave this event.
                   </p>
@@ -595,7 +595,7 @@ export default function AdminEventForm() {
               </p>
               <p className="mt-1 text-ink-muted">
                 Publishing puts the event on the website for everyone to see,
-                opens bookings, and locks the tee slots — changing them after
+                opens bookings, and locks the tee slots. Changing them after
                 this will ask you to confirm first, because players may have
                 booked into them. Any changes on the form above are saved as
                 part of publishing.

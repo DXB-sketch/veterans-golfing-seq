@@ -6,7 +6,7 @@ import RibbonRule from "../../components/RibbonRule.jsx";
 import AdminField from "./AdminField.jsx";
 
 const TIER_OPTIONS = [
-  { value: "", label: "— No tier —" },
+  { value: "", label: "No tier" },
   ...TIERS.map((t) => ({ value: t.key, label: `${t.label} (${t.priceLabel})` })),
 ];
 
@@ -81,7 +81,7 @@ export default function AdminSponsors() {
       .order("company_name", { ascending: true });
     if (error) {
       setLoadError(
-        "Couldn't load the sponsors list. If the site was just updated, sponsor management may not be switched on yet — otherwise check your internet connection and refresh the page."
+        "Couldn't load the sponsors list. If the site was just updated, sponsor management may not be switched on yet. Otherwise check your internet connection and refresh the page."
       );
     } else {
       setLoadError(null);
@@ -171,7 +171,7 @@ export default function AdminSponsors() {
       if (!parsed || (parsed.protocol !== "http:" && parsed.protocol !== "https:")) {
         setSaving(false);
         setFormError(
-          "That website address doesn't look right — it needs to start with https:// (e.g. https://urbanfairways.com.au). Please fix it and save again."
+          "That website address doesn't look right. It needs to start with https:// (e.g. https://urbanfairways.com.au). Please fix it and save again."
         );
         return;
       }
@@ -184,7 +184,7 @@ export default function AdminSponsors() {
       } catch {
         setSaving(false);
         setFormError(
-          "Couldn't upload the logo — please check it's an image file and try again. The rest of the form hasn't been saved yet."
+          "Couldn't upload the logo. Please check it's an image file and try again. The rest of the form hasn't been saved yet."
         );
         return;
       }
@@ -212,7 +212,7 @@ export default function AdminSponsors() {
     setSaving(false);
     if (error) {
       setFormError(
-        "Couldn't save the sponsor — please check your internet connection and try again."
+        "Couldn't save the sponsor. Please check your internet connection and try again."
       );
       return;
     }
@@ -237,7 +237,7 @@ export default function AdminSponsors() {
     setTogglingId(null);
     if (error) {
       setFormError(
-        "Couldn't change that sponsor — please check your internet connection and try again."
+        "Couldn't change that sponsor. Please check your internet connection and try again."
       );
     } else {
       setNotice(
@@ -262,7 +262,7 @@ export default function AdminSponsors() {
       <p className="mt-3 text-ink-muted">
         Sponsors marked as shown appear on the public sponsors page. When a
         business pays for sponsorship online, they arrive here as{" "}
-        <span className="font-semibold">pending approval</span> — check their
+        <span className="font-semibold">pending approval</span>. Check their
         details, add a logo, then switch them to shown.
       </p>
 
@@ -304,7 +304,7 @@ export default function AdminSponsors() {
                       {s.company_name}{" "}
                       {pending && (
                         <span className="ml-1 align-middle border border-navy px-2 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-navy">
-                          Pending approval — not on the website
+                          Pending approval, not on the website
                         </span>
                       )}
                     </p>

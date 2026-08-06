@@ -74,7 +74,7 @@ export default function SquarePaymentForm({
         onError?.(data);
         setError(
           data.error ||
-            "Sorry, the payment didn't go through. You haven't been charged — please try again, or email us at seqdvgc@gmail.com."
+            "Sorry, the payment didn't go through. You haven't been charged. Please try again, or email us at seqdvgc@gmail.com."
         );
       }
     } catch {
@@ -90,7 +90,7 @@ export default function SquarePaymentForm({
     return (
       <div className="border-t-4 border-gold bg-paper p-6 text-center">
         <p className="font-display text-lg font-semibold tracking-wide text-navy">
-          Payment received — thank you
+          Payment received, thank you
         </p>
         <p className="mt-1 text-sm text-ink-muted">
           A receipt will be sent by Square to the card&apos;s email if one is on

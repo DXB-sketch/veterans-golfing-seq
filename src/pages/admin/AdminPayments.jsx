@@ -38,7 +38,7 @@ export default function AdminPayments() {
         if (cancelled) return;
         if (loadError) {
           setError(
-            "Couldn't load the payments list. If the site was just updated, payment records may not be switched on yet — otherwise check your internet connection and refresh the page."
+            "Couldn't load the payments list. If the site was just updated, payment records may not be switched on yet. Otherwise check your internet connection and refresh the page."
           );
         } else {
           setPayments(data ?? []);
@@ -61,8 +61,8 @@ export default function AdminPayments() {
       </h2>
       <RibbonRule className="mt-3" />
       <p className="mt-3 text-ink-muted">
-        Every payment taken through the website — memberships, donations and
-        sponsorships — newest first. This list is a record only; refunds are
+        Every payment taken through the website (memberships, donations and
+        sponsorships), newest first. This list is a record only; refunds are
         done in the Square dashboard.
       </p>
 

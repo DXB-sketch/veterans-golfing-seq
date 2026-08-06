@@ -48,7 +48,7 @@ export default function AuthCallback() {
           ) : ok ? (
             <>
               <p className="mt-5 text-ink-muted">
-                Thanks{session.user.email ? ` — you're confirmed as ${session.user.email}` : ""}.
+                Thanks{session.user.email ? `, you're confirmed as ${session.user.email}` : ""}.
                 You&apos;re all set.
               </p>
               <Button to="/member" className="mt-8 w-full">
@@ -59,11 +59,11 @@ export default function AuthCallback() {
             <>
               <p className="mt-5 text-ink-muted">
                 {linkError === "otp_expired"
-                  ? "This link has expired — they only last a little while for security."
+                  ? "This link has expired. They only last a little while for security."
                   : "This link isn't valid any more. It may have expired or already been used."}
               </p>
               <p className="mt-3 text-ink-muted">
-                No drama — try{" "}
+                No drama. Try{" "}
                 <Link
                   to="/member"
                   className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"

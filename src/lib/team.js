@@ -36,12 +36,12 @@ export function teamErrorMessage(code) {
     case "weak_password":
       return "The password needs to be at least 8 characters long.";
     case "bad_email":
-      return "That doesn't look like an email address — please check it and try again.";
+      return "That doesn't look like an email address. Please check it and try again.";
     case "cannot_remove_self":
       return "You can't remove your own account. Ask another committee member to do it.";
     case "last_account":
-      return "You can't remove the last account — there'd be no one left who can sign in.";
+      return "You can't remove the last account. There'd be no one left who can sign in.";
     default:
-      return "Something went wrong — please check your internet connection and try again.";
+      return "Something went wrong. Please check your internet connection and try again.";
   }
 }

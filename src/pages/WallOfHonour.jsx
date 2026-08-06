@@ -18,7 +18,7 @@ export default function WallOfHonour() {
           </h1>
           <RibbonRule className="mt-5" dark />
           <p className="mt-6 max-w-2xl text-lg text-cream/90">
-            Honouring the service and stories of our veteran community — the
+            Honouring the service and stories of our veteran community, the
             people behind the Club, across Army, Navy and Air Force.
           </p>
         </div>

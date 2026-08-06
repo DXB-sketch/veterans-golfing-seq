@@ -115,7 +115,7 @@ export default function Donate() {
               />
             ) : (
               <p className="border border-ink/10 bg-paper p-4 text-sm text-ink-muted">
-                Donations are between $5 and $7,000 AUD — choose an amount above
+                Donations are between $5 and $7,000 AUD. Choose an amount above
                 to continue.
               </p>
             )}

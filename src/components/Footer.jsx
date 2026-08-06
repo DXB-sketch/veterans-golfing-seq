@@ -50,7 +50,7 @@ export default function Footer() {
             </h2>
             <ul className="mt-4 space-y-2 text-sm">
               {[
-                ["Sponsors & partners", "/sponsors"],
+                ["Sponsors & partners", "/about#sponsors"],
                 ["Wall of Honour", "/wall-of-honour"],
                 ["Donate", "/donate"],
               ].map(([label, to]) => (
