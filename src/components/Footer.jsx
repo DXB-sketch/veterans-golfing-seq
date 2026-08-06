@@ -49,7 +49,6 @@ export default function Footer() {
             </h2>
             <ul className="mt-4 space-y-2 text-sm">
               {[
-                ["Club merch", "/merch"],
                 ["Sponsors & partners", "/sponsors"],
                 ["Wall of Honour", "/wall-of-honour"],
                 ["Donate", "/donate"],

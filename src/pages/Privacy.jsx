@@ -10,7 +10,7 @@ const sections = [
   },
   {
     heading: "How we use it",
-    body: "We use your information to respond to your enquiries, manage membership, organise and run events, and provide the merchandise or services you request.",
+    body: "We use your information to respond to your enquiries, manage membership, organise and run events, and provide the services you request.",
   },
   {
     heading: "Who we share it with",

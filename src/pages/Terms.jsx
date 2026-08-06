@@ -18,11 +18,7 @@ const sections = [
   },
   {
     heading: "Refunds and cancellations",
-    body: "[Set the Club's policy here — e.g. whether event fees are refundable and up to what date. Faulty or misdescribed merchandise is covered by your rights under the Australian Consumer Law, which these terms do not exclude.]",
-  },
-  {
-    heading: "Merchandise",
-    body: "Orders are fulfilled by pickup at events or by post, as selected at checkout. [Confirm when risk/ownership passes and any postage terms.]",
+    body: "[Set the Club's policy here — e.g. whether membership fees, event fees or donations are refundable and up to what date. Nothing in this policy excludes your rights under the Australian Consumer Law.]",
   },
   {
     heading: "Intellectual property",

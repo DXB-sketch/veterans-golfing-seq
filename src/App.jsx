@@ -14,8 +14,9 @@ import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
 import Sponsors from "./pages/Sponsors.jsx";
 import WallOfHonour from "./pages/WallOfHonour.jsx";
-import Merch from "./pages/Merch.jsx";
 import Donate from "./pages/Donate.jsx";
+import MemberArea from "./pages/member/MemberArea.jsx";
+import MemberWelcome from "./pages/member/MemberWelcome.jsx";
 import { AuthProvider } from "./admin/AuthProvider.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import AdminEvents from "./pages/admin/AdminEvents.jsx";
@@ -23,6 +24,10 @@ import AdminEventForm from "./pages/admin/AdminEventForm.jsx";
 import AdminBookings from "./pages/admin/AdminBookings.jsx";
 import AdminSubmissions from "./pages/admin/AdminSubmissions.jsx";
 import AdminTeam from "./pages/admin/AdminTeam.jsx";
+import AdminOverview from "./pages/admin/AdminOverview.jsx";
+import AdminMembers from "./pages/admin/AdminMembers.jsx";
+import AdminSponsors from "./pages/admin/AdminSponsors.jsx";
+import AdminPayments from "./pages/admin/AdminPayments.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -52,10 +57,15 @@ export default function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/sponsors" element={<Sponsors />} />
             <Route path="/wall-of-honour" element={<WallOfHonour />} />
-            <Route path="/merch" element={<Merch />} />
             <Route path="/donate" element={<Donate />} />
+            <Route path="/member" element={<MemberArea />} />
+            <Route path="/member/welcome" element={<MemberWelcome />} />
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminEvents />} />
+              <Route index element={<AdminOverview />} />
+              <Route path="events" element={<AdminEvents />} />
+              <Route path="members" element={<AdminMembers />} />
+              <Route path="sponsors" element={<AdminSponsors />} />
+              <Route path="payments" element={<AdminPayments />} />
               <Route path="events/new" element={<AdminEventForm />} />
               <Route path="events/:id/edit" element={<AdminEventForm />} />
               <Route path="events/:id/bookings" element={<AdminBookings />} />

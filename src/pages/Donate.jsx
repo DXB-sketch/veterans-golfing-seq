@@ -1,5 +1,6 @@
 import { useState } from "react";
 import RibbonRule from "../components/RibbonRule.jsx";
+import FormField from "../components/FormField.jsx";
 import SquarePayment from "../components/SquarePayment.jsx";
 
 const presetDollars = [10, 25, 50, 100];
@@ -7,6 +8,8 @@ const presetDollars = [10, 25, 50, 100];
 export default function Donate() {
   const [dollars, setDollars] = useState(25);
   const [custom, setCustom] = useState("");
+  const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
 
   const activeDollars = custom !== "" ? Number(custom) : dollars;
   const cents = Number.isFinite(activeDollars)
@@ -67,12 +70,12 @@ export default function Donate() {
               htmlFor="custom-amount"
               className="mb-1.5 block text-sm font-semibold text-ink"
             >
-              Or enter your own amount (AUD)
+              Or enter your own amount (AUD, minimum $5)
             </label>
             <input
               id="custom-amount"
               type="number"
-              min="2"
+              min="5"
               max="7000"
               step="1"
               value={custom}
@@ -82,13 +85,38 @@ export default function Donate() {
             />
           </div>
 
+          <div className="mt-8 space-y-4">
+            <FormField
+              label="Your name (optional)"
+              id="donor-name"
+              autoComplete="name"
+              value={donorName}
+              onChange={(e) => setDonorName(e.target.value)}
+              placeholder="e.g. Jane Citizen"
+            />
+            <FormField
+              label="Your email (optional)"
+              id="donor-email"
+              type="email"
+              autoComplete="email"
+              value={donorEmail}
+              onChange={(e) => setDonorEmail(e.target.value)}
+              placeholder="e.g. jane@example.com"
+            />
+          </div>
+
           <div className="mt-8">
-            <SquarePayment itemType="donation" amount={cents} />
+            <SquarePayment
+              purpose="donation"
+              amountCents={cents}
+              payerName={donorName.trim() || undefined}
+              payerEmail={donorEmail.trim() || undefined}
+            />
           </div>
 
           <p className="mt-6 text-sm text-ink-muted">
-            [Confirm with the club whether donations are tax-deductible (DGR
-            status) before adding any tax-deductibility wording.]
+            Donations directly support our veteran members and the club events
+            we run for them.
           </p>
         </div>
       </section>
