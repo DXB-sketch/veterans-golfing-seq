@@ -18,7 +18,7 @@ const sections = [
   },
   {
     heading: "Refunds and cancellations",
-    body: "[Set the Club's policy here — e.g. whether membership fees, event fees or donations are refundable and up to what date. Nothing in this policy excludes your rights under the Australian Consumer Law.]",
+    body: "A booking for a Club event may be cancelled and the fees paid refunded in full, provided the Club receives the cancellation request no later than three (3) days prior to the scheduled date of the event. Cancellation requests received after that time, and failures to attend, will not be eligible for a refund, and any fees paid will be forfeited. Refund requests must be made by email to the Club and will be processed to the original payment method. If the Club cancels an event, all fees paid for that event will be refunded in full. Nothing in this policy excludes, restricts or modifies any right or remedy you have under the Australian Consumer Law.",
   },
   {
     heading: "Intellectual property",
