@@ -1,12 +1,12 @@
 import RibbonRule from "../components/RibbonRule.jsx";
 import { CLUB_ABN, CLUB_EMAIL } from "../lib/site.js";
 
-{/* REVIEW BEFORE PUBLISHING — starting template, not legal advice. Fill every [BRACKETED] placeholder and have the club confirm the refund + liability sections. */}
+{/* Finalised with the club 2026-08 — template wording, not legal advice; have the club's adviser review before/at launch. */}
 
 const sections = [
   {
     heading: "Information we collect",
-    body: "When you use our membership enquiry form we collect the details you provide: your name, email, phone (optional), service branch, playing/handicap information, whether you hold a GA handicap, and your Golf Links number (optional). When you book a tee slot for an event we collect your name, mobile number (optional, for reminders), handicap and Golf Links details, and your side comp and cart hire preferences. When you use our contact form we collect your name, email and message. If you make a payment, your card details are entered directly with our payment provider and are never collected or stored by us.",
+    body: "When you join the Club we collect the details you provide: your name, email, phone (optional), service branch, whether you hold a GA handicap, and your Golf Links number (optional). If you accept a member login invite, we hold your email and sign-in credentials with our secure authentication provider. When you book a tee slot for an event we collect your name, mobile number (optional, for reminders), handicap and Golf Links details, and your side comp and cart hire preferences. When you use our contact or volunteer forms we collect your name, email, phone (optional) and message. If you make a payment, we record the amount, purpose and payer details you supply; your card details are entered directly with our payment provider and are never collected or stored by us. Photos taken at Club events may include your image — see our Terms for how to opt out.",
   },
   {
     heading: "How we use it",
@@ -26,7 +26,7 @@ const sections = [
   },
   {
     heading: "Cookies and analytics",
-    body: "This site uses only the cookies needed for it to function. [If website analytics are added later, update this section to describe them.]",
+    body: "This site uses only the cookies needed for it to function. We do not run analytics or advertising trackers. If that ever changes, this policy will be updated to describe them.",
   },
   {
     heading: "Children",

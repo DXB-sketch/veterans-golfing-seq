@@ -1,20 +1,20 @@
 import RibbonRule from "../components/RibbonRule.jsx";
 import { CLUB_ABN, CLUB_EMAIL } from "../lib/site.js";
 
-{/* REVIEW BEFORE PUBLISHING — starting template, not legal advice. Fill every [BRACKETED] placeholder and have the club confirm the refund + liability sections. */}
+{/* Finalised with the club 2026-08 — template wording, not legal advice; have the club's adviser review before/at launch. */}
 
 const sections = [
   {
     heading: "Membership",
-    body: "Membership is $50 per year and includes a club hat. Membership is confirmed once your enquiry is accepted and payment is received. [Add renewal terms — e.g. whether membership auto-renews or is re-purchased each year.]",
+    body: "Membership is $50 per year and includes a club hat. Membership commences on the date payment is received and remains current for twelve (12) months from that date. Membership does not renew automatically and no further payment will be charged without your action; to renew, simply pay the membership fee again online or with a committee member. Membership fees are not refundable except as required by law.",
   },
   {
     heading: "Events",
-    body: "Participation in Club golf days and events is at your own risk. You are responsible for your own conduct, health and fitness to play. Event details, venues and fees may change, and we will let you know if they do. [Add any waiver or eligibility terms the Club requires.]",
+    body: "Club events are open to veterans, serving and ex-serving members of the Australian Defence Force, and their family members; the Club may ask you to confirm your eligibility. Participation in Club golf days and events is at your own risk. You are responsible for your own conduct, health and fitness to play, and to the maximum extent permitted by law the Club accepts no liability for personal injury, or for loss of or damage to property, arising from your participation in an event. You must comply with the rules, directions and etiquette of the host venue and of Club officials; the Club may refuse or cancel an entry, or remove a participant from an event, for unsafe or inappropriate conduct. Event details, venues and fees may change, and we will let you know if they do. Events may be photographed or filmed for the Club's website and social media — if you would prefer your image not be used, please tell a committee member at the event or email the Club.",
   },
   {
     heading: "Payments",
-    body: "Payments are processed securely by Square. By paying you authorise the charge shown. All prices are in Australian dollars. [State whether prices include GST, if the Club is GST-registered.]",
+    body: "Payments are processed securely by Square. By paying you authorise the charge shown. All prices are in Australian dollars. The Club is not registered for GST, and no GST applies to its fees; prices are as displayed and no tax invoices are issued.",
   },
   {
     heading: "Refunds and cancellations",
