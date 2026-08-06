@@ -105,9 +105,6 @@ export default function Membership() {
                   We&apos;ll be in touch at the email you gave us within a few
                   days. Looking forward to seeing you on the course.
                 </p>
-                <div className="mt-8 text-left">
-                  <SquarePayment itemType="membership" />
-                </div>
               </div>
             ) : (
               <form
@@ -168,6 +165,137 @@ export default function Membership() {
           </div>
         </div>
       </section>
+
+      <JoinAndPay />
     </>
+  );
+}
+
+// "Become a member" — the paid, self-serve join path. Go-live flag (brief,
+// Phase 6): the club's public timeline opens membership in early 2027, so
+// this is deliberately built visible but low-pressure, placed after the
+// register-interest form. If the club decides to hold it until 2027, remove
+// <JoinAndPay /> above (one line) — everything else keeps working.
+function JoinAndPay() {
+  const [details, setDetails] = useState(null);
+  const [paid, setPaid] = useState(false);
+
+  function handleDetails(e) {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    setDetails({
+      name: f.get("join_name").trim(),
+      email: f.get("join_email").trim(),
+      phone: f.get("join_phone")?.trim() || null,
+      serviceBranch: f.get("join_branch"),
+      gaHandicap: f.get("join_ga_handicap") === "Yes",
+      golfLinksNumber: f.get("join_golf_links")?.trim() || null,
+    });
+  }
+
+  return (
+    <section className="bg-paper px-5 py-16 md:py-24">
+      <div className="mx-auto max-w-site">
+        <div className="mx-auto max-w-2xl">
+          <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
+            Ready to join now?
+          </p>
+          <h2 className="mt-2 font-display text-[1.7rem] font-semibold leading-tight tracking-wide text-navy">
+            Become a member — $50/year
+          </h2>
+          <RibbonRule className="mt-4" />
+          <p className="mt-5 text-ink-muted">
+            If you&apos;d rather skip the wait, you can join and pay online
+            right now. No pressure — the enquiry form above works just as well
+            if you&apos;d like a chat first.
+          </p>
+
+          {paid ? (
+            <div className="mt-8 border-t-4 border-gold bg-cream p-8 text-center md:p-10">
+              <p className="font-display text-2xl font-semibold tracking-wide text-navy">
+                Payment received — welcome to the club!
+              </p>
+              <RibbonRule className="mt-3" />
+              <p className="mt-4 text-ink-muted">
+                You&apos;re now a member of the South East Queensland Defence
+                Veterans Golf Club. An email invite to set up your member login
+                is on its way to {details?.email} — if it doesn&apos;t arrive
+                in the next few minutes, please check your spam folder.
+              </p>
+              <p className="mt-3 text-ink-muted">
+                Your club hat will be given to you at your first event. See you
+                on the course.
+              </p>
+            </div>
+          ) : details ? (
+            <div className="mt-8 border-t-4 border-gold bg-cream p-8 md:p-10">
+              <p className="font-semibold text-ink">
+                Annual membership for {details.name}
+              </p>
+              <p className="mt-1 text-sm text-ink-muted">
+                $50.00 AUD — includes your club hat.{" "}
+                <button
+                  type="button"
+                  onClick={() => setDetails(null)}
+                  className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
+                >
+                  Change your details
+                </button>
+              </p>
+              <div className="mt-6">
+                <SquarePayment
+                  purpose="membership"
+                  payerName={details.name}
+                  payerEmail={details.email}
+                  member={details}
+                  onSuccess={() => setPaid(true)}
+                />
+              </div>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleDetails}
+              className="mt-8 grid gap-5 border-t-4 border-gold bg-cream p-8 sm:grid-cols-2 md:p-10"
+            >
+              <FormField label="Full name" id="join_name" required autoComplete="name" />
+              <FormField label="Email" id="join_email" type="email" required autoComplete="email" />
+              <FormField label="Phone" id="join_phone" type="tel" autoComplete="tel" />
+              <FormField
+                label="Service branch"
+                id="join_branch"
+                as="select"
+                required
+                options={["Army", "Navy", "Air Force", "Family member"]}
+              />
+              <FormField
+                label="Do you have a GA handicap?"
+                id="join_ga_handicap"
+                as="select"
+                required
+                options={["Yes", "No"]}
+              />
+              <FormField
+                label="Golf Links number"
+                id="join_golf_links"
+                placeholder="Leave blank if you don't have one"
+              />
+              <div className="sm:col-span-2">
+                <Button type="submit" className="w-full sm:w-auto">
+                  Continue to payment
+                </Button>
+                <p className="mt-3 text-sm text-ink-muted">
+                  You&apos;ll confirm your details before paying. By joining,
+                  you agree to our{" "}
+                  <Link to="/privacy" className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy">
+                    Privacy Policy
+                  </Link>
+                  .
+                </p>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
