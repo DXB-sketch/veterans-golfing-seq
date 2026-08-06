@@ -11,10 +11,12 @@ const SquarePaymentForm = configured
   ? lazy(() => import("./SquarePaymentForm.jsx"))
   : null;
 
-// purpose: "membership" | "donation" | "sponsorship".
-// amountCents applies to donations/sponsorship (membership is fixed server-side).
-// member / sponsor / payerName / payerEmail are forwarded to /api/create-payment
-// so the server can run the purpose's side effects after a successful charge.
+// purpose: "membership" | "donation" | "sponsorship" | "event_booking".
+// amountCents applies to donations/sponsorship; membership is fixed and event
+// bookings are re-priced server-side from the event's fees (amountCents is
+// display-only there). member / sponsor / booking / payerName / payerEmail /
+// accessToken are forwarded to /api/create-payment for the purpose's side
+// effects after a successful charge.
 export default function SquarePayment({
   purpose,
   amountCents,
@@ -22,7 +24,10 @@ export default function SquarePayment({
   payerEmail,
   member,
   sponsor,
+  booking,
+  accessToken,
   onSuccess,
+  onError,
 }) {
   if (!configured) {
     return (
@@ -55,7 +60,10 @@ export default function SquarePayment({
         payerEmail={payerEmail}
         member={member}
         sponsor={sponsor}
+        booking={booking}
+        accessToken={accessToken}
         onSuccess={onSuccess}
+        onError={onError}
       />
     </Suspense>
   );

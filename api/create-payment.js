@@ -84,6 +84,14 @@ export default async function handler(req, res) {
     }
     chargeCents = amount;
     note = "SEQDVGC sponsorship";
+  } else if (purpose === "event_booking") {
+    // Amount is computed from the event's own fees AFTER the DB is reachable
+    // (below) — the client never sets it. Validate the payload shape here.
+    const b = body.booking || {};
+    if (!cleanText(b.playerName) || !b.eventId || !b.teeSlotId) {
+      return bad(res, "Booking payments need a player name, event and tee slot.");
+    }
+    note = "SEQDVGC event booking";
   } else {
     return bad(res, "Unknown payment purpose.");
   }
@@ -106,6 +114,9 @@ export default async function handler(req, res) {
     if (purpose === "sponsorship") {
       probes.push(supabase.from("sponsors").select("id", { head: true, count: "exact" }).limit(1));
     }
+    if (purpose === "event_booking") {
+      probes.push(supabase.from("bookings").select("id", { head: true, count: "exact" }).limit(1));
+    }
     const results = await Promise.all(probes);
     if (results.some((r) => r.error)) {
       console.error("Payment refused — recording tables unavailable", results.map((r) => r.error?.message));
@@ -113,6 +124,78 @@ export default async function handler(req, res) {
         .status(503)
         .json({ ok: false, error: "Online payments are not quite ready yet — please try again soon or email us." });
     }
+  }
+
+  // --- Event bookings: price from the event's fees, reserve BEFORE charging -
+  // The slot is held by inserting the booking (the capacity trigger enforces
+  // availability atomically); if the card then declines, the hold is released.
+  let bookingRowId = null;
+  if (purpose === "event_booking") {
+    const b = body.booking;
+    const { data: ev, error: evError } = await supabase
+      .from("events")
+      .select("id, status, is_locked, event_date, green_fee, cart_fee, side_comp")
+      .eq("id", b.eventId)
+      .maybeSingle();
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Brisbane" });
+    if (
+      evError || !ev || ev.status !== "published" || !ev.is_locked ||
+      !ev.event_date || ev.event_date < today
+    ) {
+      return bad(res, "Bookings aren't open for this event.");
+    }
+    const { data: slot } = await supabase
+      .from("tee_slots")
+      .select("id, event_id")
+      .eq("id", b.teeSlotId)
+      .maybeSingle();
+    if (!slot || slot.event_id !== ev.id) {
+      return bad(res, "That tee slot doesn't belong to this event.");
+    }
+
+    const cents = (v) => Math.round(Number(v || 0) * 100);
+    chargeCents =
+      cents(ev.green_fee) +
+      (b.cartHire === true ? cents(ev.cart_fee) : 0) +
+      (b.playingInComp === true ? cents(ev.side_comp) : 0);
+    if (!Number.isInteger(chargeCents) || chargeCents <= 0) {
+      return bad(res, "This event has no fees to pay online — book directly on the event page.");
+    }
+
+    // Signed-in members get their booking linked so it shows on the dashboard.
+    let createdBy = null;
+    if (typeof body.accessToken === "string" && body.accessToken) {
+      const { data: userData } = await supabase.auth.getUser(body.accessToken);
+      createdBy = userData?.user?.id || null;
+    }
+
+    const { data: bookingRow, error: bookingError } = await supabase
+      .from("bookings")
+      .insert({
+        event_id: ev.id,
+        tee_slot_id: slot.id,
+        player_name: cleanText(b.playerName, 120),
+        mobile: cleanText(b.mobile, 40),
+        ga_handicap: typeof b.gaHandicap === "boolean" ? b.gaHandicap : null,
+        golf_links_number: cleanText(b.golfLinksNumber, 40),
+        playing_in_comp: b.playingInComp === true,
+        cart_hire: b.cartHire === true,
+        created_by: createdBy,
+      })
+      .select("id")
+      .single();
+    if (bookingError) {
+      const msg = bookingError.message || "";
+      if (msg.includes("SLOT_FULL")) {
+        return res.status(409).json({ ok: false, code: "slot_full", error: "That tee time just filled up — please pick another slot." });
+      }
+      if (msg.includes("EVENT_NOT_BOOKABLE")) {
+        return bad(res, "Bookings aren't open for this event.");
+      }
+      console.error("Booking insert failed", bookingError);
+      return res.status(502).json({ ok: false, error: "Couldn't hold your tee slot. You haven't been charged — please try again." });
+    }
+    bookingRowId = bookingRow.id;
   }
 
   // --- Charge via Square ---------------------------------------------------
@@ -150,15 +233,21 @@ export default async function handler(req, res) {
     const data = await squareRes.json();
     if (!squareRes.ok) {
       console.error("Square payment failed", data.errors);
+      if (bookingRowId) {
+        await supabase.from("bookings").delete().eq("id", bookingRowId);
+      }
       return res.status(402).json({
         ok: false,
         error:
-          "The payment was declined. You haven't been charged — please try another card.",
+          "The payment was declined. You haven't been charged and your tee slot wasn't taken — please try another card.",
       });
     }
     payment = data.payment;
   } catch (err) {
     console.error("Square request error", err);
+    if (bookingRowId) {
+      await supabase.from("bookings").delete().eq("id", bookingRowId);
+    }
     return res
       .status(502)
       .json({ ok: false, error: "Couldn't reach the payment service." });
@@ -172,7 +261,8 @@ export default async function handler(req, res) {
   const payerName =
     cleanText(body.payerName, 120) ||
     cleanText(body.member?.name, 120) ||
-    cleanText(body.sponsor?.contactName, 120);
+    cleanText(body.sponsor?.contactName, 120) ||
+    cleanText(body.booking?.playerName, 120);
   const payerEmail = buyerEmail;
 
   let recorded = false;
@@ -209,7 +299,13 @@ export default async function handler(req, res) {
   let inviteSent = false;
   let referenceId = null;
   try {
-    if (purpose === "membership") {
+    if (purpose === "event_booking") {
+      referenceId = bookingRowId;
+      await supabase
+        .from("bookings")
+        .update({ paid_cents: chargeCents, square_payment_id: payment?.id })
+        .eq("id", bookingRowId);
+    } else if (purpose === "membership") {
       const m = body.member;
       const email = cleanEmail(m.email);
       const joined = new Date().toLocaleDateString("en-CA", {

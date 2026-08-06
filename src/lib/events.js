@@ -113,6 +113,11 @@ export function mapEvent(row) {
     greenFee: money(row.green_fee),
     cartFee: row.cart_fee === null || row.cart_fee === undefined ? "None" : money(row.cart_fee),
     sideComp: row.side_comp === null || row.side_comp === undefined ? "None" : money(row.side_comp),
+    // Raw cents for the online-payment total (display only — the server
+    // re-prices every booking from the event row).
+    greenFeeCents: Math.round(Number(row.green_fee || 0) * 100),
+    cartFeeCents: Math.round(Number(row.cart_fee || 0) * 100),
+    sideCompCents: Math.round(Number(row.side_comp || 0) * 100),
     sideCompNote: row.side_comp_note || "",
     status: timeStatusLabel(timeStatus),
     timeStatus,

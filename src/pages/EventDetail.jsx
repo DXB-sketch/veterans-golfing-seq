@@ -11,6 +11,8 @@ import { useSlotAvailability } from "../hooks/useBookings.js";
 import { createBooking } from "../lib/bookings.js";
 import { albumForEvent } from "../lib/photos.js";
 import { FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
+import SquarePayment from "../components/SquarePayment.jsx";
+import { useAuth } from "../admin/AuthProvider.jsx";
 
 function Detail({ label, value }) {
   return (
@@ -26,12 +28,26 @@ function Detail({ label, value }) {
 // Public booking form: fee summary, tee slot picker, the six fixed fields.
 function BookingSection({ event }) {
   const { slots, loading, error, refresh } = useSlotAvailability(event.id);
+  const { session } = useAuth();
   const [slotId, setSlotId] = useState(null);
   const [sending, setSending] = useState(false);
   const [formError, setFormError] = useState(null);
   const [booked, setBooked] = useState(null);
+  // Details captured and awaiting payment (paid events only).
+  const [pending, setPending] = useState(null);
 
   const selectedSlot = slots.find((s) => s.id === slotId);
+
+  // Booking an event is pay-to-book (club decision): green fee plus whatever
+  // the player ticks, charged before the slot is confirmed. The server
+  // re-prices from the event row — this total is display only.
+  function totalCentsFor(details) {
+    return (
+      event.greenFeeCents +
+      (details.cartHire ? event.cartFeeCents : 0) +
+      (details.playingInComp ? event.sideCompCents : 0)
+    );
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -40,35 +56,49 @@ function BookingSection({ event }) {
       return;
     }
     const f = new FormData(e.target);
+    const details = {
+      eventId: event.id,
+      teeSlotId: slotId,
+      playerName: f.get("player_name"),
+      mobile: f.get("mobile") || null,
+      gaHandicap: f.get("ga_handicap") === "Yes",
+      golfLinksNumber: f.get("golf_links") || null,
+      playingInComp: f.get("side_comp") === "Yes",
+      cartHire: f.get("cart_hire") === "Yes",
+    };
     setFormError(null);
-    setSending(true);
-    try {
-      await createBooking({
-        eventId: event.id,
-        teeSlotId: slotId,
-        playerName: f.get("player_name"),
-        mobile: f.get("mobile") || null,
-        gaHandicap: f.get("ga_handicap") === "Yes",
-        golfLinksNumber: f.get("golf_links") || null,
-        playingInComp: f.get("side_comp") === "Yes",
-        cartHire: f.get("cart_hire") === "Yes",
-      });
-      setBooked({
-        playerName: f.get("player_name"),
-        teeTime: selectedSlot?.teeTime,
-      });
-    } catch (err) {
-      if (err.code === "slot_full") {
-        setFormError("That slot just filled up — please pick another time.");
-        setSlotId(null);
-        refresh();
-      } else {
-        setFormError(
-          `Sorry, your booking didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
-        );
+
+    // Events with no fees keep the direct (free) booking path.
+    if (totalCentsFor(details) <= 0) {
+      setSending(true);
+      try {
+        await createBooking(details);
+        setBooked({ playerName: details.playerName, teeTime: selectedSlot?.teeTime });
+      } catch (err) {
+        if (err.code === "slot_full") {
+          setFormError("That slot just filled up — please pick another time.");
+          setSlotId(null);
+          refresh();
+        } else {
+          setFormError(
+            `Sorry, your booking didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
+          );
+        }
+      } finally {
+        setSending(false);
       }
-    } finally {
-      setSending(false);
+      return;
+    }
+
+    setPending(details);
+  }
+
+  function handlePaymentError(data) {
+    if (data?.code === "slot_full") {
+      setPending(null);
+      setSlotId(null);
+      setFormError("That tee time filled up before payment went through — you haven't been charged. Please pick another slot.");
+      refresh();
     }
   }
 
@@ -84,8 +114,60 @@ function BookingSection({ event }) {
             <p className="mt-4 text-ink-muted">
               We&apos;ve got you down for the{" "}
               <span className="font-semibold text-ink">{booked.teeTime}</span>{" "}
-              slot. See you on the course.
+              slot{booked.paid ? " and your payment has been received" : ""}.
+              See you on the course.
             </p>
+          </div>
+        ) : pending ? (
+          <div className="mx-auto max-w-xl border-t-4 border-gold bg-cream p-8 md:p-10">
+            <p className="font-display text-xl font-semibold tracking-wide text-navy">
+              Confirm and pay
+            </p>
+            <RibbonRule className="mt-3" />
+            <dl className="mt-6 text-sm">
+              <Detail label="Player" value={pending.playerName} />
+              <Detail label="Tee time" value={selectedSlot?.teeTime || ""} />
+              <Detail label="Green fee" value={event.greenFee} />
+              {pending.cartHire && <Detail label="Cart hire" value={event.cartFee} />}
+              {pending.playingInComp && <Detail label="Side comp" value={event.sideComp} />}
+              <Detail
+                label="Total"
+                value={`$${(totalCentsFor(pending) / 100).toFixed(2)} AUD`}
+              />
+            </dl>
+            <p className="mt-3 text-sm text-ink-muted">
+              Your tee slot is confirmed once payment goes through.{" "}
+              <button
+                type="button"
+                onClick={() => setPending(null)}
+                className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
+              >
+                Change your details
+              </button>
+            </p>
+            {formError && (
+              <p className="mt-4 border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink">
+                {formError}
+              </p>
+            )}
+            <div className="mt-6">
+              <SquarePayment
+                purpose="event_booking"
+                amountCents={totalCentsFor(pending)}
+                payerName={pending.playerName}
+                booking={pending}
+                accessToken={session?.access_token}
+                onSuccess={() => {
+                  setBooked({
+                    playerName: pending.playerName,
+                    teeTime: selectedSlot?.teeTime,
+                    paid: true,
+                  });
+                  setPending(null);
+                }}
+                onError={handlePaymentError}
+              />
+            </div>
           </div>
         ) : (
           <div className="max-w-3xl">
@@ -229,8 +311,18 @@ function BookingSection({ event }) {
               )}
               <div className="sm:col-span-2">
                 <Button type="submit" disabled={sending} className="w-full sm:w-auto">
-                  {sending ? "Booking…" : "Book my spot"}
+                  {sending
+                    ? "Booking…"
+                    : event.greenFeeCents > 0
+                      ? "Continue to payment"
+                      : "Book my spot"}
                 </Button>
+                {event.greenFeeCents > 0 && (
+                  <p className="mt-3 text-sm text-ink-muted">
+                    Your slot is confirmed once payment goes through —
+                    you&apos;ll see the total before you pay.
+                  </p>
+                )}
               </div>
             </form>
           </div>

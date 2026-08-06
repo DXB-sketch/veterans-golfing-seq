@@ -96,6 +96,20 @@ Appendix F implemented verbatim, with these notes:
   letting committee and server-side (no `auth.uid()`) writes through.
 - `payments` has no client insert path at all; writes are service-role only.
 
+## Post-brief changes (club-requested, 2026-08-07)
+
+- **Membership page:** the "register interest" enquiry form is retired; the paid
+  join-and-pay flow is the primary (and only) membership path. Enquiry-style forms
+  now belong to volunteering on the Contact page (`/contact#volunteer`).
+- **Event bookings are pay-to-book:** the booking form leads to a confirm-and-pay
+  step charging green fee + cart hire + side comp as selected (full listed cart fee
+  per booking). The slot is reserved first (capacity trigger), then charged — a
+  declined card releases the slot; a slot that fills mid-payment is never charged.
+  Free events (no fees) still book directly. Committee bookings view shows who paid
+  what; **removing a paid booking does not refund it** — refunds are manual in the
+  Square dashboard. Migration `20260807000001` (applied live) added the
+  `event_booking` payment purpose and `bookings.paid_cents`/`square_payment_id`.
+
 ## Deviations / judgement calls
 
 - **The migration is NOT applied to the live database** (BACKEND.md golden rule 1 +

@@ -165,9 +165,26 @@ export default function AdminBookings() {
                                 Side comp: {yesNo(b.playing_in_comp)} · Cart
                                 hire: {yesNo(b.cart_hire)}
                               </p>
+                              <p className="mt-0.5 text-ink-muted">
+                                {b.paid_cents ? (
+                                  <span className="font-semibold text-navy">
+                                    Paid ${(b.paid_cents / 100).toFixed(2)} online
+                                  </span>
+                                ) : (
+                                  "Pays at the course (booked before online payments)"
+                                )}
+                              </p>
                             </div>
                             {confirmRemoveId === b.id ? (
-                              <div className="flex flex-col gap-3 sm:flex-row">
+                              <div className="flex flex-col gap-3">
+                                {b.paid_cents ? (
+                                  <p className="max-w-xs text-sm text-ink-muted">
+                                    This player paid ${(b.paid_cents / 100).toFixed(2)}{" "}
+                                    online. Removing the booking does NOT refund
+                                    them — do that in the Square dashboard.
+                                  </p>
+                                ) : null}
+                                <div className="flex flex-col gap-3 sm:flex-row">
                                 <button
                                   onClick={() => handleRemove(b.id)}
                                   disabled={removingId === b.id}
@@ -184,6 +201,7 @@ export default function AdminBookings() {
                                 >
                                   No, keep it
                                 </button>
+                                </div>
                               </div>
                             ) : (
                               <button

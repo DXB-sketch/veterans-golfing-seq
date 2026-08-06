@@ -12,6 +12,7 @@ const LABELS = {
   membership: "SEQDVGC membership",
   donation: "SEQDVGC donation",
   sponsorship: "SEQDVGC sponsorship",
+  event_booking: "SEQDVGC event booking",
 };
 
 function displayTotal(purpose, amountCents) {
@@ -29,7 +30,10 @@ export default function SquarePaymentForm({
   payerEmail,
   member,
   sponsor,
+  booking,
+  accessToken,
   onSuccess,
+  onError,
 }) {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState(null);
@@ -56,6 +60,8 @@ export default function SquarePaymentForm({
           payerEmail,
           member,
           sponsor,
+          booking,
+          accessToken,
         }),
       });
       const data = await res.json();
@@ -63,6 +69,9 @@ export default function SquarePaymentForm({
         setPaid(true);
         onSuccess?.(data.paymentId, data);
       } else {
+        // Some failures need the caller to react (e.g. a tee slot filling up
+        // mid-payment) — hand the response over before showing the message.
+        onError?.(data);
         setError(
           data.error ||
             "Sorry, the payment didn't go through. You haven't been charged — please try again, or email us at seqdvgc@gmail.com."
