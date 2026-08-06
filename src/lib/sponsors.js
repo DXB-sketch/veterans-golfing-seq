@@ -27,7 +27,7 @@ export async function fetchPublicSponsors() {
 
 // Resolve a sponsors.logo_path to a URL the browser can load.
 // Paths starting with "/" are files committed to public/ (e.g.
-// "/sponsors/urban-fairways.png"); anything else is an object in the
+// "/sponsors/urban-fairways.jpeg"); anything else is an object in the
 // public "sponsor-logos" Supabase Storage bucket.
 export function logoUrl(logoPath) {
   if (!logoPath) return null;

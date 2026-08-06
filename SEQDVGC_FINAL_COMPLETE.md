@@ -117,20 +117,17 @@ Appendix F implemented verbatim, with these notes:
 
 ## Outstanding manual steps for Dexter
 
-1. **Apply the migration** `supabase/migrations/20260806000001_...sql` in the Supabase
-   SQL editor (review first — it rewrites RLS). Until applied: payments return a
-   friendly "not quite ready" error; members/sponsors/volunteers/payments admin
-   sections show empty/graceful states; everything else works as today.
-2. Confirm the **sponsor-logos bucket** appears with its policies (the migration
-   creates it; verify in Storage).
-3. Committee roles: existing accounts are seeded committee by the migration. Any new
-   committee volunteer added via /admin/team is marked committee automatically.
-4. **Urban Fairways logo**: add the file at exactly `public/sponsors/urban-fairways.png`
-   (referenced by the seed; the page falls back to a styled name block until then).
-5. Vercel env: ensure `SUPABASE_URL` (or rely on `VITE_SUPABASE_URL`),
-   `SUPABASE_SERVICE_ROLE_KEY`, `SQUARE_ACCESS_TOKEN`, and `SQUARE_ENVIRONMENT`
-   (`sandbox` in Preview/Dev, `production` in Production) are set. Public vars are the
-   `VITE_` set (framework is Vite).
+1. **Apply the migration** — DONE 2026-08-06: `20260806000001` plus follow-up
+   `20260806000002_function_execute_hardening` are applied to the live project.
+   Verified live: profiles seeded committee (2), Urban Fairways visible through
+   `public_sponsors` (anon sees the view row but zero rows of the base table or
+   payments), sponsor-logos bucket present, legacy admin policies gone.
+2. **Sponsor-logos bucket** — DONE (created by the migration, verified live).
+3. Committee roles — DONE: both existing accounts seeded committee; new /admin/team
+   accounts are marked committee automatically.
+4. **Urban Fairways logo**: DONE — committed at `public/sponsors/urban-fairways.jpeg`
+   (the migration seed references it).
+5. Vercel env — DONE per Dexter (server + public vars live).
 6. Supabase Auth → URL configuration: add `https://seqdvgc.com.au/member/welcome` to
    the redirect allow-list so invite emails land on the set-password page. Also enable
    leaked-password protection (one click; flagged by the security advisor).

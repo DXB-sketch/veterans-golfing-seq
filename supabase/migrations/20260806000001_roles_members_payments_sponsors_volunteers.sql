@@ -2,11 +2,8 @@
 -- volunteer enquiries, sponsor-logo storage, and the RLS tightening that the
 -- two-role model requires.
 --
--- NOT YET APPLIED TO THE LIVE PROJECT. Per BACKEND.md golden rule 1 and the
--- Final Build Brief "Manual steps", run this in the Supabase SQL editor (or
--- `supabase db push`) after review. It is written to be safe to run once on
--- the current live schema (events/tee_slots/bookings/membership_enquiries/
--- contact_messages already exist).
+-- Applied to the live project on 2026-08-06 (with the follow-up
+-- 20260806000002_function_execute_hardening.sql).
 --
 -- WHY THE TIGHTENING MATTERS: until now every authenticated user was a
 -- committee admin, so policies used `to authenticated using (true)`. This
@@ -358,15 +355,14 @@ revoke all on public.public_sponsors from public, anon, authenticated;
 grant select on public.public_sponsors to anon, authenticated;
 
 -- First sponsor: Urban Fairways West End (Appendix B). Bronze, active.
--- Logo file is supplied by Dexter at public/sponsors/urban-fairways.png —
--- flagged in the handoff if absent.
+-- Logo file committed at public/sponsors/urban-fairways.jpeg.
 insert into public.sponsors
   (company_name, website_url, logo_path, description, tier, amount_cents,
    display_order, is_active)
 select
   'Urban Fairways West End',
   'https://urbanfairways.com.au',
-  '/sponsors/urban-fairways.png',
+  '/sponsors/urban-fairways.jpeg',
   'Defence veteran–owned golf simulator business in West End, Brisbane — coaching and state-of-the-art equipment.',
   'bronze', 25000, 1, true
 where not exists (
