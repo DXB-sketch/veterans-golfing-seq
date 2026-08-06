@@ -12,7 +12,7 @@ Tick only after verifying. Report unchecked items with a reason.
 
 ## Codebase
 - [x] Branded templates in `/email-templates/`: invite, reset password, magic link, confirm signup, change email
-- [x] Crest loads from a stable absolute public URL in emails (`https://seqdvgc.com.au/SEQDVGC-logo-transparent.png`, served from `/public`)
+- [x] Crest loads from a stable absolute public URL in emails (`https://www.seqdvgc.com.au/SEQDVGC-logo-transparent.png`, served from `/public`; verified HTTP 200 — note the bare apex domain is NOT on Vercel, see the handoff's domain finding)
 - [x] Templates use Supabase variables (`{{ .ConfirmationURL }}`, `{{ .NewEmail }}`), inline styles, club footer + ABN, no address/phone
 - [x] Invite-accept / set-password page exists, on-brand, handles the invite token, activates the member (`/member/welcome` — pre-existing, verified)
 - [x] Password reset request + set-new-password pages exist and work (`/member/reset`, `/member/reset/confirm`)

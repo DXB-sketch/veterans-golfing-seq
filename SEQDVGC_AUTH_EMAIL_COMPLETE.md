@@ -45,7 +45,7 @@ Handoff for `SEQDVGC_Auth_Email_Brief.md`. Built 2026-08-06.
 ### Email templates — `/email-templates/`
 Five branded, email-client-safe (table layout, inline styles) templates in the
 club voice, navy `#0B1E3F` + gold `#C8A02E`, ribbon rule, crest from the stable
-public URL `https://seqdvgc.com.au/SEQDVGC-logo-transparent.png`, footer
+public URL `https://www.seqdvgc.com.au/SEQDVGC-logo-transparent.png`, footer
 `SEQDVGC Inc. · ABN 35 714 983 753` + club email (no address, no phone), all
 links via `{{ .ConfirmationURL }}` (+ `{{ .NewEmail }}` where relevant):
 
@@ -75,7 +75,7 @@ links via `{{ .ConfirmationURL }}` (+ `{{ .NewEmail }}` where relevant):
 
 ### Redirects
 - `api/create-payment.js` and `api/invite-member.js` now pin the invite
-  `redirectTo` to **`https://seqdvgc.com.au/member/welcome` whenever
+  `redirectTo` to **`https://www.seqdvgc.com.au/member/welcome` whenever
   `VERCEL_ENV === "production"`**; preview deployments still invite back to
   themselves.
 - Client-side reset uses `window.location.origin`, which on production is the
@@ -105,10 +105,10 @@ invite couldn't send). Reset: `/member` → `/member/reset` → branded email �
 3. **Templates**: paste each file from `/email-templates/` into Supabase →
    Auth → Email Templates with the subjects in `email-templates/README.md`.
 4. **URLs**: Supabase → Auth → URL Configuration → Site URL
-   `https://seqdvgc.com.au`; redirect allowlist must include:
-   - `https://seqdvgc.com.au/member/welcome`
-   - `https://seqdvgc.com.au/member/reset/confirm`
-   - `https://seqdvgc.com.au/auth/callback`
+   `https://www.seqdvgc.com.au`; redirect allowlist must include:
+   - `https://www.seqdvgc.com.au/member/welcome`
+   - `https://www.seqdvgc.com.au/member/reset/confirm`
+   - `https://www.seqdvgc.com.au/auth/callback`
    Also raise the email rate limit (Auth → Rate Limits) to ~30/hr, and enable
    leaked-password protection while you're there.
 5. **Test end-to-end** with a real external address: member invite + password
@@ -116,3 +116,15 @@ invite couldn't send). Reset: `/member` → `/member/reset` → branded email �
    complete on the pages above. (Before DNS verifies, Resend's shared
    onboarding domain can be used for a first test; switch the sender to the
    club domain once verified.)
+
+## ⚠️ Domain finding (discovered during verification)
+
+The **bare/apex domain `https://seqdvgc.com.au` does not serve the site** — it
+resolves to `103.42.108.46` (not Vercel; likely registrar parking/old host) and
+times out. Only **`https://www.seqdvgc.com.au`** is aliased to the Vercel
+deployment. Everything in this build (crest URL, production redirects, the
+allowlist above) therefore uses `www.`. Recommended fix while you're in the
+Vercel dashboard for the DNS step: add `seqdvgc.com.au` as a domain on the
+project (Vercel will give you the apex A record, `76.76.21.21`) and set it to
+redirect to `www.seqdvgc.com.au` — then anything printed or typed without the
+`www` still works. Not required for the email flows to function.

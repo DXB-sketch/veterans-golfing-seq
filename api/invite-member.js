@@ -55,7 +55,7 @@ export default async function handler(req, res) {
   // redirect allowlist); previews invite back to themselves.
   const origin =
     process.env.VERCEL_ENV === "production"
-      ? "https://seqdvgc.com.au"
+      ? "https://www.seqdvgc.com.au"
       : (req.headers["x-forwarded-proto"] || "https") +
         "://" +
         (req.headers["x-forwarded-host"] || req.headers.host || "seqdvgc.com.au");

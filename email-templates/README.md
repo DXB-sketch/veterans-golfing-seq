@@ -3,7 +3,7 @@
 Branded (navy + gold, crest, club voice) HTML templates for Supabase Auth.
 Paste each file's contents into **Supabase dashboard → Authentication → Email
 Templates**, and set the subject line shown below. The crest loads from the
-stable public URL `https://seqdvgc.com.au/SEQDVGC-logo-transparent.png`
+stable public URL `https://www.seqdvgc.com.au/SEQDVGC-logo-transparent.png`
 (served from `/public` in this repo), because email clients can't use bundled
 assets.
 
