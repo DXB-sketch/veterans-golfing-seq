@@ -8,8 +8,14 @@ import {
 
 const MEMBERSHIP_CENTS = 5000; // display only — the server decides the real charge
 
-function displayTotal(itemType, amount) {
-  const cents = itemType === "membership" ? MEMBERSHIP_CENTS : amount || 0;
+const LABELS = {
+  membership: "SEQDVGC membership",
+  donation: "SEQDVGC donation",
+  sponsorship: "SEQDVGC sponsorship",
+};
+
+function displayTotal(purpose, amountCents) {
+  const cents = purpose === "membership" ? MEMBERSHIP_CENTS : amountCents || 0;
   return (cents / 100).toFixed(2);
 }
 
@@ -17,8 +23,12 @@ function displayTotal(itemType, amount) {
 export default function SquarePaymentForm({
   appId,
   locationId,
-  itemType,
-  amount,
+  purpose,
+  amountCents,
+  payerName,
+  payerEmail,
+  member,
+  sponsor,
   onSuccess,
 }) {
   const [paying, setPaying] = useState(false);
@@ -38,7 +48,15 @@ export default function SquarePaymentForm({
       const res = await fetch("/api/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: tokenResult.token, itemType, amount }),
+        body: JSON.stringify({
+          token: tokenResult.token,
+          purpose,
+          amountCents,
+          payerName,
+          payerEmail,
+          member,
+          sponsor,
+        }),
       });
       const data = await res.json();
       if (res.ok && data.ok) {
@@ -83,9 +101,8 @@ export default function SquarePaymentForm({
           countryCode: "AU",
           currencyCode: "AUD",
           total: {
-            amount: displayTotal(itemType, amount),
-            label:
-              itemType === "membership" ? "SEQDVGC membership" : "SEQDVGC donation",
+            amount: displayTotal(purpose, amountCents),
+            label: LABELS[purpose] || "SEQDVGC payment",
           },
         })}
       >
@@ -103,7 +120,7 @@ export default function SquarePaymentForm({
               },
             }}
           >
-            {paying ? "Processing…" : `Pay A$${displayTotal(itemType, amount)}`}
+            {paying ? "Processing…" : `Pay A$${displayTotal(purpose, amountCents)}`}
           </CreditCard>
         </div>
       </PaymentForm>

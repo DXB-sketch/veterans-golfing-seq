@@ -11,8 +11,19 @@ const SquarePaymentForm = configured
   ? lazy(() => import("./SquarePaymentForm.jsx"))
   : null;
 
-// itemType: "membership" | "donation". amount (cents) only applies to donations.
-export default function SquarePayment({ itemType, amount, onSuccess }) {
+// purpose: "membership" | "donation" | "sponsorship".
+// amountCents applies to donations/sponsorship (membership is fixed server-side).
+// member / sponsor / payerName / payerEmail are forwarded to /api/create-payment
+// so the server can run the purpose's side effects after a successful charge.
+export default function SquarePayment({
+  purpose,
+  amountCents,
+  payerName,
+  payerEmail,
+  member,
+  sponsor,
+  onSuccess,
+}) {
   if (!configured) {
     return (
       <div className="border border-ink/10 bg-paper p-6 text-center">
@@ -35,8 +46,12 @@ export default function SquarePayment({ itemType, amount, onSuccess }) {
       <SquarePaymentForm
         appId={appId}
         locationId={locationId}
-        itemType={itemType}
-        amount={amount}
+        purpose={purpose}
+        amountCents={amountCents}
+        payerName={payerName}
+        payerEmail={payerEmail}
+        member={member}
+        sponsor={sponsor}
         onSuccess={onSuccess}
       />
     </Suspense>
