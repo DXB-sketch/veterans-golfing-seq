@@ -22,7 +22,7 @@ Tick only after verifying. Report unchecked items with a reason.
 - [x] End-to-end path traced in code: paid → invite → set password → active → dashboard
 
 ## Manual (Dexter) — confirm each is done
-- [ ] Resend DNS records added in Vercel DNS; domain verified — *pending Dexter (records handed over)*
+- [x] Resend DNS records added (in VentraIP DNS — the domain's actual zone, not Vercel); domain **verified** in Resend 2026-08-06. Required removing two stale `vercel-dns.com` nameservers from the registry delegation that were serving a conflicting empty zone (split-brain DNS)
 - [ ] Resend wired as Supabase custom SMTP (native integration or manual creds); sender = noreply@seqdvgc.com.au — *pending Dexter*
 - [ ] Branded templates + subjects pasted into Supabase Auth templates — *pending Dexter*
 - [ ] Site URL + redirect allowlist set to production; email rate limit raised (~30/hr) — *pending Dexter*

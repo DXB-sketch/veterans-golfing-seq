@@ -117,14 +117,21 @@ invite couldn't send). Reset: `/member` → `/member/reset` → branded email �
    onboarding domain can be used for a first test; switch the sender to the
    club domain once verified.)
 
-## ⚠️ Domain finding (discovered during verification)
+## ⚠️ Domain findings (discovered during verification — updated 2026-08-06)
 
-The **bare/apex domain `https://seqdvgc.com.au` does not serve the site** — it
-resolves to `103.42.108.46` (not Vercel; likely registrar parking/old host) and
-times out. Only **`https://www.seqdvgc.com.au`** is aliased to the Vercel
-deployment. Everything in this build (crest URL, production redirects, the
-allowlist above) therefore uses `www.`. Recommended fix while you're in the
-Vercel dashboard for the DNS step: add `seqdvgc.com.au` as a domain on the
-project (Vercel will give you the apex A record, `76.76.21.21`) and set it to
-redirect to `www.seqdvgc.com.au` — then anything printed or typed without the
-`www` still works. Not required for the email flows to function.
+1. **Resend domain: VERIFIED.** DKIM + SPF (MX) + SPF (TXT) all verified;
+   sending from `noreply@seqdvgc.com.au` is live. The blocker turned out to be
+   **split-brain DNS**: the .au registry delegated to five nameservers —
+   VentraIP's three (serving the Resend records) *plus* two stale
+   `ns1/ns2.vercel-dns.com` entries (serving a conflicting zone with no Resend
+   records) — so Resend's checker randomly saw or missed the DKIM record.
+   Dexter removed the two Vercel nameservers from the delegation; DKIM
+   verified as soon as resolver caches drained. DNS truth now lives solely in
+   the VentraIP zone.
+2. **Apex domain**: originally served registrar parking. Dexter has repointed
+   the apex A record at Vercel and DNS has propagated, but HTTPS on the bare
+   domain still fails because `seqdvgc.com.au` isn't added to the Vercel
+   project, so no certificate exists for it. Remaining step: Vercel dashboard
+   → project → Settings → Domains → add `seqdvgc.com.au` → "Redirect to
+   www.seqdvgc.com.au". Not required for the email flows — everything in this
+   build (crest URL, redirects, allowlist) uses `www.`, which works today.
