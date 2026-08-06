@@ -160,7 +160,7 @@ export default function Contact() {
             </>
           )}
 
-          <div className="mt-16 border-t-2 border-gold/40 pt-12">
+          <div id="volunteer" className="mt-16 border-t-2 border-gold/40 pt-12">
             {volSent ? (
               <div className="border-t-4 border-gold bg-paper p-10 text-center">
                 <p className="font-display text-2xl font-semibold tracking-wide text-navy">
