@@ -336,12 +336,15 @@ export default async function handler(req, res) {
       if (error) throw error;
       referenceId = memberRow.id;
 
-      // Invite the paid member to create their login. Origin comes from the
-      // request so previews invite back to themselves.
+      // Invite the paid member to create their login. Production always uses
+      // the canonical domain (it must match Supabase's redirect allowlist);
+      // previews invite back to themselves.
       const origin =
-        (req.headers["x-forwarded-proto"] || "https") +
-        "://" +
-        (req.headers["x-forwarded-host"] || req.headers.host || "seqdvgc.com.au");
+        process.env.VERCEL_ENV === "production"
+          ? "https://seqdvgc.com.au"
+          : (req.headers["x-forwarded-proto"] || "https") +
+            "://" +
+            (req.headers["x-forwarded-host"] || req.headers.host || "seqdvgc.com.au");
       const { error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
         redirectTo: `${origin}/member/welcome`,
       });

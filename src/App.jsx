@@ -17,6 +17,9 @@ import WallOfHonour from "./pages/WallOfHonour.jsx";
 import Donate from "./pages/Donate.jsx";
 import MemberArea from "./pages/member/MemberArea.jsx";
 import MemberWelcome from "./pages/member/MemberWelcome.jsx";
+import ResetPassword from "./pages/member/ResetPassword.jsx";
+import ResetConfirm from "./pages/member/ResetConfirm.jsx";
+import AuthCallback from "./pages/AuthCallback.jsx";
 import { AuthProvider } from "./admin/AuthProvider.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import AdminEvents from "./pages/admin/AdminEvents.jsx";
@@ -64,6 +67,9 @@ export default function App() {
             <Route path="/donate" element={<Donate />} />
             <Route path="/member" element={<MemberArea />} />
             <Route path="/member/welcome" element={<MemberWelcome />} />
+            <Route path="/member/reset" element={<ResetPassword />} />
+            <Route path="/member/reset/confirm" element={<ResetConfirm />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminOverview />} />
               <Route path="events" element={<AdminEvents />} />

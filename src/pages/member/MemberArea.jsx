@@ -106,8 +106,14 @@ function MemberSignIn() {
             >
               Join the club
             </Link>{" "}
-            and we&apos;ll send your invite. Forgotten your password? Email us
-            at seqdvgc@gmail.com and we&apos;ll reset it for you.
+            and we&apos;ll send your invite. Forgotten your password?{" "}
+            <Link
+              to="/member/reset"
+              className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
+            >
+              Reset it here
+            </Link>
+            .
           </p>
         </div>
       </div>

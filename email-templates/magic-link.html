@@ -1,0 +1,74 @@
+<!-- SEQDVGC — Supabase Auth email template: MAGIC LINK -->
+<!-- Paste into Supabase → Auth → Email Templates → "Magic Link". -->
+<!-- Suggested subject: Your SEQDVGC sign-in link -->
+<!-- Note: the site currently signs members in with email + password only, so
+     this template is here for completeness in case passwordless sign-in is
+     ever enabled. -->
+<html>
+  <body style="margin:0; padding:0; background-color:#F5F0E4;">
+    <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+      Tap the button to sign in to your member account.
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5F0E4;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:100%; background-color:#FFFFFF; border-top:4px solid #C8A02E;">
+            <!-- Crest header -->
+            <tr>
+              <td align="center" style="background-color:#0B1E3F; padding:28px 24px;">
+                <img src="https://seqdvgc.com.au/SEQDVGC-logo-transparent.png" width="96" alt="South East Queensland Defence Veterans Golf Club crest" style="display:block; width:96px; height:auto;" />
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td style="padding:36px 40px 8px 40px; font-family:Arial, Helvetica, sans-serif;">
+                <p style="margin:0; color:#C8A02E; font-size:13px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;">Club members</p>
+                <h1 style="margin:10px 0 0 0; color:#0B1E3F; font-family:Georgia, 'Times New Roman', serif; font-size:26px; line-height:1.25; text-transform:uppercase;">Your sign-in link</h1>
+                <!-- Ribbon rule -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;">
+                  <tr>
+                    <td width="22" height="4" style="background-color:#C8A02E; font-size:0; line-height:0;">&nbsp;</td>
+                    <td width="22" height="4" style="background-color:#A81E27; font-size:0; line-height:0;">&nbsp;</td>
+                    <td width="22" height="4" style="background-color:#0B1E3F; font-size:0; line-height:0;">&nbsp;</td>
+                  </tr>
+                </table>
+                <p style="margin:22px 0 0 0; color:#4A5B72; font-size:15px; line-height:1.65;">
+                  G&rsquo;day — here&rsquo;s your one-time link to sign in to your
+                  SEQDVGC member account. It only lasts a little while for security,
+                  and it can only be used once.
+                </p>
+                <p style="margin:16px 0 0 0; color:#4A5B72; font-size:15px; line-height:1.65;">
+                  If you didn&rsquo;t ask to sign in, you can safely ignore this email.
+                </p>
+              </td>
+            </tr>
+            <!-- CTA -->
+            <tr>
+              <td align="center" style="padding:28px 40px 8px 40px;">
+                <a href="{{ .ConfirmationURL }}" style="display:inline-block; background-color:#C8A02E; color:#07152B; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; letter-spacing:1px; text-transform:uppercase; text-decoration:none; padding:14px 36px;">Sign me in</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 40px 36px 40px; font-family:Arial, Helvetica, sans-serif;">
+                <p style="margin:0; color:#4A5B72; font-size:12px; line-height:1.6;">
+                  Button not working? Copy and paste this link into your browser:<br />
+                  <a href="{{ .ConfirmationURL }}" style="color:#0B1E3F; word-break:break-all;">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td align="center" style="background-color:#0B1E3F; padding:24px 40px; font-family:Arial, Helvetica, sans-serif;">
+                <p style="margin:0; color:#E4C158; font-family:Georgia, 'Times New Roman', serif; font-size:13px; font-style:italic;">United by service. Connected by golf.</p>
+                <p style="margin:10px 0 0 0; color:#8FA0B8; font-size:11px; line-height:1.6;">
+                  South East Queensland Defence Veterans Golf Club Inc. &middot; ABN 35 714 983 753<br />
+                  <a href="mailto:seqdvgc@gmail.com" style="color:#8FA0B8;">seqdvgc@gmail.com</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
