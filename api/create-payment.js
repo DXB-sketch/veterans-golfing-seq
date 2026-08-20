@@ -199,8 +199,13 @@ export default async function handler(req, res) {
   }
 
   // --- Charge via Square ---------------------------------------------------
-  const environment =
-    process.env.SQUARE_ENVIRONMENT || process.env.VITE_SQUARE_ENVIRONMENT;
+  const environment = (
+    process.env.SQUARE_ENVIRONMENT ||
+    process.env.VITE_SQUARE_ENVIRONMENT ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
   const base =
     environment === "production"
       ? "https://connect.squareup.com"
@@ -232,7 +237,12 @@ export default async function handler(req, res) {
     });
     const data = await squareRes.json();
     if (!squareRes.ok) {
-      console.error("Square payment failed", data.errors);
+      console.error("Square payment failed", {
+        host: base,
+        resolvedEnvironment: environment || "(unset -> sandbox)",
+        httpStatus: squareRes.status,
+        errors: data.errors,
+      });
       if (bookingRowId) {
         await supabase.from("bookings").delete().eq("id", bookingRowId);
       }
