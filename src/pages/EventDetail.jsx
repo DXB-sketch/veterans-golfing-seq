@@ -7,7 +7,7 @@ import FormField from "../components/FormField.jsx";
 import Photo from "../components/Photo.jsx";
 import { EventMeta } from "../components/EventCard.jsx";
 import { useEvent } from "../hooks/useEvents.js";
-import { useSlotAvailability } from "../hooks/useBookings.js";
+import { useSlotAvailability, useSlotPlayers } from "../hooks/useBookings.js";
 import { createBooking } from "../lib/bookings.js";
 import { albumForEvent } from "../lib/photos.js";
 import { FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
@@ -28,6 +28,7 @@ function Detail({ label, value }) {
 // Public booking form: fee summary, tee slot picker, the six fixed fields.
 function BookingSection({ event }) {
   const { slots, loading, error, refresh } = useSlotAvailability(event.id);
+  const { players, refresh: refreshPlayers } = useSlotPlayers(event.id);
   const { session } = useAuth();
   const [slotId, setSlotId] = useState(null);
   const [sending, setSending] = useState(false);
@@ -79,6 +80,7 @@ function BookingSection({ event }) {
           setFormError("That slot just filled up. Please pick another time.");
           setSlotId(null);
           refresh();
+          refreshPlayers();
         } else {
           setFormError(
             `Sorry, your booking didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
@@ -99,6 +101,7 @@ function BookingSection({ event }) {
       setSlotId(null);
       setFormError("That tee time filled up before payment went through. You haven't been charged. Please pick another slot.");
       refresh();
+      refreshPlayers();
     }
   }
 
@@ -259,6 +262,35 @@ function BookingSection({ event }) {
                   })}
                 </div>
               )}
+
+              {/* Names come from an anon-safe RPC: first initial + last name
+                  only, so people can see who they'd be playing alongside. */}
+              {!loading &&
+                !error &&
+                slots.some((s) => players[s.id]?.length) && (
+                  <div className="mt-6 max-w-xl">
+                    <p className="text-sm font-semibold text-ink">
+                      Who&apos;s already booked
+                    </p>
+                    <dl className="mt-2">
+                      {slots
+                        .filter((s) => players[s.id]?.length)
+                        .map((s) => (
+                          <div
+                            key={s.id}
+                            className="flex flex-wrap gap-x-4 gap-y-1 border-b border-ink/10 py-2 text-sm sm:flex-nowrap"
+                          >
+                            <dt className="w-24 shrink-0 font-semibold text-ink">
+                              {s.teeTime}
+                            </dt>
+                            <dd className="text-ink-muted">
+                              {players[s.id].join(", ")}
+                            </dd>
+                          </div>
+                        ))}
+                    </dl>
+                  </div>
+                )}
             </div>
 
             <form onSubmit={handleSubmit} className="mt-8 grid gap-5 sm:grid-cols-2">

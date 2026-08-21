@@ -19,6 +19,26 @@ export async function fetchSlotAvailability(eventId) {
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
+// Anon-safe list of who's booked: first initial + last name per slot, via a
+// SECURITY DEFINER RPC that never exposes mobiles or other details. Returns
+// a map of tee_slot_id -> ["D. Bell", ...]. On any error (including the RPC
+// not existing yet) we return an empty map; the booking form works without it.
+export async function fetchSlotPlayers(eventId) {
+  try {
+    const { data, error } = await supabase.rpc("get_slot_players", {
+      p_event_id: eventId,
+    });
+    if (error) return {};
+    const bySlot = {};
+    for (const row of data ?? []) {
+      (bySlot[row.tee_slot_id] ??= []).push(row.display_name);
+    }
+    return bySlot;
+  } catch {
+    return {};
+  }
+}
+
 // Anonymous insert. A BEFORE INSERT trigger enforces capacity server-side;
 // we translate its error messages into codes the booking form can act on.
 export async function createBooking({
@@ -121,6 +141,21 @@ export async function fetchEventBookings(eventId) {
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data;
+}
+
+// Committee-only edit of a booking's details, including moving it to another
+// tee slot. The capacity trigger raises SLOT_FULL if the target slot is full.
+export async function updateBooking(id, fields) {
+  const { error } = await supabase.from("bookings").update(fields).eq("id", id);
+  if (error) {
+    const message = error.message || "";
+    if (message.includes("SLOT_FULL")) {
+      const err = new Error("That tee time is already full.");
+      err.code = "slot_full";
+      throw err;
+    }
+    throw error;
+  }
 }
 
 export async function deleteBooking(id) {

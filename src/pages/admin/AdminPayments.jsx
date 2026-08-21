@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase.js";
+import { downloadCsv, csvFilename } from "../../lib/csv.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 
 const PURPOSE_LABELS = {
@@ -50,20 +51,49 @@ export default function AdminPayments() {
     };
   }, []);
 
+  // The full payment record as a spreadsheet, newest first like the table.
+  function downloadPayments() {
+    downloadCsv(
+      csvFilename("seqdvgc payments"),
+      ["Date", "Purpose", "Amount", "Payer", "Payer email", "Status", "Square ID"],
+      payments.map((p) => [
+        formatWhen(p.created_at),
+        PURPOSE_LABELS[p.purpose] ?? p.purpose,
+        (p.amount_cents / 100).toFixed(2),
+        p.payer_name ?? "",
+        p.payer_email ?? "",
+        p.status,
+        p.square_payment_id ?? "",
+      ])
+    );
+  }
+
   if (loading) {
     return <p className="text-lg text-ink-muted">Loading the payments…</p>;
   }
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h2 className="font-display text-2xl font-semibold tracking-wide text-navy">
-        Payments
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="font-display text-2xl font-semibold tracking-wide text-navy">
+          Payments
+        </h2>
+        {payments.length > 0 && (
+          <button
+            onClick={downloadPayments}
+            className="min-h-[48px] border-2 border-navy px-6 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy hover:text-white"
+          >
+            Download the payments
+          </button>
+        )}
+      </div>
       <RibbonRule className="mt-3" />
       <p className="mt-3 text-ink-muted">
         Every payment taken through the website (memberships, donations and
         sponsorships), newest first. This list is a record only; refunds are
         done in the Square dashboard.
+        {payments.length > 0 &&
+          " The download is a spreadsheet file (CSV) that opens straight into Excel."}
       </p>
 
       {error ? (
@@ -101,7 +131,7 @@ export default function AdminPayments() {
                     {formatAmount(p.amount_cents)}
                   </td>
                   <td className="px-4 py-3">
-                    {p.payer_name || "—"}
+                    {p.payer_name || "–"}
                     {p.payer_email && (
                       <span className="block text-sm text-ink-muted">
                         {p.payer_email}
@@ -110,7 +140,7 @@ export default function AdminPayments() {
                   </td>
                   <td className="px-4 py-3 capitalize">{p.status}</td>
                   <td className="px-4 py-3 text-sm text-ink-muted">
-                    {p.square_payment_id || "—"}
+                    {p.square_payment_id || "–"}
                   </td>
                 </tr>
               ))}

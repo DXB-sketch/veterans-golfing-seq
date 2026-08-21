@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../lib/supabase.js";
+import { downloadCsv, csvFilename } from "../../lib/csv.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 import AdminField from "./AdminField.jsx";
 
@@ -27,7 +28,7 @@ const emptyForm = {
 };
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "–";
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-AU", {
     day: "numeric",
     month: "short",
@@ -245,20 +246,61 @@ export default function AdminMembers() {
     }
   }
 
+  // The whole register as a spreadsheet, same order as the list on screen.
+  function downloadMembers() {
+    downloadCsv(
+      csvFilename("seqdvgc members"),
+      [
+        "Name",
+        "Email",
+        "Phone",
+        "Service branch",
+        "GA handicap",
+        "Golf Links number",
+        "Status",
+        "Joined",
+        "Membership ends",
+      ],
+      members.map((m) => [
+        m.name,
+        m.email,
+        m.phone ?? "",
+        m.service_branch ?? "",
+        m.ga_handicap === true ? "Yes" : m.ga_handicap === false ? "No" : "",
+        m.golf_links_number ?? "",
+        m.status === "active" ? "Active" : "Expired",
+        m.joined_at ?? "",
+        m.expires_at ?? "",
+      ])
+    );
+  }
+
   if (loading) {
     return <p className="text-lg text-ink-muted">Loading the members…</p>;
   }
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h2 className="font-display text-2xl font-semibold tracking-wide text-navy">
-        Members
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="font-display text-2xl font-semibold tracking-wide text-navy">
+          Members
+        </h2>
+        {members.length > 0 && (
+          <button
+            onClick={downloadMembers}
+            className="min-h-[48px] border-2 border-navy px-6 font-body text-base font-bold uppercase tracking-[0.08em] text-navy transition-colors hover:bg-navy hover:text-white"
+          >
+            Download the register
+          </button>
+        )}
+      </div>
       <RibbonRule className="mt-3" />
       <p className="mt-3 text-ink-muted">
         The club&apos;s register of paid members. Members who paid online
         appear here automatically; use the form below to record someone who
         paid in person or by bank transfer.
+        {members.length > 0 &&
+          " The download is a spreadsheet file (CSV) that opens straight into Excel."}
       </p>
 
       {notice && (

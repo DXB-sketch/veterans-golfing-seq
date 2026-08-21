@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase.js";
+import { downloadCsv, csvFilename } from "../../lib/csv.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 
 function formatWhen(iso) {
@@ -36,6 +37,19 @@ function HandledToggle({ item, saving, onToggle }) {
       }`}
     >
       {saving ? "Saving…" : handled ? "Mark as new" : "Mark as handled"}
+    </button>
+  );
+}
+
+// Small per-section export link: each list downloads as a CSV spreadsheet
+// that opens straight into Excel.
+function DownloadLink({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="mt-2 font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"
+    >
+      Download as a spreadsheet
     </button>
   );
 }
@@ -115,6 +129,53 @@ export default function AdminSubmissions() {
     );
   }
 
+  function downloadEnquiries() {
+    downloadCsv(
+      csvFilename("membership enquiries"),
+      ["Date", "Name", "Email", "Phone", "Service", "Playing info", "GA handicap", "Golf Links number", "Status"],
+      enquiries.map((e) => [
+        formatWhen(e.created_at),
+        e.name,
+        e.email,
+        e.phone ?? "",
+        e.service_branch ?? "",
+        e.playing_info ?? "",
+        e.ga_handicap ?? "",
+        e.golf_links_number ?? "",
+        e.status === "handled" ? "Handled" : "New",
+      ])
+    );
+  }
+
+  function downloadMessages() {
+    downloadCsv(
+      csvFilename("contact messages"),
+      ["Date", "Name", "Email", "Message", "Status"],
+      messages.map((m) => [
+        formatWhen(m.created_at),
+        m.name,
+        m.email,
+        m.message,
+        m.status === "handled" ? "Handled" : "New",
+      ])
+    );
+  }
+
+  function downloadVolunteers() {
+    downloadCsv(
+      csvFilename("volunteer enquiries"),
+      ["Date", "Name", "Email", "Phone", "Message", "Status"],
+      (volunteers ?? []).map((v) => [
+        formatWhen(v.created_at),
+        v.name,
+        v.email,
+        v.phone ?? "",
+        v.message,
+        v.status === "handled" ? "Handled" : "New",
+      ])
+    );
+  }
+
   if (loading) {
     return <p className="text-lg text-ink-muted">Loading submissions…</p>;
   }
@@ -140,6 +201,7 @@ export default function AdminSubmissions() {
             People who&apos;ve filled in the &ldquo;Join the club&rdquo; form.
             Newest first. Reply to them by email, then mark them as handled.
           </p>
+          {enquiries.length > 0 && <DownloadLink onClick={downloadEnquiries} />}
           {enquiries.length === 0 ? (
             <p className="mt-8 text-ink-muted">No enquiries yet.</p>
           ) : (
@@ -194,6 +256,7 @@ export default function AdminSubmissions() {
             Messages sent through the &ldquo;Contact us&rdquo; page. Newest
             first.
           </p>
+          {messages.length > 0 && <DownloadLink onClick={downloadMessages} />}
           {messages.length === 0 ? (
             <p className="mt-8 text-ink-muted">No messages yet.</p>
           ) : (
@@ -240,6 +303,9 @@ export default function AdminSubmissions() {
             People offering to lend a hand, from the volunteer form. Newest
             first.
           </p>
+          {volunteers?.length > 0 && (
+            <DownloadLink onClick={downloadVolunteers} />
+          )}
           {volunteers === null ? (
             <p className="mt-8 text-ink-muted">
               Volunteer enquiries aren&apos;t switched on yet. They&apos;ll

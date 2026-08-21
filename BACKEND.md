@@ -196,3 +196,13 @@ Confirm `.env` is gitignored and add `.env.example`.
 ---
 
 *Anything genuinely ambiguous — ask me before guessing. The three things most worth pausing on: the final RLS policies (§3), the framework detection (§0.4), and anything that would touch the live database irreversibly.*
+
+---
+
+## 11. Addendum, 2026-08-21: tee sheet names + committee editing
+
+- New RPC `get_slot_players(p_event_id uuid)` (SECURITY DEFINER, granted to anon + authenticated): returns `tee_slot_id` + `display_name` for every booking on a non-draft event, where `display_name` is **first initial + last name only** (e.g. "D. Bell"). This is the only public window into `bookings`; mobiles, Golf Links numbers and full first names remain committee-only. Shown on the public event page under the tee slot picker.
+- `enforce_booking_rules` updated: fires on INSERT and on UPDATE of `tee_slot_id` (so moving a player can't overfill a slot); committee members (`is_committee()`) bypass the published/locked/date booking-window check but **capacity still applies to everyone**.
+- Admin bookings page can now add players to a slot, edit a booking's details, and move players between slots, alongside the existing remove.
+- CSV export (UTF-8 BOM, Excel-ready) added in the admin area: per-event tee sheet, members register, payments, and each enquiries list. Client-side only via `src/lib/csv.js`; no new server surface.
+- Migration: `supabase/migrations/20260821000001_tee_sheet_names_and_admin_edit.sql`.
