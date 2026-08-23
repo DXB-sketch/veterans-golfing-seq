@@ -264,33 +264,33 @@ function BookingSection({ event }) {
               )}
 
               {/* Names come from an anon-safe RPC: first initial + last name
-                  only, so people can see who they'd be playing alongside. */}
-              {!loading &&
-                !error &&
-                slots.some((s) => players[s.id]?.length) && (
-                  <div className="mt-6 max-w-xl">
-                    <p className="text-sm font-semibold text-ink">
-                      Who&apos;s already booked
-                    </p>
-                    <dl className="mt-2">
-                      {slots
-                        .filter((s) => players[s.id]?.length)
-                        .map((s) => (
-                          <div
-                            key={s.id}
-                            className="flex flex-wrap gap-x-4 gap-y-1 border-b border-ink/10 py-2 text-sm sm:flex-nowrap"
-                          >
-                            <dt className="w-24 shrink-0 font-semibold text-ink">
-                              {s.teeTime}
-                            </dt>
-                            <dd className="text-ink-muted">
-                              {players[s.id].join(", ")}
-                            </dd>
-                          </div>
-                        ))}
-                    </dl>
-                  </div>
-                )}
+                  only, so anyone booking can see who they'd be playing
+                  alongside. Every slot is listed so the sheet is visible even
+                  before the first booking comes in. */}
+              {!loading && !error && slots.length > 0 && (
+                <div className="mt-6 max-w-xl">
+                  <p className="text-sm font-semibold text-ink">
+                    Who&apos;s already booked
+                  </p>
+                  <dl className="mt-2">
+                    {slots.map((s) => (
+                      <div
+                        key={s.id}
+                        className="flex flex-wrap gap-x-4 gap-y-1 border-b border-ink/10 py-2 text-sm sm:flex-nowrap"
+                      >
+                        <dt className="w-24 shrink-0 font-semibold text-ink">
+                          {s.teeTime}
+                        </dt>
+                        <dd className="text-ink-muted">
+                          {players[s.id]?.length
+                            ? players[s.id].join(", ")
+                            : "No bookings yet"}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="mt-8 grid gap-5 sm:grid-cols-2">

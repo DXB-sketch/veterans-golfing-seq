@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../../admin/AuthProvider.jsx";
 import { supabase } from "../../lib/supabase.js";
 import {
@@ -33,91 +33,11 @@ export default function MemberArea() {
     );
   }
 
-  return session ? <MemberDashboard session={session} /> : <MemberSignIn />;
-}
-
-// ---------------------------------------------------------------------------
-// Sign in — member accounts are created by invite after joining, so there is
-// deliberately no "create account" link here.
-// ---------------------------------------------------------------------------
-function MemberSignIn() {
-  const [error, setError] = useState(null);
-  const [signingIn, setSigningIn] = useState(false);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const f = new FormData(e.target);
-    setError(null);
-    setSigningIn(true);
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: f.get("email").trim(),
-      password: f.get("password"),
-    });
-    setSigningIn(false);
-    if (authError) {
-      setError(
-        "That email or password isn't right. Please check both and try again. If you're stuck, email us at seqdvgc@gmail.com and we'll sort it out."
-      );
-    }
-    // On success the auth listener updates the session and the dashboard appears.
-  }
-
-  return (
-    <section className="bg-cream px-5 py-16 md:py-24">
-      <div className="mx-auto max-w-lg">
-        <div className="border-t-4 border-gold bg-paper p-8 md:p-10">
-          <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
-            Club members
-          </p>
-          <h1 className="mt-2 font-display text-3xl font-bold uppercase text-navy">
-            Member sign in
-          </h1>
-          <RibbonRule className="mt-4" />
-          <p className="mt-5 text-ink-muted">
-            Member accounts are created by invite. When you join the club,
-            we email you a link to set up your login. There&apos;s no
-            self-serve sign-up.
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
-            <FormField label="Email" id="email" type="email" required autoComplete="email" />
-            <FormField
-              label="Password"
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-            />
-            {error && (
-              <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink">
-                {error}
-              </p>
-            )}
-            <Button type="submit" disabled={signingIn} className="w-full">
-              {signingIn ? "Signing in…" : "Sign in"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-sm text-ink-muted">
-            Not a member yet?{" "}
-            <Link
-              to="/membership"
-              className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
-            >
-              Join the club
-            </Link>{" "}
-            and we&apos;ll send your invite. Forgotten your password?{" "}
-            <Link
-              to="/member/reset"
-              className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
-            >
-              Reset it here
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
-    </section>
+  // Signing in happens on the site-wide login page.
+  return session ? (
+    <MemberDashboard session={session} />
+  ) : (
+    <Navigate to="/login" replace />
   );
 }
 

@@ -14,6 +14,7 @@ import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
 import WallOfHonour from "./pages/WallOfHonour.jsx";
 import Donate from "./pages/Donate.jsx";
+import Login from "./pages/Login.jsx";
 import MemberArea from "./pages/member/MemberArea.jsx";
 import MemberWelcome from "./pages/member/MemberWelcome.jsx";
 import ResetPassword from "./pages/member/ResetPassword.jsx";
@@ -111,6 +112,7 @@ export default function App() {
             <Route path="/sponsors" element={<Navigate to="/about#sponsors" replace />} />
             <Route path="/wall-of-honour" element={<WallOfHonour />} />
             <Route path="/donate" element={<Donate />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/member" element={<MemberArea />} />
             <Route path="/member/welcome" element={<MemberWelcome />} />
             <Route path="/member/reset" element={<ResetPassword />} />

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, Navigate, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../admin/AuthProvider.jsx";
 import { supabase } from "../../lib/supabase.js";
-import AdminLogin from "./AdminLogin.jsx";
 
 function AdminTab({ to, end = false, children }) {
   return (
@@ -79,8 +78,9 @@ export default function AdminLayout() {
     );
   }
 
+  // Signing in happens on the site-wide login page.
   if (!session) {
-    return <AdminLogin />;
+    return <Navigate to="/login" replace />;
   }
 
   if (role === "checking") {

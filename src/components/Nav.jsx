@@ -10,6 +10,7 @@ const links = [
   { to: "/membership", label: "Membership" },
   { to: "/resources", label: "Resources" },
   { to: "/contact", label: "Contact" },
+  { to: "/login", label: "Sign in" },
 ];
 
 export default function Nav() {

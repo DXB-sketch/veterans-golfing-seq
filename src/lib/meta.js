@@ -59,6 +59,7 @@ export const ROUTE_META = [
   { path: "/privacy", title: "Privacy Policy" },
   { path: "/terms", title: "Terms of Use" },
   // Account and committee areas: real pages, but not for search results.
+  { path: "/login", title: "Sign In", noindex: true },
   { path: "/member", title: "Member Area", noindex: true },
   { path: "/admin", title: "Committee", noindex: true },
   { path: "/auth", title: "Account", noindex: true },

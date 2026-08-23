@@ -32,8 +32,7 @@ export default function Footer() {
                 ["Membership", "/membership"],
                 ["Veteran resources", "/resources"],
                 ["Contact us", "/contact"],
-                ["Member sign in", "/member"],
-                ["Committee login", "/admin"],
+                ["Sign in", "/login"],
               ].map(([label, to]) => (
                 <li key={to}>
                   <Link to={to} className="text-cream/85 transition-colors hover:text-gold-bright">
