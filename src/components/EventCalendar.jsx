@@ -61,7 +61,7 @@ export default function EventCalendar({ events, className = "" }) {
 
   return (
     <div
-      className={`w-fit rounded-card border border-gold/25 bg-navy-deep/70 p-4 shadow-soft sm:p-5 lg:p-4 ${className}`}
+      className={`w-fit rounded-card border border-gold/25 bg-navy-deep/70 p-4 shadow-soft sm:p-5 lg:p-3 ${className}`}
     >
       <DayPicker
         mode="single"
@@ -80,13 +80,13 @@ export default function EventCalendar({ events, className = "" }) {
           root: "font-body text-cream",
           months: "relative",
           month: "w-full",
-          nav: "absolute inset-x-0 top-0 flex items-center justify-between",
+          nav: "absolute inset-x-0 top-0 flex items-center justify-between px-1",
           button_previous:
             "flex h-9 w-9 items-center justify-center rounded-card text-cream/70 transition-colors hover:bg-gold/15 hover:text-gold-bright focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold",
           button_next:
             "flex h-9 w-9 items-center justify-center rounded-card text-cream/70 transition-colors hover:bg-gold/15 hover:text-gold-bright focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold",
           chevron: "h-5 w-5 fill-current",
-          month_caption: "flex h-9 items-center justify-center",
+          month_caption: "flex h-9 items-center justify-center lg:h-8",
           dropdowns: "flex items-center gap-2",
           dropdown_root:
             "relative inline-flex items-center rounded-card px-1 transition-colors hover:bg-gold/15 focus-within:outline focus-within:outline-2 focus-within:outline-gold",
@@ -96,19 +96,19 @@ export default function EventCalendar({ events, className = "" }) {
             "absolute inset-0 cursor-pointer bg-navy font-body text-base text-cream opacity-0",
           caption_label:
             "flex items-center gap-1 font-display text-base font-bold uppercase tracking-wide text-white",
-          month_grid: "mt-3 border-separate border-spacing-y-1 lg:mt-2 lg:border-spacing-y-0.5",
+          month_grid: "mt-3 border-separate border-spacing-y-1 lg:mt-1.5 lg:border-spacing-y-0.5",
           weekdays: "",
           weekday:
             "pb-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-gold lg:text-[0.625rem]",
           day: "p-0 text-center",
           day_button:
-            "h-11 w-11 rounded-card text-[0.9375rem] text-cream/90 lg:h-9 lg:w-9 lg:text-sm",
+            "h-11 w-11 rounded-card text-[0.9375rem] text-cream/90 lg:h-[38px] lg:w-14",
           today: "[&>button]:ring-1 [&>button]:ring-inset [&>button]:ring-gold/60",
           outside: "[&>button]:text-cream/30",
           hidden: "invisible",
         }}
       />
-      <p className="mt-2 flex items-center gap-2 border-t border-gold/15 pt-3 text-xs text-cream/70 lg:pt-2">
+      <p className="mt-2 flex items-center gap-2 border-t border-gold/15 pt-3 text-xs text-cream/70 lg:mt-1.5 lg:pt-2">
         <span
           className="inline-block h-3 w-3 rounded-[2px] bg-gold"
           aria-hidden="true"
