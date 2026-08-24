@@ -42,7 +42,7 @@ export default function Events() {
   return (
     <>
       {/* Events identity: compact navy banner with a solid gold baseline. */}
-      <section className="border-b-4 border-gold bg-navy px-5 py-12 md:py-16">
+      <section className="border-b-4 border-gold bg-navy px-5 py-12 md:py-16 lg:py-10">
         <div className="mx-auto flex max-w-site flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">

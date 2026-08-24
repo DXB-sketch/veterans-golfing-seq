@@ -35,17 +35,17 @@ export default function EventCalendar({ events, className = "" }) {
     [eventsByDate]
   );
 
-  // Open on the month of the next event; cover every event year in the
-  // dropdowns with a little room either side.
+  // Open on the month of the next event. The club started in 2026, so the
+  // year dropdown floors there and always reaches a decade ahead (further if
+  // an event is somehow seeded beyond that).
   const { defaultMonth, startMonth, endMonth } = useMemo(() => {
     const now = new Date();
     const next = events.find((e) => e.timeStatus !== "finalised" && e.date);
     const years = [...eventsByDate.keys()].map((d) => Number(d.slice(0, 4)));
-    const minYear = Math.min(now.getFullYear() - 1, ...years);
-    const maxYear = Math.max(now.getFullYear() + 1, ...years);
+    const maxYear = Math.max(now.getFullYear() + 10, ...years);
     return {
       defaultMonth: next ? isoToDate(next.date) : now,
-      startMonth: new Date(minYear, 0),
+      startMonth: new Date(2026, 0),
       endMonth: new Date(maxYear, 11),
     };
   }, [events, eventsByDate]);
@@ -61,7 +61,7 @@ export default function EventCalendar({ events, className = "" }) {
 
   return (
     <div
-      className={`w-fit rounded-card border border-gold/25 bg-navy-deep/70 p-4 shadow-soft sm:p-5 ${className}`}
+      className={`w-fit rounded-card border border-gold/25 bg-navy-deep/70 p-4 shadow-soft sm:p-5 lg:p-4 ${className}`}
     >
       <DayPicker
         mode="single"
@@ -90,22 +90,25 @@ export default function EventCalendar({ events, className = "" }) {
           dropdowns: "flex items-center gap-2",
           dropdown_root:
             "relative inline-flex items-center rounded-card px-1 transition-colors hover:bg-gold/15 focus-within:outline focus-within:outline-2 focus-within:outline-gold",
-          dropdown: "absolute inset-0 cursor-pointer opacity-0",
+          // The select overlays its styled label invisibly, but the colours
+          // set here carry into the browser's open option list.
+          dropdown:
+            "absolute inset-0 cursor-pointer bg-navy font-body text-base text-cream opacity-0",
           caption_label:
             "flex items-center gap-1 font-display text-base font-bold uppercase tracking-wide text-white",
-          month_grid: "mt-3 border-separate border-spacing-y-1",
+          month_grid: "mt-3 border-separate border-spacing-y-1 lg:mt-2 lg:border-spacing-y-0.5",
           weekdays: "",
           weekday:
-            "pb-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-gold",
+            "pb-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-gold lg:text-[0.625rem]",
           day: "p-0 text-center",
           day_button:
-            "h-10 w-10 rounded-card text-[0.9375rem] text-cream/90 sm:h-11 sm:w-11",
+            "h-11 w-11 rounded-card text-[0.9375rem] text-cream/90 lg:h-9 lg:w-9 lg:text-sm",
           today: "[&>button]:ring-1 [&>button]:ring-inset [&>button]:ring-gold/60",
           outside: "[&>button]:text-cream/30",
           hidden: "invisible",
         }}
       />
-      <p className="mt-2 flex items-center gap-2 border-t border-gold/15 pt-3 text-xs text-cream/70">
+      <p className="mt-2 flex items-center gap-2 border-t border-gold/15 pt-3 text-xs text-cream/70 lg:pt-2">
         <span
           className="inline-block h-3 w-3 rounded-[2px] bg-gold"
           aria-hidden="true"
