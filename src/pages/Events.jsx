@@ -1,5 +1,6 @@
 import { useState } from "react";
 import RibbonRule from "../components/RibbonRule.jsx";
+import EventCalendar from "../components/EventCalendar.jsx";
 import { EventRow } from "../components/EventCard.jsx";
 import { REGIONS } from "../lib/events.js";
 import { useEvents } from "../hooks/useEvents.js";
@@ -42,18 +43,21 @@ export default function Events() {
     <>
       {/* Events identity: compact navy banner with a solid gold baseline. */}
       <section className="border-b-4 border-gold bg-navy px-5 py-12 md:py-16">
-        <div className="mx-auto max-w-site">
-          <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
-            Golf days &amp; club events
-          </p>
-          <h1 className="text-page-title mt-3 font-display font-bold uppercase text-white">
-            Events
-          </h1>
-          <RibbonRule className="mt-5" dark />
-          <p className="mt-5 max-w-xl text-cream/85">
-            Brisbane, Sunshine Coast and Gold Coast. Filter by region to find a
-            round near you.
-          </p>
+        <div className="mx-auto flex max-w-site flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="font-body text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-gold">
+              Golf days &amp; club events
+            </p>
+            <h1 className="text-page-title mt-3 font-display font-bold uppercase text-white">
+              Events
+            </h1>
+            <RibbonRule className="mt-5" dark />
+            <p className="mt-5 max-w-xl text-cream/85">
+              Brisbane, Sunshine Coast and Gold Coast. Filter by region to find
+              a round near you.
+            </p>
+          </div>
+          <EventCalendar events={events} className="lg:shrink-0" />
         </div>
       </section>
 
