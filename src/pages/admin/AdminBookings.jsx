@@ -281,6 +281,15 @@ export default function AdminBookings() {
     setConfirmRemoveId(null);
   }
 
+  // What an unpaid booking owes at the course: green fee plus the extras
+  // the player ticked, priced from the event.
+  const owedCents = (b) =>
+    event
+      ? event.greenFeeCents +
+        (b.cart_hire ? event.cartFeeCents : 0) +
+        (b.playing_in_comp ? event.sideCompCents : 0)
+      : 0;
+
   // The tee sheet as a spreadsheet, one row per player, ordered by tee time.
   function downloadTeeSheet() {
     const rows = [];
@@ -295,6 +304,9 @@ export default function AdminBookings() {
           b.playing_in_comp ? "Yes" : "No",
           b.cart_hire ? "Yes" : "No",
           b.paid_cents ? `$${(b.paid_cents / 100).toFixed(2)}` : "",
+          !b.paid_cents && owedCents(b) > 0
+            ? `$${(owedCents(b) / 100).toFixed(2)}`
+            : "",
           b.created_at ? new Date(b.created_at).toLocaleDateString("en-AU") : "",
         ]);
       }
@@ -310,6 +322,7 @@ export default function AdminBookings() {
         "Side comp",
         "Cart hire",
         "Paid online",
+        "Owes at course",
         "Booked on",
       ],
       rows
@@ -470,8 +483,15 @@ export default function AdminBookings() {
                                     <span className="font-semibold text-navy">
                                       Paid ${(b.paid_cents / 100).toFixed(2)} online
                                     </span>
+                                  ) : owedCents(b) > 0 ? (
+                                    <>
+                                      Pays at the course on the day —{" "}
+                                      <span className="font-semibold text-navy">
+                                        ${(owedCents(b) / 100).toFixed(2)} owing
+                                      </span>
+                                    </>
                                   ) : (
-                                    "No online payment recorded (pays at the course)"
+                                    "No fees to pay"
                                   )}
                                 </p>
                               </div>

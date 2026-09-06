@@ -1,6 +1,12 @@
 import { FACEBOOK_URL } from "./site.js";
 import gcOpenManifest from "../../public/images/events/gold-coast-open-2026/captions.json";
 
+// BUNDLED FALLBACK ONLY (since 2026-09-06): the live photo library is the
+// committee-managed gallery_photos table + 'gallery' bucket (src/lib/gallery.js,
+// managed at /admin/photos). These manifest albums render instantly on first
+// paint and keep the site whole if the database is unreachable — the same
+// five photos are seeded in the database, so the swap is invisible.
+//
 // Event photo albums live in public/images/events/<slug>/ with a captions.json
 // manifest (title, alt, orientation, role, faces, consent). Photos are always
 // placed by their manifest role, never guessed.

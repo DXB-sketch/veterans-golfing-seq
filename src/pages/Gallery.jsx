@@ -1,10 +1,16 @@
 import RibbonRule from "../components/RibbonRule.jsx";
 import Photo from "../components/Photo.jsx";
 import { allPhotos } from "../lib/photos.js";
+import { useGalleryPhotos } from "../hooks/useGallery.js";
 import { FACEBOOK_URL } from "../lib/site.js";
 
 export default function Gallery() {
-  const photos = allPhotos();
+  // Committee-managed photos from the database, with the bundled album as
+  // the instant first paint / offline fallback. Hidden photos are already
+  // filtered out by the database for public visitors; the extra filter
+  // keeps a signed-in committee member's public view honest too.
+  const { photos: allRows } = useGalleryPhotos(allPhotos());
+  const photos = allRows.filter((p) => p.isPublished !== false);
 
   return (
     <>

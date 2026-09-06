@@ -30,6 +30,7 @@ import AdminTeam from "./pages/admin/AdminTeam.jsx";
 import AdminOverview from "./pages/admin/AdminOverview.jsx";
 import AdminMembers from "./pages/admin/AdminMembers.jsx";
 import AdminSponsors from "./pages/admin/AdminSponsors.jsx";
+import AdminGallery from "./pages/admin/AdminGallery.jsx";
 import AdminPayments from "./pages/admin/AdminPayments.jsx";
 import {
   SITE_NAME,
@@ -123,6 +124,7 @@ export default function App() {
               <Route path="events" element={<AdminEvents />} />
               <Route path="members" element={<AdminMembers />} />
               <Route path="sponsors" element={<AdminSponsors />} />
+              <Route path="photos" element={<AdminGallery />} />
               <Route path="payments" element={<AdminPayments />} />
               <Route path="events/new" element={<AdminEventForm />} />
               <Route path="events/:id/edit" element={<AdminEventForm />} />

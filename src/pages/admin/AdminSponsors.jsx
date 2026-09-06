@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "../../lib/supabase.js";
+import { supabase, uploadToBucket } from "../../lib/supabase.js";
 import { TIERS, tierByKey } from "../../lib/tiers.js";
 import { logoUrl } from "../../lib/sponsors.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
@@ -133,20 +133,8 @@ export default function AdminSponsors() {
   }
 
   // Upload the chosen logo to the sponsor-logos bucket and return its path.
-  async function uploadLogo(file) {
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const safeName = form.company_name
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "sponsor";
-    const path = `${safeName}-${Date.now()}.${ext}`;
-    const { data, error } = await supabase.storage
-      .from("sponsor-logos")
-      .upload(path, file, { upsert: false });
-    if (error) throw error;
-    return data.path;
-  }
+  const uploadLogo = (file) =>
+    uploadToBucket("sponsor-logos", file, form.company_name || "sponsor");
 
   async function handleSubmit(e) {
     e.preventDefault();

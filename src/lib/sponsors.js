@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.js";
+import { supabase, publicStorageUrl } from "./supabase.js";
 import { TIER_ORDER } from "./tiers.js";
 
 // Rank a tier key by prominence (Platinum Plus first). Unknown tiers sort last.
@@ -32,7 +32,5 @@ export async function fetchPublicSponsors() {
 export function logoUrl(logoPath) {
   if (!logoPath) return null;
   if (logoPath.startsWith("/")) return logoPath;
-  const base = import.meta.env.VITE_SUPABASE_URL;
-  if (!base) return null;
-  return `${base.replace(/\/+$/, "")}/storage/v1/object/public/sponsor-logos/${logoPath}`;
+  return publicStorageUrl("sponsor-logos", logoPath);
 }

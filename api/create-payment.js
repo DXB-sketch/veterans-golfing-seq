@@ -134,7 +134,7 @@ export default async function handler(req, res) {
     const b = body.booking;
     const { data: ev, error: evError } = await supabase
       .from("events")
-      .select("id, status, is_locked, event_date, green_fee, cart_fee, side_comp")
+      .select("id, status, is_locked, event_date, green_fee, cart_fee, side_comp, payment_mode")
       .eq("id", b.eventId)
       .maybeSingle();
     const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Brisbane" });
@@ -143,6 +143,11 @@ export default async function handler(req, res) {
       !ev.event_date || ev.event_date < today
     ) {
       return bad(res, "Bookings aren't open for this event.");
+    }
+    // Committee-set payment mode: pay-at-the-course events never take money
+    // online — book directly on the event page instead.
+    if (ev.payment_mode === "on_arrival") {
+      return bad(res, "This event is paid at the course on the day — book your spot without paying online.");
     }
     const { data: slot } = await supabase
       .from("tee_slots")

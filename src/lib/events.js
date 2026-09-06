@@ -119,6 +119,10 @@ export function mapEvent(row) {
     cartFeeCents: Math.round(Number(row.cart_fee || 0) * 100),
     sideCompCents: Math.round(Number(row.side_comp || 0) * 100),
     sideCompNote: row.side_comp_note || "",
+    // How players pay for a booking: 'online_required' (pay to book),
+    // 'online_choice' (player picks online or at the course — the default),
+    // or 'on_arrival' (book free, pay at the course on the day).
+    paymentMode: row.payment_mode || "online_choice",
     status: timeStatusLabel(timeStatus),
     timeStatus,
     lifecycle: row.status,

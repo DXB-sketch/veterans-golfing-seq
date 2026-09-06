@@ -8,6 +8,7 @@ import Photo from "../components/Photo.jsx";
 import { EventMeta } from "../components/EventCard.jsx";
 import { useEvent } from "../hooks/useEvents.js";
 import { useSlotAvailability, useSlotPlayers } from "../hooks/useBookings.js";
+import { useEventPhotos } from "../hooks/useGallery.js";
 import { createBooking } from "../lib/bookings.js";
 import { albumForEvent } from "../lib/photos.js";
 import { FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
@@ -34,14 +35,25 @@ function BookingSection({ event }) {
   const [sending, setSending] = useState(false);
   const [formError, setFormError] = useState(null);
   const [booked, setBooked] = useState(null);
-  // Details captured and awaiting payment (paid events only).
+  // Details captured and awaiting payment (online payments only).
   const [pending, setPending] = useState(null);
+  // Where the player pays when the event offers the choice: 'online' | 'course'.
+  const [payWhere, setPayWhere] = useState(null);
 
   const selectedSlot = slots.find((s) => s.id === slotId);
 
-  // Booking an event is pay-to-book (club decision): green fee plus whatever
-  // the player ticks, charged before the slot is confirmed. The server
-  // re-prices from the event row — this total is display only.
+  // How this event takes money (committee-set, per event): pay online to
+  // book, the player's choice of online or at the course, or everyone pays
+  // at the course on arrival.
+  const hasFees =
+    event.greenFeeCents + event.cartFeeCents + event.sideCompCents > 0;
+  const offersChoice = hasFees && event.paymentMode === "online_choice";
+  const onlineRequired = hasFees && event.paymentMode === "online_required";
+  const payAtCourseOnly = hasFees && event.paymentMode === "on_arrival";
+  const paysOnline = onlineRequired || (offersChoice && payWhere === "online");
+
+  // Green fee plus whatever the player ticks. The server re-prices online
+  // payments from the event row — this total is display only.
   function totalCentsFor(details) {
     return (
       event.greenFeeCents +
@@ -54,6 +66,12 @@ function BookingSection({ event }) {
     e.preventDefault();
     if (!slotId) {
       setFormError("Please pick a tee slot above before booking.");
+      return;
+    }
+    if (offersChoice && !payWhere) {
+      setFormError(
+        "Please choose how you'd like to pay — online now, or at the course on the day."
+      );
       return;
     }
     const f = new FormData(e.target);
@@ -69,30 +87,41 @@ function BookingSection({ event }) {
     };
     setFormError(null);
 
-    // Events with no fees keep the direct (free) booking path.
-    if (totalCentsFor(details) <= 0) {
-      setSending(true);
-      try {
-        await createBooking(details);
-        setBooked({ playerName: details.playerName, teeTime: selectedSlot?.teeTime });
-      } catch (err) {
-        if (err.code === "slot_full") {
-          setFormError("That slot just filled up. Please pick another time.");
-          setSlotId(null);
-          refresh();
-          refreshPlayers();
-        } else {
-          setFormError(
-            `Sorry, your booking didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
-          );
-        }
-      } finally {
-        setSending(false);
-      }
+    if (paysOnline && totalCentsFor(details) > 0) {
+      setPending(details);
       return;
     }
 
-    setPending(details);
+    // Free events, pay-at-the-course events, and the "pay at the course"
+    // choice all book directly — no charge.
+    setSending(true);
+    try {
+      await createBooking(details);
+      setBooked({
+        playerName: details.playerName,
+        teeTime: selectedSlot?.teeTime,
+        owedCents: totalCentsFor(details),
+      });
+    } catch (err) {
+      if (err.code === "slot_full") {
+        setFormError("That slot just filled up. Please pick another time.");
+        setSlotId(null);
+        refresh();
+        refreshPlayers();
+      } else if (err.code === "payment_required") {
+        // The committee flipped the event to pay-online-only while this
+        // page was open.
+        setFormError(
+          "This event is now paid online when booking. Please refresh the page and book again."
+        );
+      } else {
+        setFormError(
+          `Sorry, your booking didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
+        );
+      }
+    } finally {
+      setSending(false);
+    }
   }
 
   function handlePaymentError(data) {
@@ -120,6 +149,15 @@ function BookingSection({ event }) {
               slot{booked.paid ? " and your payment has been received" : ""}.
               See you on the course.
             </p>
+            {booked.owedCents > 0 && (
+              <p className="mt-3 text-ink-muted">
+                You&apos;ll pay{" "}
+                <span className="font-semibold text-ink">
+                  ${(booked.owedCents / 100).toFixed(2)}
+                </span>{" "}
+                at the course on the day.
+              </p>
+            )}
           </div>
         ) : pending ? (
           <div className="mx-auto max-w-xl border-t-4 border-gold bg-cream p-8 md:p-10">
@@ -200,6 +238,17 @@ function BookingSection({ event }) {
                 )}
               </p>
             </div>
+
+            {/* How fees are paid, set per event by the committee. */}
+            {hasFees && (
+              <p className="mt-4 text-sm text-ink-muted">
+                {payAtCourseOnly
+                  ? "Fees are paid at the course on the day — booking your slot is free."
+                  : offersChoice
+                    ? "Pay online when you book, or at the course on the day — your choice below."
+                    : "Fees are paid online when you book."}
+              </p>
+            )}
 
             {/* Tee slot picker. Radio-group semantics on plain buttons. */}
             <div className="mt-8">
@@ -336,6 +385,56 @@ function BookingSection({ event }) {
                   <p className="mt-1.5 text-sm text-ink-muted">{event.cartFee}</p>
                 )}
               </div>
+              {/* Pay online now, or at the course? Radio-group semantics on
+                  plain buttons, same pattern as the tee slot picker. */}
+              {offersChoice && (
+                <div className="sm:col-span-2">
+                  <p className="text-sm font-semibold text-ink">
+                    How would you like to pay?
+                    <span className="ml-1 text-crimson" aria-hidden="true">*</span>
+                  </p>
+                  <div
+                    role="radiogroup"
+                    aria-label="How would you like to pay?"
+                    className="mt-3 grid gap-3 sm:grid-cols-2"
+                  >
+                    {[
+                      {
+                        value: "online",
+                        label: "Pay online now",
+                        note: "Card payment as part of booking",
+                      },
+                      {
+                        value: "course",
+                        label: "Pay at the course",
+                        note: "Book free now, pay on arrival",
+                      },
+                    ].map((opt) => {
+                      const active = payWhere === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          onClick={() => {
+                            setPayWhere(opt.value);
+                            setFormError(null);
+                          }}
+                          className={`flex min-h-[46px] flex-col justify-center border-2 px-4 py-3 text-left transition-colors ${
+                            active
+                              ? "border-gold bg-gold/10"
+                              : "border-ink/20 bg-paper hover:border-gold"
+                          }`}
+                        >
+                          <span className="font-semibold text-ink">{opt.label}</span>
+                          <span className="text-sm text-ink-muted">{opt.note}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               {formError && (
                 <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
                   {formError}
@@ -345,16 +444,20 @@ function BookingSection({ event }) {
                 <Button type="submit" disabled={sending} className="w-full sm:w-auto">
                   {sending
                     ? "Booking…"
-                    : event.greenFeeCents > 0
+                    : paysOnline
                       ? "Continue to payment"
                       : "Book my spot"}
                 </Button>
-                {event.greenFeeCents > 0 && (
+                {paysOnline ? (
                   <p className="mt-3 text-sm text-ink-muted">
                     Your slot is confirmed once payment goes through, and
                     you&apos;ll see the total before you pay.
                   </p>
-                )}
+                ) : hasFees ? (
+                  <p className="mt-3 text-sm text-ink-muted">
+                    Booking is free — fees are paid at the course on the day.
+                  </p>
+                ) : null}
               </div>
             </form>
           </div>
@@ -368,6 +471,11 @@ export default function EventDetail() {
   const { id } = useParams();
   const { event, loading } = useEvent(id);
   const location = useLocation();
+  // Committee-uploaded photos linked to this event, for the recap of a
+  // played day (only fetched once the event is finalised).
+  const { photos: dbEventPhotos } = useEventPhotos(
+    event && event.timeStatus === "finalised" ? event.id : null
+  );
 
   // ScrollToTop in App.jsx wins on route change, so honour the #book anchor
   // ourselves once the event has loaded.
@@ -401,10 +509,15 @@ export default function EventDetail() {
   }
 
   const finalised = event.timeStatus === "finalised";
-  const album = finalised ? albumForEvent(event) : null;
   // Two or three photos make a recap; the full set lives in the Gallery.
-  const recapPhotos =
-    album?.photos.filter((p) => p.role !== "accent").slice(0, 3) ?? [];
+  // Committee-uploaded photos (linked to this event in the admin Photos
+  // area) win; the bundled album is the fallback for the original event.
+  const album = finalised ? albumForEvent(event) : null;
+  const legacyRecap = album?.photos.filter((p) => p.role !== "accent") ?? [];
+  const recapPhotos = (
+    dbEventPhotos.length > 0 ? dbEventPhotos : legacyRecap
+  ).slice(0, 3);
+  const showRecap = finalised && recapPhotos.length > 0;
 
   return (
     <>
@@ -543,13 +656,13 @@ export default function EventDetail() {
       {/* Online booking: only while the event is published, locked and not yet played. */}
       {event.bookable && <BookingSection event={event} />}
 
-      {/* Recap: only for played events that have a photo album. */}
-      {album && (
+      {/* Recap: only for played events that have photos. */}
+      {showRecap && (
         <Section eyebrow="How the day went" title="From the course" tone="paper">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {recapPhotos.map((p) => (
               <Photo
-                key={p.file}
+                key={p.src}
                 photo={p}
                 ratio={p.orientation === "portrait" ? "aspect-[4/5]" : "aspect-[3/2]"}
                 position="object-top"
@@ -559,7 +672,7 @@ export default function EventDetail() {
           </div>
           <p className="mt-8">
             <a
-              href={album.facebookUrl}
+              href={FACEBOOK_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="font-body text-sm font-bold uppercase tracking-[0.08em] text-navy underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-crimson"

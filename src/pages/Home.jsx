@@ -4,7 +4,8 @@ import RibbonRule from "../components/RibbonRule.jsx";
 import EventCard from "../components/EventCard.jsx";
 import TeaserCard from "../components/TeaserCard.jsx";
 import { useEvents } from "../hooks/useEvents.js";
-import { heroPhoto } from "../lib/photos.js";
+import { heroPhoto as bundledHeroPhoto } from "../lib/photos.js";
+import { usePlacementPhoto } from "../hooks/useGallery.js";
 import { values } from "../data/values.js";
 
 const teaserIcon = (path) => (
@@ -17,6 +18,9 @@ export default function Home() {
   const { events } = useEvents();
   // Events come back sorted soonest-first, so the first non-finalised one is next.
   const nextEvent = events.find((e) => e.timeStatus !== "finalised");
+  // The committee picks the hero photo in the admin Photos area; the bundled
+  // photo is the instant first paint and the fallback.
+  const heroPhoto = usePlacementPhoto("home_hero", bundledHeroPhoto);
 
   return (
     <>

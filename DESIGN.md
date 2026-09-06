@@ -135,7 +135,7 @@ function RibbonRule({ className = "" }) {
 
 - **Hero style:** the Image 1 hero (veterans walking the fairway into dawn/dusk light) is the target mood — warm, human, Australian, from behind or wide so it's about the group, not portraits.
 - **Treatment:** all photos on navy get a `navy-deep` gradient scrim (bottom-up, ~0→70%) so white/gold text stays legible.
-- **Source:** real club photos now live in `public/images/events/<event-slug>/` with a `captions.json` manifest (title, alt, orientation, role, faces, consent). `src/lib/photos.js` reads the manifest; photos are placed by their manifest `role`, never guessed. Albums are matched to Supabase events by region + date.
+- **Source:** photos are committee-managed since September 2026 — uploaded and captioned in the admin "Photos" tab, stored in the Supabase `gallery` bucket + `gallery_photos` table, and placed by their `placement` field (gallery / home hero / About photo) plus an optional event link for recaps. The original album in `public/images/events/<event-slug>/` with its `captions.json` manifest remains as the bundled first-paint/offline fallback (`src/lib/photos.js`).
 - **Duotone unification:** every photo renders through the `Photo` component, which applies a light desaturation plus a navy multiply wash so mixed phone photos read as one set, inside a defined border frame (never full-bleed behind text).
 - **Never** publish faces without the club's ok: `src/lib/photos.js` filters out any photo with `faces: "yes"` unless its manifest `consent` is `"granted"`. Respect and dignity over polish.
 

@@ -151,6 +151,7 @@ export default function AdminLayout() {
               Overview
             </AdminTab>
             <AdminTab to="/admin/events">Events</AdminTab>
+            <AdminTab to="/admin/photos">Photos</AdminTab>
             <AdminTab to="/admin/members">Members</AdminTab>
             <AdminTab to="/admin/submissions">Enquiries</AdminTab>
             <AdminTab to="/admin/sponsors">Sponsors</AdminTab>

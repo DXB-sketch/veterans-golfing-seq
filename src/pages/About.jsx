@@ -2,7 +2,8 @@ import { useLayoutEffect, useRef, useState } from "react";
 import Section from "../components/Section.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Photo from "../components/Photo.jsx";
-import { groupPhoto } from "../lib/photos.js";
+import { groupPhoto as bundledGroupPhoto } from "../lib/photos.js";
+import { usePlacementPhoto } from "../hooks/useGallery.js";
 import { values } from "../data/values.js";
 import Sponsors from "./Sponsors.jsx";
 
@@ -216,6 +217,9 @@ function SnakeTimeline({ items, perRow = 3 }) {
 }
 
 export default function About() {
+  // The committee picks this photo in the admin Photos area; the bundled
+  // group shot is the instant first paint and the fallback.
+  const groupPhoto = usePlacementPhoto("about", bundledGroupPhoto);
   return (
     <>
       {/* Light hero: About is the one page that opens on cream, with the

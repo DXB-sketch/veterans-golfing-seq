@@ -11,6 +11,21 @@ const SPOTS_OPTIONS = [
   { value: "full", label: "Full (no spots left)" },
 ];
 
+const PAYMENT_OPTIONS = [
+  {
+    value: "online_choice",
+    label: "Player's choice — pay online when booking, or at the course",
+  },
+  {
+    value: "online_required",
+    label: "Pay online to book — no payment, no booking",
+  },
+  {
+    value: "on_arrival",
+    label: "Pay at the course on the day — booking is free",
+  },
+];
+
 const emptyForm = {
   title: "",
   region: "brisbane",
@@ -25,6 +40,7 @@ const emptyForm = {
   cart_fee: "",
   side_comp: "",
   side_comp_note: "",
+  payment_mode: "online_choice",
   spots: "open",
   sponsor: "",
   description: "",
@@ -82,6 +98,7 @@ export default function AdminEventForm() {
           cart_fee: data.cart_fee === null ? "" : String(data.cart_fee),
           side_comp: data.side_comp === null ? "" : String(data.side_comp),
           side_comp_note: data.side_comp_note ?? "",
+          payment_mode: data.payment_mode ?? "online_choice",
           spots: data.is_full ? "full" : "open",
           sponsor: data.sponsor ?? "",
           description: data.description ?? "",
@@ -153,6 +170,7 @@ export default function AdminEventForm() {
       cart_fee: form.cart_fee === "" ? null : Number(form.cart_fee),
       side_comp: form.side_comp === "" ? null : Number(form.side_comp),
       side_comp_note: form.side_comp_note.trim() || null,
+      payment_mode: form.payment_mode,
       is_full: form.spots === "full",
       sponsor: form.sponsor.trim() || null,
       description: form.description.trim() || null,
@@ -391,6 +409,16 @@ export default function AdminEventForm() {
             onChange={set("side_comp_note")}
           />
         </div>
+        <AdminField
+          label="How do players pay?"
+          id="payment_mode"
+          as="select"
+          required
+          options={PAYMENT_OPTIONS}
+          hint="Only matters when the event has a green fee. 'Pay at the course' and 'player's choice' let people book a spot for free and settle up on the day. You can change this any time, even after publishing."
+          value={form.payment_mode}
+          onChange={set("payment_mode")}
+        />
         <AdminField
           label="Spots"
           id="spots"

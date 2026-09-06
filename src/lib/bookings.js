@@ -73,6 +73,11 @@ export async function createBooking({
       err.code = "not_bookable";
       throw err;
     }
+    if (message.includes("EVENT_REQUIRES_PAYMENT")) {
+      const err = new Error("This event must be paid online when booking.");
+      err.code = "payment_required";
+      throw err;
+    }
     throw error;
   }
 }
