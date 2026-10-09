@@ -93,7 +93,15 @@ export default function Footer() {
           </p>
           <p className="mt-2">
             © {new Date().getFullYear()} South East Queensland Defence Veterans
-            Golf Club Inc. · ABN {CLUB_ABN}
+            Golf Club Inc. · ABN {CLUB_ABN} · Site built by{" "}
+            <a
+              href="https://monolithstudio.au"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-gold-bright"
+            >
+              Dexter Bell
+            </a>
           </p>
           <p className="mt-2 space-x-3">
             <Link to="/privacy" className="transition-colors hover:text-gold-bright">
