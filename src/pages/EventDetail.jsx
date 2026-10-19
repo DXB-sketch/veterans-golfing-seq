@@ -14,6 +14,8 @@ import { albumForEvent } from "../lib/photos.js";
 import { FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
 import SquarePayment from "../components/SquarePayment.jsx";
 import { useAuth } from "../admin/AuthProvider.jsx";
+import { applyPageMeta } from "../lib/meta.js";
+import { eventMeta, eventJsonLd } from "../lib/seo.js";
 
 function Detail({ label, value }) {
   return (
@@ -39,6 +41,9 @@ function BookingSection({ event }) {
   const [pending, setPending] = useState(null);
   // Where the player pays when the event offers the choice: 'online' | 'course'.
   const [payWhere, setPayWhere] = useState(null);
+  // Last details entered, so "Change your details" reopens a filled form.
+  const [draft, setDraft] = useState(null);
+  const yesNo = (v) => (draft ? (v ? "Yes" : "No") : undefined);
 
   const selectedSlot = slots.find((s) => s.id === slotId);
 
@@ -78,14 +83,19 @@ function BookingSection({ event }) {
     const details = {
       eventId: event.id,
       teeSlotId: slotId,
-      playerName: f.get("player_name"),
-      mobile: f.get("mobile") || null,
+      playerName: f.get("player_name").trim(),
+      email: f.get("email").trim().toLowerCase(),
+      suburb: f.get("suburb").trim(),
+      postcode: f.get("postcode").trim(),
+      emailOptIn: f.get("email_opt_in") === "on",
+      mobile: f.get("mobile")?.trim() || null,
       gaHandicap: f.get("ga_handicap") === "Yes",
-      golfLinksNumber: f.get("golf_links") || null,
+      golfLinksNumber: f.get("golf_links")?.trim() || null,
       playingInComp: f.get("side_comp") === "Yes",
       cartHire: f.get("cart_hire") === "Yes",
     };
     setFormError(null);
+    setDraft(details);
 
     if (paysOnline && totalCentsFor(details) > 0) {
       setPending(details);
@@ -113,6 +123,10 @@ function BookingSection({ event }) {
         // page was open.
         setFormError(
           "This event is now paid online when booking. Please refresh the page and book again."
+        );
+      } else if (err.code === "23514") {
+        setFormError(
+          "Please check your email address, and that your postcode is 4 digits."
         );
       } else {
         setFormError(
@@ -167,6 +181,7 @@ function BookingSection({ event }) {
             <RibbonRule className="mt-3" />
             <dl className="mt-6 text-sm">
               <Detail label="Player" value={pending.playerName} />
+              <Detail label="Email" value={pending.email} />
               <Detail label="Tee time" value={selectedSlot?.teeTime || ""} />
               <Detail label="Green fee" value={event.greenFee} />
               {pending.cartHire && <Detail label="Cart hire" value={event.cartFee} />}
@@ -228,15 +243,17 @@ function BookingSection({ event }) {
                   <span className="font-semibold text-ink">{event.cartFee}</span>
                 </p>
               )}
-              <p>
-                <span className="font-bold uppercase tracking-[0.08em] text-ink-muted">
-                  Side comp
-                </span>{" "}
-                <span className="font-semibold text-ink">{event.sideComp}</span>
-                {event.sideCompNote && (
-                  <span className="text-ink-muted"> ({event.sideCompNote})</span>
+              {event.sideComp !== "None" && (
+                <p>
+                  <span className="font-bold uppercase tracking-[0.08em] text-ink-muted">
+                    Side comp
+                  </span>{" "}
+                  <span className="font-semibold text-ink">{event.sideComp}</span>
+                  {event.sideCompNote && (
+                    <span className="text-ink-muted"> ({event.sideCompNote})</span>
                 )}
               </p>
+              )}
             </div>
 
             {/* How fees are paid, set per event by the committee. */}
@@ -342,124 +359,196 @@ function BookingSection({ event }) {
               )}
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-8 grid gap-5 sm:grid-cols-2">
-              <FormField label="Name" id="player_name" required autoComplete="name" />
-              <FormField
-                label="Mobile (for a reminder)"
-                id="mobile"
-                type="tel"
-                autoComplete="tel"
-              />
-              <FormField
-                label="Do you have a GA handicap?"
-                id="ga_handicap"
-                as="select"
-                required
-                options={["Yes", "No"]}
-              />
-              <FormField
-                label="Golf Links number"
-                id="golf_links"
-                placeholder="Leave blank if you don't have one"
-              />
-              <div>
+            {/* No form until there's a tee slot to book into. */}
+            {!loading && !error && slots.length > 0 && (
+              <form onSubmit={handleSubmit} className="mt-8 grid gap-5 sm:grid-cols-2">
                 <FormField
-                  label="Playing in the side comp?"
-                  id="side_comp"
+                  label="Name"
+                  id="player_name"
+                  required
+                  maxLength={120}
+                  autoComplete="name"
+                  defaultValue={draft?.playerName}
+                />
+                <FormField
+                  label="Email"
+                  id="email"
+                  type="email"
+                  required
+                  maxLength={254}
+                  autoComplete="email"
+                  defaultValue={draft?.email ?? session?.user?.email ?? ""}
+                />
+                <FormField
+                  label="Home suburb"
+                  id="suburb"
+                  required
+                  maxLength={80}
+                  autoComplete="address-level2"
+                  defaultValue={draft?.suburb}
+                />
+                <FormField
+                  label="Postcode"
+                  id="postcode"
+                  required
+                  inputMode="numeric"
+                  pattern="[0-9]{4}"
+                  maxLength={4}
+                  title="A 4-digit Australian postcode"
+                  autoComplete="postal-code"
+                  defaultValue={draft?.postcode}
+                />
+                <FormField
+                  label="Mobile (optional, for a reminder)"
+                  id="mobile"
+                  type="tel"
+                  maxLength={40}
+                  autoComplete="tel"
+                  defaultValue={draft?.mobile ?? ""}
+                />
+                <FormField
+                  label="Do you have a GA handicap?"
+                  id="ga_handicap"
                   as="select"
+                  defaultValue={yesNo(draft?.gaHandicap)}
+                  required
                   options={["Yes", "No"]}
                 />
-                <p className="mt-1.5 text-sm text-ink-muted">
-                  {event.sideComp}
-                  {event.sideCompNote && ` (${event.sideCompNote})`}
-                </p>
-              </div>
-              <div>
                 <FormField
-                  label="Cart hire?"
-                  id="cart_hire"
-                  as="select"
-                  options={["Yes", "No"]}
+                  label="Golf Links number"
+                  id="golf_links"
+                  placeholder="Leave blank if you don't have one"
+                  maxLength={40}
+                  defaultValue={draft?.golfLinksNumber ?? ""}
                 />
-                {event.cartFee !== "None" && (
-                  <p className="mt-1.5 text-sm text-ink-muted">{event.cartFee}</p>
-                )}
-              </div>
-              {/* Pay online now, or at the course? Radio-group semantics on
-                  plain buttons, same pattern as the tee slot picker. */}
-              {offersChoice && (
-                <div className="sm:col-span-2">
-                  <p className="text-sm font-semibold text-ink">
-                    How would you like to pay?
-                    <span className="ml-1 text-crimson" aria-hidden="true">*</span>
-                  </p>
-                  <div
-                    role="radiogroup"
-                    aria-label="How would you like to pay?"
-                    className="mt-3 grid gap-3 sm:grid-cols-2"
-                  >
-                    {[
-                      {
-                        value: "online",
-                        label: "Pay online now",
-                        note: "Card payment as part of booking",
-                      },
-                      {
-                        value: "course",
-                        label: "Pay at the course",
-                        note: "Book free now, pay on arrival",
-                      },
-                    ].map((opt) => {
-                      const active = payWhere === opt.value;
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          role="radio"
-                          aria-checked={active}
-                          onClick={() => {
-                            setPayWhere(opt.value);
-                            setFormError(null);
-                          }}
-                          className={`flex min-h-[46px] flex-col justify-center border-2 px-4 py-3 text-left transition-colors ${
-                            active
-                              ? "border-gold bg-gold/10"
-                              : "border-ink/20 bg-paper hover:border-gold"
-                          }`}
-                        >
-                          <span className="font-semibold text-ink">{opt.label}</span>
-                          <span className="text-sm text-ink-muted">{opt.note}</span>
-                        </button>
-                      );
-                    })}
+                {event.sideComp !== "None" && (
+                  <div>
+                    <FormField
+                      label="Playing in the side comp?"
+                      id="side_comp"
+                      as="select"
+                      defaultValue={yesNo(draft?.playingInComp)}
+                      options={["Yes", "No"]}
+                    />
+                    <p className="mt-1.5 text-sm text-ink-muted">
+                      {event.sideComp}
+                      {event.sideCompNote && ` (${event.sideCompNote})`}
+                    </p>
                   </div>
+                )}
+                <div>
+                  <FormField
+                    label="Cart hire?"
+                    id="cart_hire"
+                    as="select"
+                    defaultValue={yesNo(draft?.cartHire)}
+                    options={["Yes", "No"]}
+                  />
+                  {event.cartFee !== "None" && (
+                    <p className="mt-1.5 text-sm text-ink-muted">{event.cartFee}</p>
+                  )}
                 </div>
-              )}
-              {formError && (
-                <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
-                  {formError}
+                {/* Pay online now, or at the course? Radio-group semantics on
+                    plain buttons, same pattern as the tee slot picker. */}
+                {offersChoice && (
+                  <div className="sm:col-span-2">
+                    <p className="text-sm font-semibold text-ink">
+                      How would you like to pay?
+                      <span className="ml-1 text-crimson" aria-hidden="true">*</span>
+                    </p>
+                    <div
+                      role="radiogroup"
+                      aria-label="How would you like to pay?"
+                      className="mt-3 grid gap-3 sm:grid-cols-2"
+                    >
+                      {[
+                        {
+                          value: "online",
+                          label: "Pay online now",
+                          note: "Card payment as part of booking",
+                        },
+                        {
+                          value: "course",
+                          label: "Pay at the course",
+                          note: "Book free now, pay on arrival",
+                        },
+                      ].map((opt) => {
+                        const active = payWhere === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={active}
+                            onClick={() => {
+                              setPayWhere(opt.value);
+                              setFormError(null);
+                            }}
+                            className={`flex min-h-[46px] flex-col justify-center border-2 px-4 py-3 text-left transition-colors ${
+                              active
+                                ? "border-gold bg-gold/10"
+                                : "border-ink/20 bg-paper hover:border-gold"
+                            }`}
+                          >
+                            <span className="font-semibold text-ink">{opt.label}</span>
+                            <span className="text-sm text-ink-muted">{opt.note}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                <label className="flex items-start gap-3 text-sm text-ink sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    name="email_opt_in"
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-gold"
+                  />
+                  <span>
+                    Email me about future club events and news. Optional — you
+                    can unsubscribe any time.
+                  </span>
+                </label>
+                {/* APP 5 collection notice: what, why, and where to read more. */}
+                <p className="text-sm text-ink-muted sm:col-span-2">
+                  We collect these details to manage your booking, contact you
+                  about this event, and (for your suburb and postcode) plan
+                  events across the regions our members travel from. Booking
+                  contact details are deleted 12 months after the event. See our{" "}
+                  <Link
+                    to="/privacy"
+                    className="font-semibold text-navy underline decoration-gold decoration-2 underline-offset-2 hover:text-crimson"
+                  >
+                    Privacy Policy
+                  </Link>{" "}
+                  for how we handle and protect your information.
                 </p>
-              )}
-              <div className="sm:col-span-2">
-                <Button type="submit" disabled={sending} className="w-full sm:w-auto">
-                  {sending
-                    ? "Booking…"
-                    : paysOnline
-                      ? "Continue to payment"
-                      : "Book my spot"}
-                </Button>
-                {paysOnline ? (
-                  <p className="mt-3 text-sm text-ink-muted">
-                    Your slot is confirmed once payment goes through, and
-                    you&apos;ll see the total before you pay.
+                {formError && (
+                  <p className="border-l-4 border-crimson bg-crimson/5 p-4 text-sm text-ink sm:col-span-2">
+                    {formError}
                   </p>
-                ) : hasFees ? (
-                  <p className="mt-3 text-sm text-ink-muted">
-                    Booking is free — fees are paid at the course on the day.
-                  </p>
-                ) : null}
-              </div>
-            </form>
+                )}
+                <div className="sm:col-span-2">
+                  <Button type="submit" disabled={sending} className="w-full sm:w-auto">
+                    {sending
+                      ? "Booking…"
+                      : paysOnline
+                        ? "Continue to payment"
+                        : "Book my spot"}
+                  </Button>
+                  {paysOnline ? (
+                    <p className="mt-3 text-sm text-ink-muted">
+                      Your slot is confirmed once payment goes through, and
+                      you&apos;ll see the total before you pay.
+                    </p>
+                  ) : hasFees ? (
+                    <p className="mt-3 text-sm text-ink-muted">
+                      Booking is free — fees are paid at the course on the day.
+                    </p>
+                  ) : null}
+                </div>
+              </form>
+            )}
           </div>
         )}
       </Section>
@@ -469,13 +558,34 @@ function BookingSection({ event }) {
 
 export default function EventDetail() {
   const { id } = useParams();
-  const { event, loading } = useEvent(id);
+  const { event, loading, error } = useEvent(id);
   const location = useLocation();
   // Committee-uploaded photos linked to this event, for the recap of a
   // played day (only fetched once the event is finalised).
   const { photos: dbEventPhotos } = useEventPhotos(
     event && event.timeStatus === "finalised" ? event.id : null
   );
+
+  // Event-specific title/description and schema.org data for search
+  // engines (the prerendered HTML has these for events that existed at the
+  // last deploy; this covers newer ones). Drafts stay out of the index.
+  useEffect(() => {
+    if (!event) return;
+    applyPageMeta({
+      ...eventMeta(event),
+      path: location.pathname,
+      noindex: event.lifecycle === "draft",
+    });
+    let script = document.getElementById("event-jsonld");
+    if (!script) {
+      script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.id = "event-jsonld";
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(eventJsonLd(event));
+    return () => script.remove();
+  }, [event, location.pathname]);
 
   // ScrollToTop in App.jsx wins on route change, so honour the #book anchor
   // ourselves once the event has loaded.
@@ -489,6 +599,21 @@ export default function EventDetail() {
     return (
       <Section eyebrow="Events" title="Loading…" tone="cream" center>
         <p className="text-ink-muted">Just a moment.</p>
+      </Section>
+    );
+  }
+
+  if (error) {
+    return (
+      <Section eyebrow="Events" title="Couldn't load this event" tone="cream" center>
+        <p className="text-ink-muted">
+          Please check your internet connection and refresh the page.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <Button to="/events" variant="secondary-light">
+            Back to events
+          </Button>
+        </div>
       </Section>
     );
   }
@@ -628,13 +753,13 @@ export default function EventDetail() {
             ) : (
               <>
                 <h2 className="font-display text-xl font-semibold tracking-wide">
-                  Secure your spot
+                  {event.isFull ? "This event is full" : "Secure your spot"}
                 </h2>
                 <RibbonRule className="mt-3" dark />
                 <p className="mt-4 text-sm text-cream/85">
-                  Message us on Facebook or email the club and we&apos;ll lock
-                  you in. All veterans, serving and ex-serving, and family
-                  members are welcome.
+                  {event.isFull
+                    ? "Every spot has been taken. Email the club or message us on Facebook and we'll let you know if one opens up."
+                    : "Message us on Facebook or email the club and we'll lock you in. All veterans, serving and ex-serving, and family members are welcome."}
                 </p>
                 <div className="mt-6 flex flex-col gap-3">
                   <Button href={`mailto:${CLUB_EMAIL}`}>Email the club</Button>
@@ -662,7 +787,7 @@ export default function EventDetail() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {recapPhotos.map((p) => (
               <Photo
-                key={p.src}
+                key={p.id ?? p.src}
                 photo={p}
                 ratio={p.orientation === "portrait" ? "aspect-[4/5]" : "aspect-[3/2]"}
                 position="object-top"

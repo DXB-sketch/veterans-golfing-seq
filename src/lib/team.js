@@ -39,6 +39,8 @@ export function teamErrorMessage(code) {
       return "That doesn't look like an email address. Please check it and try again.";
     case "cannot_remove_self":
       return "You can't remove your own account. Ask another committee member to do it.";
+    case "not_committee_account":
+      return "That account isn't a committee account, so it can't be removed here.";
     case "last_account":
       return "You can't remove the last account. There'd be no one left who can sign in.";
     default:

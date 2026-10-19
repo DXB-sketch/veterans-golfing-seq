@@ -23,7 +23,7 @@ export default function AdminField({
         {as === "textarea" ? (
           <textarea id={id} name={id} rows={5} required={required} className={base} {...rest} />
         ) : as === "select" ? (
-          <select id={id} name={id} required={required} className={base} {...rest}>
+          <select id={id} name={id} required={required} className={`${base.replace("px-4", "pl-4 pr-11")} select-chevron`} {...rest}>
             {options.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}

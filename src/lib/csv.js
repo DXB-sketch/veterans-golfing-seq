@@ -3,7 +3,13 @@
 // and anything with a comma, quote or newline is quoted.
 export function downloadCsv(filename, headers, rows) {
   const escape = (value) => {
-    const s = value == null ? "" : String(value);
+    let s = value == null ? "" : String(value);
+    // Public form input lands in these sheets: stop Excel treating a cell
+    // like "=HYPERLINK(...)" as a formula (CSV injection). A leading +/- is
+    // left alone when the whole cell is a phone number like "+61 412 345 678".
+    if (/^[=@\t\r]/.test(s) || (/^[+-]/.test(s) && !/^\+[\d\s()-]+$/.test(s))) {
+      s = `'${s}`;
+    }
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = [headers, ...rows].map((row) => row.map(escape).join(","));
@@ -17,7 +23,8 @@ export function downloadCsv(filename, headers, rows) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  // Revoking straight after click() can cancel the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 // "Winter Classic" + "tee sheet" -> "winter-classic-tee-sheet.csv"

@@ -35,3 +35,11 @@ for (const [size, out] of [
     .toFile("public/og-image.png");
   console.log("wrote public/og-image.png");
 }
+
+// Web crest sizes: the 1024px master is ~1.3MB, far too heavy for the nav.
+// 2x the largest rendered size of each use (nav 56px, footer 80px, About 208px).
+for (const size of [112, 160, 416]) {
+  const out = `public/crest-${size}.webp`;
+  await sharp(CREST).resize(size, size).webp({ quality: 90 }).toFile(out);
+  console.log(`wrote ${out}`);
+}

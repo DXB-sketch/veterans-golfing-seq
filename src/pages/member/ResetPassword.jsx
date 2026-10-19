@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabase.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 import Button from "../../components/Button.jsx";
 import FormField from "../../components/FormField.jsx";
+import { CLUB_EMAIL } from "../../lib/site.js";
 
 // Password reset — request page. Sends the Supabase recovery email, which
 // lands on /member/reset/confirm where the member chooses a new password.
@@ -24,7 +25,7 @@ export default function ResetPassword() {
     if (resetError) {
       // Rate limits are the realistic failure here; anything else is transient.
       setError(
-        "Sorry, we couldn't send the reset email just now. Please wait a minute and try again, or email us at seqdvgc@gmail.com and we'll sort it out."
+        `Sorry, we couldn't send the reset email just now. Please wait a minute and try again, or email us at ${CLUB_EMAIL} and we'll sort it out.`
       );
       return;
     }

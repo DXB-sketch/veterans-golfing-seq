@@ -7,16 +7,15 @@ export async function fetchSlotAvailability(eventId) {
     p_event_id: eventId,
   });
   if (error) throw error;
-  return (data ?? [])
-    .map((row) => ({
-      id: row.id,
-      teeTime: row.tee_time,
-      capacity: row.capacity,
-      sortOrder: row.sort_order,
-      spotsTaken: row.spots_taken,
-      spotsLeft: Math.max(0, row.capacity - row.spots_taken),
-    }))
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+  // The RPC already orders by sort_order (nulls last), then tee time.
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    teeTime: row.tee_time,
+    capacity: row.capacity,
+    sortOrder: row.sort_order,
+    spotsTaken: row.spots_taken,
+    spotsLeft: Math.max(0, row.capacity - row.spots_taken),
+  }));
 }
 
 // Anon-safe list of who's booked: first initial + last name per slot, via a
@@ -45,16 +44,28 @@ export async function createBooking({
   eventId,
   teeSlotId,
   playerName,
+  email,
+  suburb,
+  postcode,
+  emailOptIn,
   mobile,
   gaHandicap,
   golfLinksNumber,
   playingInComp,
   cartHire,
+  // Committee adds pass true so the player doesn't land in the volunteer's
+  // own member dashboard (created_by defaults to the signed-in user).
+  onBehalf = false,
 }) {
   const { error } = await supabase.from("bookings").insert({
+    ...(onBehalf ? { created_by: null } : {}),
     event_id: eventId,
     tee_slot_id: teeSlotId,
     player_name: playerName,
+    email: email || null,
+    suburb: suburb || null,
+    postcode: postcode || null,
+    email_opt_in: emailOptIn === true,
     mobile,
     ga_handicap: gaHandicap,
     golf_links_number: golfLinksNumber,
@@ -161,6 +172,16 @@ export async function updateBooking(id, fields) {
     }
     throw error;
   }
+}
+
+// Committee-only: swap two players between tee times in one transaction, so
+// players in two full slots can trade places.
+export async function swapBookings(bookingA, bookingB) {
+  const { error } = await supabase.rpc("swap_bookings", {
+    p_booking_a: bookingA,
+    p_booking_b: bookingB,
+  });
+  if (error) throw error;
 }
 
 export async function deleteBooking(id) {

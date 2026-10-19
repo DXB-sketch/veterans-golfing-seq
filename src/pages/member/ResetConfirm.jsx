@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 import Button from "../../components/Button.jsx";
 import FormField from "../../components/FormField.jsx";
+import { CLUB_EMAIL } from "../../lib/site.js";
 
 // Password reset — landing page from the recovery email. Like the invite
 // landing (/member/welcome), the email link carries session tokens in the URL
@@ -44,7 +45,7 @@ export default function ResetConfirm() {
     setSaving(false);
     if (updateError) {
       setError(
-        "Sorry, we couldn't set your password just now. Please try again, or email us at seqdvgc@gmail.com and we'll sort it out."
+        `Sorry, we couldn't set your password just now. Please try again, or email us at ${CLUB_EMAIL} and we'll sort it out.`
       );
       return;
     }
@@ -113,7 +114,7 @@ export default function ResetConfirm() {
                 >
                   request a fresh link
                 </Link>
-                , or email us at seqdvgc@gmail.com and we&apos;ll sort it out.
+                , or email us at {CLUB_EMAIL} and we&apos;ll sort it out.
               </p>
             </>
           )}

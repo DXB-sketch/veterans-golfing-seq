@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import RibbonRule from "../components/RibbonRule.jsx";
 import FormField from "../components/FormField.jsx";
 import SquarePayment from "../components/SquarePayment.jsx";
@@ -15,6 +16,13 @@ export default function Donate() {
   const cents = Number.isFinite(activeDollars)
     ? Math.round(activeDollars * 100)
     : 0;
+  // The payment form remounts whenever the amount changes (so wallet sheets
+  // show the right total); wait for typing to pause before passing it on.
+  const [payCents, setPayCents] = useState(cents);
+  useEffect(() => {
+    const t = setTimeout(() => setPayCents(cents), custom !== "" ? 600 : 0);
+    return () => clearTimeout(t);
+  }, [cents, custom]);
 
   return (
     <>
@@ -106,13 +114,15 @@ export default function Donate() {
           </div>
 
           <div className="mt-8">
-            {cents >= 500 && cents <= 700000 ? (
+            {payCents >= 500 && payCents <= 700000 && payCents === cents ? (
               <SquarePayment
                 purpose="donation"
-                amountCents={cents}
+                amountCents={payCents}
                 payerName={donorName.trim() || undefined}
                 payerEmail={donorEmail.trim() || undefined}
               />
+            ) : cents >= 500 && cents <= 700000 ? (
+              <p className="text-sm text-ink-muted">Updating the amount…</p>
             ) : (
               <p className="border border-ink/10 bg-paper p-4 text-sm text-ink-muted">
                 Donations are between $5 and $7,000 AUD. Choose an amount above
@@ -124,6 +134,18 @@ export default function Donate() {
           <p className="mt-6 text-sm text-ink-muted">
             Donations directly support our veteran members and the club events
             we run for them.
+          </p>
+          <p className="mt-3 text-sm text-ink-muted">
+            Your name and email are optional and only used to record and thank
+            you for your donation. Card details go straight to Square and are
+            never seen by us. See our{" "}
+            <Link
+              to="/privacy"
+              className="underline decoration-gold decoration-2 underline-offset-2 hover:text-navy"
+            >
+              Privacy Policy
+            </Link>
+            .
           </p>
         </div>
       </section>

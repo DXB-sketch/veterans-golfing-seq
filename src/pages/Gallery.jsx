@@ -37,7 +37,7 @@ export default function Gallery() {
             <div className="columns-1 gap-6 sm:columns-2 lg:columns-3">
               {photos.map((p) => (
                 <Photo
-                  key={p.src}
+                  key={p.id ?? p.src}
                   photo={p}
                   ratio={p.orientation === "portrait" ? "aspect-[4/5]" : "aspect-[3/2]"}
                   position="object-top"

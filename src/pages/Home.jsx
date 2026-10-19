@@ -33,6 +33,7 @@ export default function Home() {
             src={heroPhoto.src}
             alt=""
             aria-hidden="true"
+            fetchpriority="high"
             className="absolute inset-0 -z-20 h-full w-full object-cover [filter:grayscale(0.22)_saturate(0.88)]"
           />
         )}
@@ -54,7 +55,7 @@ export default function Home() {
               Sunshine Coast and the Gold Coast. All services, all abilities,
               all welcome.
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
               <Button to="/membership">Join the club</Button>
               <Button to="/events" variant="secondary">
                 See what&apos;s on

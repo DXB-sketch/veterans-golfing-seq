@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase.js";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
+import { CLUB_EMAIL } from "../lib/site.js";
 
 // The one sign-in page for the whole site. Members and the committee use the
 // same accounts under the hood; the choice below just sets the copy and where
@@ -54,7 +55,7 @@ export default function Login() {
       setError(
         role.value === "committee"
           ? "That email or password isn't right. Please check both and try again. If you're stuck, contact Dexter and he'll sort it out."
-          : "That email or password isn't right. Please check both and try again. If you're stuck, email us at seqdvgc@gmail.com and we'll sort it out."
+          : `That email or password isn't right. Please check both and try again. If you're stuck, email us at ${CLUB_EMAIL} and we'll sort it out.`
       );
       return;
     }

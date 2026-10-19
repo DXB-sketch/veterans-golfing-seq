@@ -74,3 +74,33 @@ export function metaForPath(pathname) {
   }
   return best;
 }
+
+// Point the document's title, description, canonical URL and social tags at
+// one page. Used by <PageMeta /> on every route change, and by pages that
+// know more about themselves once their data loads (event pages).
+export function applyPageMeta({ title, description, path, noindex = false }) {
+  if (typeof document === "undefined") return;
+  const fullTitle = title ? `${title} | ${SITE_NAME}` : DEFAULT_TITLE;
+  const desc = description || DEFAULT_DESCRIPTION;
+  const url = `${BASE_URL}${path === "/" ? "/" : path}`;
+  const set = (attr, key, content) => {
+    let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+    if (!el) {
+      el = document.createElement("meta");
+      el.setAttribute(attr, key);
+      document.head.appendChild(el);
+    }
+    el.setAttribute("content", content);
+  };
+  document.title = fullTitle;
+  set("name", "description", desc);
+  set("property", "og:title", fullTitle);
+  set("property", "og:description", desc);
+  set("property", "og:url", url);
+  set("name", "twitter:title", fullTitle);
+  set("name", "twitter:description", desc);
+  document.head.querySelector('link[rel="canonical"]')?.setAttribute("href", url);
+  const robots = document.head.querySelector('meta[name="robots"]');
+  if (noindex) set("name", "robots", "noindex, nofollow");
+  else robots?.remove();
+}

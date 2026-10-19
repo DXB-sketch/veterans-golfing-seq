@@ -4,6 +4,7 @@ import RibbonRule from "../components/RibbonRule.jsx";
 import SquarePayment from "../components/SquarePayment.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
+import { CLUB_EMAIL } from "../lib/site.js";
 
 // Joining is the paid, self-serve flow: details → confirm → pay $50 → the
 // server records the member and emails a login invite. The old
@@ -132,8 +133,8 @@ function JoinAndPay() {
             You&apos;re now a member of the South East Queensland Defence
             Veterans Golf Club. Your payment has been received, and the
             club will be in touch to set up your member login. If you
-            don&apos;t hear from us within a few days, email us at
-            seqdvgc@gmail.com.
+            don&apos;t hear from us within a few days, email us at{" "}
+            {CLUB_EMAIL}.
           </p>
         )}
         <p className="mt-3 text-ink-muted">

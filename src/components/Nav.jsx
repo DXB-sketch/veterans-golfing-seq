@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import RibbonRule from "./RibbonRule.jsx";
+import { useAuth } from "../admin/AuthProvider.jsx";
 
 const links = [
   { to: "/", label: "Home" },
@@ -10,11 +11,26 @@ const links = [
   { to: "/membership", label: "Membership" },
   { to: "/resources", label: "Resources" },
   { to: "/contact", label: "Contact" },
-  { to: "/login", label: "Sign in" },
 ];
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const { session } = useAuth();
+  const { pathname } = useLocation();
+  const allLinks = [
+    ...links,
+    { to: "/login", label: session ? "My account" : "Sign in" },
+  ];
+
+  // Close the mobile menu on any navigation (including back/forward) and
+  // on Escape.
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   const linkClass = ({ isActive }) =>
     `relative px-1 py-2 font-body text-[0.95rem] font-semibold transition-colors ${
@@ -25,10 +41,18 @@ export default function Nav() {
 
   return (
     <nav className="sticky top-0 z-50 bg-navy shadow-soft" aria-label="Main navigation">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-gold focus:px-4 focus:py-2 focus:font-bold focus:text-navy-deep"
+      >
+        Skip to content
+      </a>
       <div className="mx-auto flex max-w-site items-center justify-between gap-4 px-5 py-3">
         <NavLink to="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
           <img
-            src="/SEQDVGC-logo-transparent.png"
+            src="/crest-112.webp"
+            width={56}
+            height={56}
             alt="SEQDVGC crest"
             className="h-14 w-14 shrink-0"
           />
@@ -46,7 +70,7 @@ export default function Nav() {
         </NavLink>
 
         <div className="hidden items-center gap-6 lg:flex">
-          {links.map((l) => (
+          {allLinks.map((l) => (
             <NavLink key={l.to} to={l.to} className={linkClass} end={l.to === "/"}>
               {l.label}
             </NavLink>
@@ -56,6 +80,7 @@ export default function Nav() {
         <button
           className="flex h-11 w-11 items-center justify-center text-white lg:hidden"
           aria-expanded={open}
+          aria-controls="mobile-menu"
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((v) => !v)}
         >
@@ -77,9 +102,9 @@ export default function Nav() {
       </div>
 
       {open && (
-        <div className="border-t border-gold/15 bg-navy px-5 pb-8 pt-4 lg:hidden">
+        <div id="mobile-menu" className="border-t border-gold/15 bg-navy px-5 pb-8 pt-4 lg:hidden">
           <div className="flex flex-col gap-1">
-            {links.map((l) => (
+            {allLinks.map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}

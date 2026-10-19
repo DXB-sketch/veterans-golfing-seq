@@ -8,7 +8,7 @@ export default function FormField({
   ...rest
 }) {
   const base =
-    "w-full border border-ink/20 bg-paper px-4 py-3 text-ink placeholder:text-ink-muted/60 focus:outline-none focus-visible:outline-none focus:border-gold focus:ring-1 focus:ring-gold min-h-[46px]";
+    "w-full border border-ink/20 bg-paper px-4 py-3 text-[1.0625rem] text-ink placeholder:text-ink-muted/60 focus:outline-none focus-visible:outline-none focus:border-gold focus:ring-1 focus:ring-gold min-h-[46px]";
 
   return (
     <div>
@@ -19,7 +19,7 @@ export default function FormField({
       {as === "textarea" ? (
         <textarea id={id} name={id} rows={5} required={required} className={base} {...rest} />
       ) : as === "select" ? (
-        <select id={id} name={id} required={required} className={base} {...rest}>
+        <select id={id} name={id} required={required} className={`${base.replace("px-4", "pl-4 pr-11")} select-chevron`} {...rest}>
           <option value="">Please choose…</option>
           {options.map((o) => (
             <option key={o} value={o}>

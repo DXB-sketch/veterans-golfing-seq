@@ -21,6 +21,24 @@ function cleanEmail(v) {
   return s ? s.toLowerCase() : null;
 }
 
+// Loose shape check — the database enforces the same pattern.
+function validEmail(v) {
+  return typeof v === "string" && v.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+}
+
+// Today's date in Brisbane as "YYYY-MM-DD".
+function brisbaneToday() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Brisbane" });
+}
+
+// "2027-02-28" -> "2028-02-28"; 29 Feb rolls to 28 Feb in a non-leap year.
+function addOneYear(isoDate) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const next = new Date(Date.UTC(y + 1, m - 1, d));
+  if (next.getUTCMonth() !== m - 1) next.setUTCDate(0);
+  return next.toISOString().slice(0, 10);
+}
+
 function cleanUrl(v) {
   const s = cleanText(v, 300);
   if (!s) return null;
@@ -57,8 +75,8 @@ export default async function handler(req, res) {
   if (purpose === "membership") {
     chargeCents = MEMBERSHIP_CENTS;
     note = "SEQDVGC annual membership";
-    if (!cleanText(body.member?.name) || !cleanText(body.member?.email)) {
-      return bad(res, "Membership payments need the member's name and email.");
+    if (!cleanText(body.member?.name) || !validEmail(cleanEmail(body.member?.email))) {
+      return bad(res, "Membership payments need the member's name and a valid email address.");
     }
   } else if (purpose === "donation") {
     const amount = body.amountCents;
@@ -79,8 +97,8 @@ export default async function handler(req, res) {
     if (amount > SPONSORSHIP_MAX_CENTS) {
       return bad(res, "For sponsorships over $10,000 AUD, please email us so we can arrange it directly.");
     }
-    if (!cleanText(body.sponsor?.companyName) || !cleanText(body.sponsor?.contactEmail)) {
-      return bad(res, "Sponsorship payments need a company name and contact email.");
+    if (!cleanText(body.sponsor?.companyName) || !validEmail(cleanEmail(body.sponsor?.contactEmail))) {
+      return bad(res, "Sponsorship payments need a company name and a valid contact email.");
     }
     chargeCents = amount;
     note = "SEQDVGC sponsorship";
@@ -90,6 +108,12 @@ export default async function handler(req, res) {
     const b = body.booking || {};
     if (!cleanText(b.playerName) || !b.eventId || !b.teeSlotId) {
       return bad(res, "Booking payments need a player name, event and tee slot.");
+    }
+    if (!validEmail(cleanEmail(b.email))) {
+      return bad(res, "Please enter a valid email address for your booking.");
+    }
+    if (!cleanText(b.suburb, 80) || !/^[0-9]{4}$/.test(cleanText(b.postcode, 4) || "")) {
+      return bad(res, "Please enter your home suburb and a 4-digit postcode.");
     }
     note = "SEQDVGC event booking";
   } else {
@@ -137,7 +161,7 @@ export default async function handler(req, res) {
       .select("id, status, is_locked, event_date, green_fee, cart_fee, side_comp, payment_mode")
       .eq("id", b.eventId)
       .maybeSingle();
-    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Brisbane" });
+    const today = brisbaneToday();
     if (
       evError || !ev || ev.status !== "published" || !ev.is_locked ||
       !ev.event_date || ev.event_date < today
@@ -180,9 +204,13 @@ export default async function handler(req, res) {
         event_id: ev.id,
         tee_slot_id: slot.id,
         player_name: cleanText(b.playerName, 120),
-        mobile: cleanText(b.mobile, 40),
+        email: cleanEmail(b.email),
+        suburb: cleanText(b.suburb, 80),
+        postcode: cleanText(b.postcode, 4),
+        email_opt_in: b.emailOptIn === true,
+        mobile: cleanText(b.mobile, 40) || null,
         ga_handicap: typeof b.gaHandicap === "boolean" ? b.gaHandicap : null,
-        golf_links_number: cleanText(b.golfLinksNumber, 40),
+        golf_links_number: cleanText(b.golfLinksNumber, 40) || null,
         playing_in_comp: b.playingInComp === true,
         cart_hire: b.cartHire === true,
         created_by: createdBy,
@@ -219,7 +247,8 @@ export default async function handler(req, res) {
   const buyerEmail =
     cleanEmail(body.payerEmail) ||
     cleanEmail(body.member?.email) ||
-    cleanEmail(body.sponsor?.contactEmail);
+    cleanEmail(body.sponsor?.contactEmail) ||
+    cleanEmail(body.booking?.email);
 
   let payment;
   try {
@@ -323,31 +352,56 @@ export default async function handler(req, res) {
     } else if (purpose === "membership") {
       const m = body.member;
       const email = cleanEmail(m.email);
-      const joined = new Date().toLocaleDateString("en-CA", {
-        timeZone: "Australia/Brisbane",
-      });
-      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString(
-        "en-CA",
-        { timeZone: "Australia/Brisbane" }
-      );
-      const { data: memberRow, error } = await supabase
+      const today = brisbaneToday();
+      const { data: existing, error: lookupError } = await supabase
         .from("members")
-        .upsert(
-          {
+        .select("id, name, phone, service_branch, ga_handicap, golf_links_number, joined_at, expires_at")
+        .eq("email", email)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
+
+      let memberRow;
+      let error;
+      if (existing) {
+        // Renewal: a year on from whichever is later, today or the current
+        // expiry, so renewing early never loses paid time. Identity fields
+        // are only filled in where blank — paying with someone's email must
+        // not overwrite their details.
+        const from = existing.expires_at && existing.expires_at > today ? existing.expires_at : today;
+        ({ data: memberRow, error } = await supabase
+          .from("members")
+          .update({
+            name: existing.name || cleanText(m.name, 120),
+            phone: existing.phone || cleanText(m.phone, 40) || null,
+            service_branch: existing.service_branch || cleanText(m.serviceBranch, 60) || null,
+            ga_handicap:
+              existing.ga_handicap ?? (typeof m.gaHandicap === "boolean" ? m.gaHandicap : null),
+            golf_links_number:
+              existing.golf_links_number || cleanText(m.golfLinksNumber, 40) || null,
+            status: "active",
+            joined_at: existing.joined_at || today,
+            expires_at: addOneYear(from),
+          })
+          .eq("id", existing.id)
+          .select("id")
+          .single());
+      } else {
+        ({ data: memberRow, error } = await supabase
+          .from("members")
+          .insert({
             name: cleanText(m.name, 120),
             email,
-            phone: cleanText(m.phone, 40),
-            service_branch: cleanText(m.serviceBranch, 60),
+            phone: cleanText(m.phone, 40) || null,
+            service_branch: cleanText(m.serviceBranch, 60) || null,
             ga_handicap: typeof m.gaHandicap === "boolean" ? m.gaHandicap : null,
-            golf_links_number: cleanText(m.golfLinksNumber, 40),
+            golf_links_number: cleanText(m.golfLinksNumber, 40) || null,
             status: "active",
-            joined_at: joined,
-            expires_at: expires,
-          },
-          { onConflict: "email" }
-        )
-        .select("id")
-        .single();
+            joined_at: today,
+            expires_at: addOneYear(today),
+          })
+          .select("id")
+          .single());
+      }
       if (error) throw error;
       referenceId = memberRow.id;
 

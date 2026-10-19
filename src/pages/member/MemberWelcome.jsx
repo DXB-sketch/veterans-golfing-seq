@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase.js";
 import RibbonRule from "../../components/RibbonRule.jsx";
 import Button from "../../components/Button.jsx";
 import FormField from "../../components/FormField.jsx";
+import { CLUB_EMAIL } from "../../lib/site.js";
 
 // Invite-link landing page. The Supabase invite email points here with the
 // session tokens in the URL hash — the supabase client (detectSessionInUrl is
@@ -45,7 +46,7 @@ export default function MemberWelcome() {
     setSaving(false);
     if (updateError) {
       setError(
-        "Sorry, we couldn't set your password just now. Please try again, or email us at seqdvgc@gmail.com and we'll sort it out."
+        `Sorry, we couldn't set your password just now. Please try again, or email us at ${CLUB_EMAIL} and we'll sort it out.`
       );
       return;
     }
@@ -107,7 +108,7 @@ export default function MemberWelcome() {
                   : "This invite link isn't valid any more. It may have expired or already been used."}
               </p>
               <p className="mt-3 text-ink-muted">
-                No drama. Email us at seqdvgc@gmail.com and we&apos;ll send
+                No drama. Email us at {CLUB_EMAIL} and we&apos;ll send
                 you a fresh one. If you&apos;ve already set a password, you can{" "}
                 <Link
                   to="/member"

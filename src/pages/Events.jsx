@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import RibbonRule from "../components/RibbonRule.jsx";
-import EventCalendar from "../components/EventCalendar.jsx";
 import { EventRow } from "../components/EventCard.jsx";
 import { REGIONS } from "../lib/events.js";
 import { useEvents } from "../hooks/useEvents.js";
+
+// The date picker library is the heaviest thing on the public site, so it
+// loads in its own chunk; the placeholder holds its space meanwhile.
+const EventCalendar = lazy(() => import("../components/EventCalendar.jsx"));
 
 const regionTabs = ["All", ...REGIONS.map((r) => r.label)];
 const statusTabs = ["All", "Upcoming", "Finalised"];
@@ -57,7 +60,16 @@ export default function Events() {
               a round near you.
             </p>
           </div>
-          <EventCalendar events={events} className="lg:shrink-0" />
+          <Suspense
+            fallback={
+              <div
+                aria-hidden="true"
+                className="h-[21rem] w-[18.5rem] rounded-card border border-gold/25 bg-navy-deep/70 lg:shrink-0"
+              />
+            }
+          >
+            <EventCalendar events={events} className="lg:shrink-0" />
+          </Suspense>
         </div>
       </section>
 

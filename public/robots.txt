@@ -1,7 +1,11 @@
+# /member$ and /member/ rather than /member: robots rules are prefix
+# matches, and a bare "/member" would also block /membership.
 User-agent: *
 Allow: /
 Disallow: /admin
-Disallow: /member
-Disallow: /auth
+Disallow: /member$
+Disallow: /member/
+Disallow: /auth/
+Disallow: /login
 
 Sitemap: https://www.seqdvgc.com.au/sitemap.xml

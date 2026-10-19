@@ -29,6 +29,18 @@
   }
 }
 
+@layer components {
+  /* Native selects render at different sizes across browsers; draw our own
+     chevron so they match the text inputs beside them. */
+  .select-chevron {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B1E3F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    background-size: 1.1rem;
+  }
+}
+
 @layer utilities {
   .text-hero {
     font-size: clamp(2rem, 4.5vw, 3.4rem);

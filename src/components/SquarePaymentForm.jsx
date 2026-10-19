@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   PaymentForm,
   CreditCard,
   ApplePay,
   GooglePay,
 } from "react-square-web-payments-sdk";
+import { CLUB_EMAIL } from "../lib/site.js";
 
 const MEMBERSHIP_CENTS = 5000; // display only — the server decides the real charge
 
@@ -38,8 +39,12 @@ export default function SquarePaymentForm({
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState(null);
   const [paid, setPaid] = useState(false);
+  // Card, Apple Pay and Google Pay all tokenize independently; this stops a
+  // second wallet tap (or double click) charging twice while one is in flight.
+  const inFlight = useRef(false);
 
   async function handleToken(tokenResult) {
+    if (inFlight.current || paid) return;
     if (tokenResult.status !== "OK") {
       setError(
         "Sorry, your card details couldn't be processed. Please check them and try again."
@@ -48,6 +53,7 @@ export default function SquarePaymentForm({
     }
     setError(null);
     setPaying(true);
+    inFlight.current = true;
     try {
       const res = await fetch("/api/create-payment", {
         method: "POST",
@@ -74,14 +80,15 @@ export default function SquarePaymentForm({
         onError?.(data);
         setError(
           data.error ||
-            "Sorry, the payment didn't go through. You haven't been charged. Please try again, or email us at seqdvgc@gmail.com."
+            `Sorry, the payment didn't go through. You haven't been charged. Please try again, or email us at ${CLUB_EMAIL}.`
         );
       }
     } catch {
       setError(
-        "Sorry, we couldn't reach the payment service. Please check your internet connection and try again, or email us at seqdvgc@gmail.com."
+        `Sorry, we couldn't reach the payment service. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
       );
     } finally {
+      inFlight.current = false;
       setPaying(false);
     }
   }

@@ -10,6 +10,7 @@ import {
 import RibbonRule from "../../components/RibbonRule.jsx";
 import Button from "../../components/Button.jsx";
 import FormField from "../../components/FormField.jsx";
+import { CLUB_EMAIL } from "../../lib/site.js";
 
 function formatDate(value) {
   if (!value) return "—";
@@ -67,7 +68,7 @@ function MemberDashboard({ session }) {
       } catch {
         if (!cancelled) {
           setLoadError(
-            "We couldn't load your membership details just now. Please refresh the page, or email us at seqdvgc@gmail.com if it keeps happening."
+            `We couldn't load your membership details just now. Please refresh the page, or email us at ${CLUB_EMAIL} if it keeps happening.`
           );
         }
       } finally {
@@ -131,7 +132,7 @@ function MemberDashboard({ session }) {
                 >
                   committee area
                 </Link>
-                . Otherwise, email us at seqdvgc@gmail.com and we&apos;ll sort
+                . Otherwise, email us at {CLUB_EMAIL} and we&apos;ll sort
                 it out.
               </p>
             </div>
@@ -153,7 +154,13 @@ function MemberDashboard({ session }) {
 }
 
 function MembershipCard({ member }) {
-  const active = member.status === "active";
+  // A daily job marks lapsed members expired; also check the date so the
+  // badge is right on the day itself.
+  const todayIso = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Australia/Brisbane",
+  });
+  const active =
+    member.status === "active" && (!member.expires_at || member.expires_at >= todayIso);
   return (
     <div className="border-t-4 border-gold bg-paper p-8">
       <h2 className="font-display text-xl font-semibold tracking-wide text-navy">
@@ -276,7 +283,7 @@ function ProfileForm({ member, onSaved }) {
       setSaved(true);
     } catch {
       setError(
-        "Sorry, we couldn't save your changes just now. Please try again, or email us at seqdvgc@gmail.com."
+        `Sorry, we couldn't save your changes just now. Please try again, or email us at ${CLUB_EMAIL}.`
       );
     } finally {
       setSaving(false);
@@ -295,8 +302,8 @@ function ProfileForm({ member, onSaved }) {
         <RibbonRule className="mt-3" />
         <p className="mt-4 text-sm text-ink-muted">
           Keep these up to date so we can reach you about events. Your login
-          email is {member.email}. To change it, email us at
-          seqdvgc@gmail.com.
+          email is {member.email}. To change it, email us at{" "}
+          {CLUB_EMAIL}.
         </p>
       </div>
       <FormField

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import RibbonRule from "./RibbonRule.jsx";
-import { CLUB_ABN, FACEBOOK_URL } from "../lib/site.js";
+import { CLUB_ABN, FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
 
 export default function Footer() {
   return (
@@ -9,7 +9,9 @@ export default function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <img
-              src="/SEQDVGC-logo-transparent.png"
+              src="/crest-160.webp"
+              width={80}
+              height={80}
               alt="SEQDVGC crest"
               className="h-20 w-20"
             />
@@ -68,8 +70,8 @@ export default function Footer() {
             </h2>
             <ul className="mt-4 space-y-2 text-sm text-cream/85">
               <li>
-                <a href="mailto:seqdvgc@gmail.com" className="transition-colors hover:text-gold-bright">
-                  seqdvgc@gmail.com
+                <a href={`mailto:${CLUB_EMAIL}`} className="transition-colors hover:text-gold-bright">
+                  {CLUB_EMAIL}
                 </a>
               </li>
               <li>

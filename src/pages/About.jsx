@@ -239,7 +239,9 @@ export default function About() {
             </p>
           </div>
           <img
-            src="/SEQDVGC-logo-transparent.png"
+            src="/crest-416.webp"
+            width={208}
+            height={208}
             alt="SEQDVGC crest"
             className="h-40 w-40 shrink-0 md:h-52 md:w-52"
           />

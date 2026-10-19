@@ -1,6 +1,6 @@
-# SEQDVGC — Website Mock-up
+# SEQDVGC — Club Website
 
-Visual front-end mock-up for the **South East Queensland Defence Veterans Golf Club Inc.** website. This is a client-review build: all data is static/mock and no backend is wired up yet.
+Website for the **South East Queensland Defence Veterans Golf Club Inc.** (live at https://www.seqdvgc.com.au). Events, bookings, members, sponsors and photos are managed by the committee in `/admin` and stored in Supabase; payments go through Square.
 
 ## Stack
 
@@ -12,7 +12,8 @@ Visual front-end mock-up for the **South East Queensland Defence Veterans Golf C
 
 ```bash
 npm install
-npm run dev
+npm run dev     # local dev server
+npm run build   # production build + SEO prerender (scripts/prerender.mjs)
 ```
 
 ## Pages
@@ -29,13 +30,9 @@ Live data comes from the club's Supabase project (see `BACKEND.md` for the full 
 - **Env vars** (`.env`, copy from `.env.example`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Set the same two in Vercel (Project → Settings → Environment Variables).
 - **GitHub Actions**: `supabase-keepalive.yml` (stops the free-tier project pausing) and `supabase-backup.yml` (weekly JSON export to `/backups`). They need repo secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` (backup only — never in front-end code).
 
-## What's still mocked
+## Privacy & data
 
-- **Hero imagery** is a placeholder gradient → real club photos arrive after the 31 July 2026 event; the slot is data-driven so they drop in without layout changes.
-- **Values** (`src/data/values.js`) are the placeholder set — canonical wording still to be confirmed by the club.
-- ABN in the footer is a placeholder.
-
-Phase 2 (separate scope): Square payments, merch store, sponsor packages, Wall of Honour.
+The Privacy Policy (`src/pages/Privacy.jsx`) describes exactly what each form collects, where it's stored (Supabase project is hosted in India, ap-south-1) and how long it's kept. If you add a form field, a third-party service or analytics, update that page and its `LAST_UPDATED` date. Retention is automated with pg_cron (see BACKEND.md §13).
 
 ## Design reference
 

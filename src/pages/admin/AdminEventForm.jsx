@@ -201,7 +201,19 @@ export default function AdminEventForm() {
           .select()
           .single();
         if (saveError || !inserted) throw saveError ?? new Error("insert failed");
-        await syncTeeSlots(inserted.id, cleanSlots());
+        try {
+          await syncTeeSlots(inserted.id, cleanSlots());
+        } catch {
+          // The event exists now — don't let a retry create a duplicate.
+          setSaving(false);
+          navigate("/admin/events", {
+            state: {
+              message:
+                "Event saved as a draft, but its tee times didn't save. Open the event and add them again",
+            },
+          });
+          return;
+        }
       }
     } catch {
       setSaving(false);
@@ -221,6 +233,20 @@ export default function AdminEventForm() {
 
   async function handlePublish() {
     setError(null);
+    // Publish sits outside the form, so check what bookings depend on here.
+    const today = new Date().toLocaleDateString("en-CA", {
+      timeZone: "Australia/Brisbane",
+    });
+    if (!form.title.trim()) {
+      setConfirmPublish(false);
+      setError("Please give the event a name before publishing it.");
+      return;
+    }
+    if (!form.event_date || form.event_date < today) {
+      setConfirmPublish(false);
+      setError("Please set an event date that's today or later before publishing it.");
+      return;
+    }
     setPublishing(true);
 
     try {
@@ -244,7 +270,7 @@ export default function AdminEventForm() {
 
     setPublishing(false);
     navigate("/admin/events", {
-      state: { message: "Event published. It&apos;s live on the website now" },
+      state: { message: "Event published. It's live on the website now" },
     });
   }
 

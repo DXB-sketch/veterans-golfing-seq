@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../admin/AuthProvider.jsx";
 import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
+import { CLUB_EMAIL } from "../lib/site.js";
 
 // Generic auth-email landing — email confirmation / change-email links point
 // here. The supabase client (detectSessionInUrl) consumes the tokens from the
@@ -70,7 +71,7 @@ export default function AuthCallback() {
                 >
                   signing in
                 </Link>
-                , or email us at seqdvgc@gmail.com and we&apos;ll sort it out.
+                , or email us at {CLUB_EMAIL} and we&apos;ll sort it out.
               </p>
             </>
           )}

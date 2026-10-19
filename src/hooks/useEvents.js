@@ -1,16 +1,25 @@
 import { useEffect, useState } from "react";
 import { fetchEvents, fetchEvent } from "../lib/events.js";
 
-export function useEvents() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+// Last public list, so moving between Home and Events shows events
+// instantly while a fresh copy loads in the background.
+let publicCache = null;
+
+export function useEvents({ includeDrafts = false } = {}) {
+  const cached = includeDrafts ? null : publicCache;
+  const [events, setEvents] = useState(cached ?? []);
+  const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetchEvents()
+    fetchEvents({ includeDrafts })
       .then((data) => {
-        if (!cancelled) setEvents(data);
+        if (!includeDrafts) publicCache = data;
+        if (!cancelled) {
+          setEvents(data);
+          setError(null);
+        }
       })
       .catch(() => {
         if (!cancelled) setError("Couldn't load events right now.");
@@ -21,7 +30,7 @@ export function useEvents() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [includeDrafts]);
 
   return { events, loading, error };
 }
@@ -35,6 +44,7 @@ export function useEvent(id) {
     let cancelled = false;
     setLoading(true);
     setEvent(null);
+    setError(null);
     fetchEvent(id)
       .then((data) => {
         if (!cancelled) setEvent(data);

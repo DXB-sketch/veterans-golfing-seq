@@ -39,11 +39,15 @@ function formatDate(iso) {
 // A year from today in Queensland time, as YYYY-MM-DD — the standard
 // membership term. Same approach as api/create-payment.js, so a member
 // added early in the morning doesn't expire a day early.
+function todayBrisbane() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Brisbane" });
+}
+
 function oneYearFromToday() {
-  return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString(
-    "en-CA",
-    { timeZone: "Australia/Brisbane" }
-  );
+  const [y, m, d] = todayBrisbane().split("-").map(Number);
+  const next = new Date(Date.UTC(y + 1, m - 1, d));
+  if (next.getUTCMonth() !== m - 1) next.setUTCDate(0); // 29 Feb -> 28 Feb
+  return next.toISOString().slice(0, 10);
 }
 
 export default function AdminMembers() {
@@ -205,7 +209,12 @@ export default function AdminMembers() {
         },
         body: JSON.stringify({ email: m.email }),
       });
-      if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.alreadyInvited) {
+        setNotice(
+          `${m.email} already has a member login, so no new invite was sent. They can use "Forgot password" on the sign-in page if they're stuck.`
+        );
+      } else if (res.ok) {
         setNotice(`A login invite is on its way to ${m.email}.`);
         loadMembers();
       } else {
@@ -227,9 +236,13 @@ export default function AdminMembers() {
     setFormError(null);
     setTogglingId(m.id);
     const next = m.status === "active" ? "expired" : "active";
+    // Re-activating a lapsed member starts a fresh year; otherwise they'd
+    // be "active" with an expiry date already in the past.
+    const renew =
+      next === "active" && (!m.expires_at || m.expires_at < todayBrisbane());
     const { error } = await supabase
       .from("members")
-      .update({ status: next })
+      .update(renew ? { status: next, expires_at: oneYearFromToday() } : { status: next })
       .eq("id", m.id);
     setTogglingId(null);
     if (error) {
@@ -239,7 +252,7 @@ export default function AdminMembers() {
     } else {
       setNotice(
         next === "active"
-          ? `${m.name} is marked as an active member again.`
+          ? `${m.name} is marked as an active member again${renew ? ", for another year" : ""}.`
           : `${m.name} is now marked as expired.`
       );
       loadMembers();

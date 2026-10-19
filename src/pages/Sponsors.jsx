@@ -9,6 +9,7 @@ import {
   tierFromAmountCents,
   SPONSORSHIP_MIN_CENTS,
 } from "../lib/tiers.js";
+import { CLUB_EMAIL } from "../lib/site.js";
 
 function TierBadge({ tierKey, className = "" }) {
   const tier = tierByKey(tierKey);
@@ -206,8 +207,8 @@ export default function Sponsors() {
             We&apos;d be proud to put your name behind the veteran community,
             from local businesses to national brands. Pay your sponsorship
             online below, or email{" "}
-            <a href="mailto:seqdvgc@gmail.com" className="font-semibold text-navy underline">
-              seqdvgc@gmail.com
+            <a href={`mailto:${CLUB_EMAIL}`} className="font-semibold text-navy underline">
+              {CLUB_EMAIL}
             </a>{" "}
             if you&apos;d rather talk it through first.
           </p>
@@ -227,10 +228,10 @@ export default function Sponsors() {
                   One more thing: we couldn&apos;t automatically link your
                   payment to your company details, so please email{" "}
                   <a
-                    href="mailto:seqdvgc@gmail.com"
+                    href={`mailto:${CLUB_EMAIL}`}
                     className="font-semibold text-navy underline"
                   >
-                    seqdvgc@gmail.com
+                    {CLUB_EMAIL}
                   </a>{" "}
                   with your company name so we can match it up.
                 </p>

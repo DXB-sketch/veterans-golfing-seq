@@ -35,7 +35,7 @@ export async function fetchOwnMember() {
   const { data: byEmail, error: emailError } = await supabase
     .from("members")
     .select("*")
-    .ilike("email", email)
+    .eq("email", email.toLowerCase())
     .maybeSingle();
   if (emailError) throw emailError;
   return byEmail ?? null;

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useEvents } from "../../hooks/useEvents.js";
 
 export default function AdminEvents() {
-  const { events, loading, error } = useEvents();
+  const { events, loading, error } = useEvents({ includeDrafts: true });
   const location = useLocation();
   const [notice, setNotice] = useState(location.state?.message ?? null);
 

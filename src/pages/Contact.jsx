@@ -4,7 +4,7 @@ import RibbonRule from "../components/RibbonRule.jsx";
 import Button from "../components/Button.jsx";
 import FormField from "../components/FormField.jsx";
 import { supabase } from "../lib/supabase.js";
-import { FACEBOOK_URL } from "../lib/site.js";
+import { FACEBOOK_URL, CLUB_EMAIL } from "../lib/site.js";
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
@@ -29,7 +29,7 @@ export default function Contact() {
     setSending(false);
     if (insertError) {
       setError(
-        "Sorry, your message didn't go through. Please check your internet connection and try again, or email us at seqdvgc@gmail.com."
+        `Sorry, your message didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
       );
     } else {
       setSent(true);
@@ -50,7 +50,7 @@ export default function Contact() {
     setVolSending(false);
     if (insertError) {
       setVolError(
-        "Sorry, your enquiry didn't go through. Please check your internet connection and try again, or email us at seqdvgc@gmail.com."
+        `Sorry, your enquiry didn't go through. Please check your internet connection and try again, or email us at ${CLUB_EMAIL}.`
       );
     } else {
       setVolSent(true);
@@ -76,10 +76,10 @@ export default function Contact() {
                 Email
               </p>
               <a
-                href="mailto:seqdvgc@gmail.com"
+                href={`mailto:${CLUB_EMAIL}`}
                 className="mt-1 block font-semibold text-cream hover:text-gold-bright"
               >
-                seqdvgc@gmail.com
+                {CLUB_EMAIL}
               </a>
             </li>
             <li>

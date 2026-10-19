@@ -27,48 +27,30 @@ export default function AdminLayout() {
   // 'checking' | 'committee' | 'member'
   const [role, setRole] = useState("checking");
 
+  const userId = session?.user?.id ?? null;
+
   useEffect(() => {
-    // A new session (sign-out, or a different user signing in) must never see
-    // the previous user's role — always start from "checking".
+    // A different user (or signing out) must never see the previous user's
+    // role, so start from "checking". Token refreshes keep the same user id
+    // and don't re-run this, so open admin forms aren't wiped.
     setRole("checking");
-    if (!session) return;
+    if (!userId) return;
     let cancelled = false;
     supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", userId)
       .maybeSingle()
       .then(({ data, error }) => {
         if (cancelled) return;
-        if (error) {
-          // TEMPORARY FALLBACK: the roles migration hasn't been applied yet,
-          // so the profiles table doesn't exist and this query fails. In that
-          // legacy world every authenticated user IS a committee admin, so we
-          // let them through rather than locking the committee out. Once the
-          // migration is applied the query succeeds, every user has a profiles
-          // row, and this branch never runs again — the role check below is
-          // then the only way in. (RLS enforces the real security either way.)
-          // Only the "table doesn't exist yet" errors get that grace — any
-          // other failure must not grant committee access.
-          const missingTable =
-            error.code === "42P01" ||
-            error.code === "PGRST205" ||
-            /profiles|schema cache/i.test(error.message ?? "");
-          setRole(missingTable ? "committee" : "member");
-        } else if (!data) {
-          // A missing row can't happen post-migration (the trigger creates
-          // one per auth user), but treat it as committee for the same
-          // legacy-mode reason as above.
-          setRole("committee");
-        } else {
-          // Post-migration: only an explicit committee role gets in.
-          setRole(data.role === "committee" ? "committee" : "member");
-        }
+        // Only an explicit committee role gets in; any error or missing row
+        // is treated as a member. (RLS enforces the real security anyway.)
+        setRole(!error && data?.role === "committee" ? "committee" : "member");
       });
     return () => {
       cancelled = true;
     };
-  }, [session]);
+  }, [userId]);
 
   if (loading) {
     return (

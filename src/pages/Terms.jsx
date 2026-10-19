@@ -33,6 +33,10 @@ const sections = [
     body: "To the maximum extent permitted by law, the Club is not liable for any loss arising from use of this website or participation in events. Nothing in these terms excludes rights you have under the Australian Consumer Law.",
   },
   {
+    heading: "Your privacy",
+    body: "How we collect, use, store and protect your personal information, including the details you give when booking an event, is explained in our Privacy Policy at seqdvgc.com.au/privacy.",
+  },
+  {
     heading: "Governing law",
     body: "These terms are governed by the laws of Queensland, Australia.",
   },
@@ -55,7 +59,7 @@ export default function Terms() {
           </h1>
           <RibbonRule className="mt-5" dark />
           <p className="mt-6 text-sm font-semibold text-cream/80">
-            Last updated: 4 August 2026
+            Last updated: 19 October 2026
           </p>
         </div>
       </section>

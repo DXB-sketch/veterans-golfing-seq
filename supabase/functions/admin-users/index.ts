@@ -46,14 +46,16 @@ Deno.serve(async (req) => {
     .select("role")
     .eq("id", caller.id)
     .maybeSingle();
-  if (profileError) {
-    // Legacy window only: before the roles migration exists there are no
-    // member accounts, so every authenticated user is committee. Any error
-    // other than "table missing" is a hard deny.
-    const missing = `${profileError.message ?? ""}`.includes("profiles");
-    if (!missing) return json({ error: "not_committee" }, 403);
-  } else if (callerProfile?.role !== "committee") {
+  if (profileError || callerProfile?.role !== "committee") {
     return json({ error: "not_committee" }, 403);
+  }
+
+  async function committeeUserIds(): Promise<string[] | null> {
+    const { data, error } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("role", "committee");
+    return error ? null : (data ?? []).map((p) => p.id as string);
   }
 
   let body: { action?: string; email?: string; password?: string; id?: string };
@@ -64,19 +66,23 @@ Deno.serve(async (req) => {
   }
 
   if (body.action === "list") {
-    const { data, error } = await admin.auth.admin.listUsers({
-      page: 1,
-      perPage: 200,
-    });
-    if (error) return json({ error: "list_failed" }, 500);
-    return json({
-      users: data.users.map((u) => ({
-        id: u.id,
-        email: u.email,
-        created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at,
-      })),
-    });
+    // Committee accounts only: paid members also have logins, and they must
+    // never show up here with a Remove button next to them.
+    const committeeIds = await committeeUserIds();
+    if (!committeeIds) return json({ error: "list_failed" }, 500);
+    const users = [];
+    for (const id of committeeIds) {
+      const { data, error } = await admin.auth.admin.getUserById(id);
+      if (error || !data.user) continue;
+      users.push({
+        id: data.user.id,
+        email: data.user.email,
+        created_at: data.user.created_at,
+        last_sign_in_at: data.user.last_sign_in_at,
+      });
+    }
+    users.sort((a, b) => `${a.created_at}`.localeCompare(`${b.created_at}`));
+    return json({ users });
   }
 
   if (body.action === "create") {
@@ -98,12 +104,15 @@ Deno.serve(async (req) => {
 
     // Accounts made here are committee volunteers. The on-auth-user-created
     // trigger gives every new user a 'member' profile by default, so override
-    // it with the service client (bypasses RLS). Ignore failure while the
-    // roles migration hasn't been applied yet — pre-migration, every account
-    // is treated as committee anyway.
-    await admin
+    // it with the service client (bypasses RLS).
+    const { error: roleError } = await admin
       .from("profiles")
       .upsert({ id: data.user.id, role: "committee" }, { onConflict: "id" });
+    if (roleError) {
+      // Don't leave a login that can't reach the admin area.
+      await admin.auth.admin.deleteUser(data.user.id);
+      return json({ error: "create_failed" }, 500);
+    }
 
     return json({ user: { id: data.user.id, email: data.user.email } });
   }
@@ -112,13 +121,12 @@ Deno.serve(async (req) => {
     if (!body.id) return json({ error: "bad_request" }, 400);
     if (body.id === caller.id) return json({ error: "cannot_remove_self" }, 400);
 
-    // Never allow the last account to be removed — that would lock everyone out.
-    const { data: all, error: listError } = await admin.auth.admin.listUsers({
-      page: 1,
-      perPage: 200,
-    });
-    if (listError) return json({ error: "remove_failed" }, 500);
-    if (all.users.length <= 1) return json({ error: "last_account" }, 400);
+    // Only committee accounts can be removed from here, and never the last
+    // one — that would lock everyone out.
+    const committeeIds = await committeeUserIds();
+    if (!committeeIds) return json({ error: "remove_failed" }, 500);
+    if (!committeeIds.includes(body.id)) return json({ error: "not_committee_account" }, 400);
+    if (committeeIds.length <= 1) return json({ error: "last_account" }, 400);
 
     const { error } = await admin.auth.admin.deleteUser(body.id);
     if (error) return json({ error: "remove_failed" }, 500);

@@ -7,6 +7,7 @@ const PURPOSE_LABELS = {
   membership: "Membership",
   donation: "Donation",
   sponsorship: "Sponsorship",
+  event_booking: "Event booking",
 };
 
 function formatWhen(iso) {
@@ -89,8 +90,8 @@ export default function AdminPayments() {
       </div>
       <RibbonRule className="mt-3" />
       <p className="mt-3 text-ink-muted">
-        Every payment taken through the website (memberships, donations and
-        sponsorships), newest first. This list is a record only; refunds are
+        Every payment taken through the website (memberships, event
+        bookings, donations and sponsorships), newest first. This list is a record only; refunds are
         done in the Square dashboard.
         {payments.length > 0 &&
           " The download is a spreadsheet file (CSV) that opens straight into Excel."}
